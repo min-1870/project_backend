@@ -76,7 +76,7 @@ function authLoginV1(authUserId, email, password) {
     * You are expected to have at least 1 meeting with your group, and document the meeting(s) in meeting minutes which should be stored at a timestamped location in your repo (e.g. uploading a word doc/pdf or writing in the GitLab repo Wiki after each meeting).
     * For this iteration you will need to make a minimum of **1** merge request for **each person** in your group, into `master`.
     * **1** merge request per function must be made (9 in total)
-    * Check out the <a href="https://cgi.cse.unsw.edu.au/~cs1531/redirect/?path=COMP1531/22T3/students/_/lab01_git-basics">Git Basics lab</a> to get familiar with using Git 
+    * Check out the <a href="https://cgi.cse.unsw.edu.au/~cs1531/redirect/?path=COMP1531/22T3/students/_/lab01_git">Git Basics lab</a> to get familiar with using Git 
 
 ### 2.2. Dryrun
 We have provided a dryrun for iteration 0 consisting of one test for each function. Passing these tests means you have a correct implementation for your stubs, and have earned the marks for this component of iteration 0.
