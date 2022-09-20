@@ -6,7 +6,7 @@ function channelsCreateV1( authUserId, name, isPublic ){
   }
 
 //channelsListV1 stub fucntion
-function channelsCreateV1( authUserId ){
+function channelsListV1( authUserId ){
     return {
         channels: [
           {
