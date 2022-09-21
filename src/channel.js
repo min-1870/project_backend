@@ -22,10 +22,3 @@ function channelDetailsV1(authUserId, channelId) {
     ],
   }
 }
-
-// channelJoinV1 stub function
-function channelJoinV1(authUserId, channelId) {
-  return {
-
-  }
-}
