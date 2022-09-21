@@ -4,7 +4,7 @@ function authLoginV1(email, password) {
     authUserId: 1,
   }
 }
-
+  
 
 // authRegisterV1 stub function
 function authRegisterV1(email, password, nameFirst, nameLast) {
