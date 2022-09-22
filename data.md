@@ -14,12 +14,16 @@ let data = {
         }
     ]
 
-    channels: [
+    channel: [
         {
             channelId: 55,
             authUserId: 30,
             isPublic: 1,
             name: 'My Channel',
+            start: 0,
+            end: 50,
+            ownerMembers: [user],
+            allMembers: [user],
         } 
     ]
 
