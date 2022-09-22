@@ -37,7 +37,7 @@ function channelInviteV1(authUserId, channelId) {
 }
 
 //channelMessagesV1 stub function
-function ( authUserId, channelId, start ) {
+function channelMessagesV1 ( authUserId, channelId, start ) {
   return {
     messages: [
     {
