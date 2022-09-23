@@ -20,9 +20,9 @@ let data = {
             authUserId: 30,
             isPublic: false,
             name: 'My Channel',
-            ownerMembers: [adamsmasher],
-            allMembers: [adamsmasher, martinez],
-            messages: [message1, message2]
+            ownerMembers: ['adamsmasher'],
+            allMembers: ['adamsmasher', 'martinez'],
+            messages: ['message1', 'message2'],
         } 
     ],
 
