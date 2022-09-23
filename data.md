@@ -14,7 +14,7 @@ let data = {
         }
     ],
 
-    channel: [
+    channels: [
         {
             channelId: 55,
             authUserId: 30,
