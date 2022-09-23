@@ -12,20 +12,18 @@ let data = {
             password: 'martinez',
 
         }
-    ]
-
+    ],
+ß
     channel: [
         {
             channelId: 55,
             authUserId: 30,
-            isPublic: 1,
+            isPublic: false,
             name: 'My Channel',
-            start: 0,
-            end: 50,
             ownerMembers: [user],
             allMembers: [user],
         } 
-    ]
+    ],
 
 }
 ```
