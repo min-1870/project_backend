@@ -13,15 +13,16 @@ let data = {
 
         }
     ],
-ß
+
     channel: [
         {
             channelId: 55,
             authUserId: 30,
             isPublic: false,
             name: 'My Channel',
-            ownerMembers: [user],
-            allMembers: [user],
+            ownerMembers: [adamsmasher],
+            allMembers: [adamsmasher, martinez],
+            messages: [message1, message2]
         } 
     ],
 
