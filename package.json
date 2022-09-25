@@ -1,0 +1,16 @@
+{
+    "scripts": {
+        "test": "jest"
+    },
+    "dependencies": {
+        "validator": "^13.7.0",
+        "rewire": "^6.0.0"
+    },
+    "devDependencies": {
+        "jest": "^28.1.0",
+        "@babel/cli": "^7.18.10",
+        "@babel/core": "^7.19.1",
+        "@babel/preset-env": "^7.19.1"
+    },
+    "type": "module"
+}
