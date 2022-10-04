@@ -11,5 +11,6 @@ export function clearV1(){
         ]    
     };
     setData(data);
+
     return;
-}
+};
