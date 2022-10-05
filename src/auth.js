@@ -72,6 +72,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
   const temp = {
     uID: uuID,
     email: email,
+    password: password,
     nameFirst: nameFirst,
     nameLast: nameLast,
     handleStr: fullname
