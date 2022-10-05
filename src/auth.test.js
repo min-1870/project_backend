@@ -10,7 +10,10 @@ describe('Test Suite for auth functions', () => {
     });
 
     test('Successful authRegisterV1', () => {   
-        expect(authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')).toStrictEqual(expect.any(Number));    
+        authRegisterV1('moniker2@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker');
+        authRegisterV1('moniker3@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker');
+        authRegisterV1('moniker4@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker');
+        expect(authRegisterV1('moniker@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker')).toStrictEqual(expect.any(Number));    
     });
 
     test('error passing invalid email through authRegisterV1', () => {   
