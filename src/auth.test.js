@@ -1,7 +1,7 @@
 import { authRegisterV1 } from './auth.js';
 import { clearV1 } from './other.js';
 
-describe('Test Suite for auth functions', () => {
+describe('Test Suite for authRegisterV1 function', () => {
 
 
 
@@ -49,4 +49,30 @@ describe('Test Suite for auth functions', () => {
     //     const case_1 = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker');
         
     // });
+});
+
+
+describe('Test Suite for authLoginV1 function', () => {
+
+
+
+    afterEach(() =>  {  
+        clearV1();
+    });
+
+    test('Successful authLoginV1', () => {   
+        const authId = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
+        expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual(authId);    
+    });
+
+    test('Error passing invalid email through authLoginV1', () => {   
+        expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({error: expect.any(String)});    
+    });
+
+    test('Error passing incorrect password into authLoginV1', () => {
+        authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
+        expect(authLoginV1('moniker@hotmail.com', 'pxssword')).toStrictEqual({error: expect.any(String)});    
+    });
+
+    
 });

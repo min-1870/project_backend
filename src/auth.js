@@ -8,9 +8,30 @@ let uniqueuserID = 0;
 
 // authLoginV1 stub function
 export function authLoginV1(email, password) {
-  return {
-    authUserId: 1,
+  let data = getData();
+
+  let i = 0;  // checking if email has already been used
+  while (true) {
+    if (i >= data.users.length) {
+      return {error: 'Email address is not registered'};
+    }
+    if (data.users[i]['email'] === email) {
+      break;
+    }  
+    i ++;
+  };
+  console.log(password);
+  console.log(data.users[i]['password']);
+  console.log(data.users[i]);
+  if (data.users[i]['password'] !== password) {
+    return {error: 'Wrong password'};
+  } else {
+    return data.users[i]['uID'];
   }
+
+
+
+  
 }
   
 
