@@ -29,15 +29,21 @@ describe('Test suite for channels functions', () => {
 
     test('channels list valid authUserId with channels returns list of channels', () => {
         let data = getData();
-        data.channels.append({
+        data.channels.push({
             channelId,
-            name: channelName
+            name: channelName,
+            allMembers: [channelCreator]
         });
         setData(data);
         const channelListResult = channelsListV1(channelCreatorId)
 
         expect(channelListResult).toStrictEqual({
-            channels: []
+            channels: [
+                {
+                    channelId,
+                    name: channelName
+                }
+            ]
         });
     }); 
 
