@@ -1,4 +1,4 @@
-import {authRegisterV1} from './auth';
+import {authRegisterV1, authLoginV1} from './auth';
 import {clearV1} from './other.js';
 
 describe('Test Suite for authRegisterV1 function', () => {
@@ -63,12 +63,12 @@ describe('Test Suite for authLoginV1 function', () => {
     });
 
     test('Error passing invalid email through authLoginV1', () => {   
-        expect(authRegisterV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({error: expect.any(String)});    
+        expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({error: expect.any(String)});    
     });
 
     test('Error passing incorrect password into authLoginV1', () => {
         authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
-        expect(authRegisterV1('moniker@hotmail.com', 'pxssword')).toStrictEqual({error: expect.any(String)});    
+        expect(authLoginV1('moniker@hotmail.com', 'pxssword')).toStrictEqual({error: expect.any(String)});    
     });
 
     
