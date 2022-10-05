@@ -76,10 +76,9 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
     nameLast: nameLast,
     handleStr: fullname
   }
+  
   uniqueuserID ++;
-  // console.log(data);
   data.users.push(temp);
-  // console.log(data);
   setData(data);
   return uuID;
 };
