@@ -104,7 +104,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
     nameFirst: nameFirst,
     nameLast: nameLast,
     handleStr: fullname,
-    GlobalOwner: ownerglob
+    isGlobalOwner: ownerglob
   }
   
   uniqueuserID ++;
