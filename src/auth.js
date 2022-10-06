@@ -20,9 +20,6 @@ export function authLoginV1(email, password) {
     }  
     i ++;
   };
-  console.log(password);
-  console.log(data.users[i]['password']);
-  console.log(data.users[i]);
   if (data.users[i]['password'] !== password) {
     return {error: 'Wrong password'};
   } else {
@@ -66,10 +63,6 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
   if (nameLast.length < 1 || nameLast.length > 50) {
     return {error: 'Last name has to be between 1 and 50 characters in length'};
   };
-  // let temp_1 = nameFirst.replace(/[^0-9a-z]/gi, "");
-  // console.log(temp_1);
-  // let temp_2 = nameLast.replace(/[\W_]/g, "");
-  // console.log(temp_2);
   let fullname = nameFirst.toLowerCase() + nameLast.toLowerCase();
   fullname = onlyalphanumeric(fullname);
   if (fullname.length > 20) {
