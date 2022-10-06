@@ -25,7 +25,7 @@ function channelDetailsV1(authUserId, channelId) {
 }
 
 // channelJoinV1 function
-function channelJoinV1(authUserId, channelId) {
+export function channelJoinV1(authUserId, channelId) {
   let data = getData();
   let uIdList = data.users.filter((element) => {
     return element.uId === authUserId;
