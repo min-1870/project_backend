@@ -14,7 +14,7 @@ export function channelDetailsV1(authUserId, channelId) {
   else {
     const rightChannel = data.channels.find(channel => channel.channelId === channelId);
   }
-  const details ={
+  const details = {
     name: rightChannel.name,
     isPublic: rightChannel.isPublic, 
     ownerMembers: rightChannel.ownerMembers, 
@@ -46,7 +46,7 @@ export function channelDetailsV1(authUserId, channelId) {
     ],
   }
   */
-}
+
 
 // channelJoinV1 stub function
 function channelJoinV1(authUserId, channelId) {
