@@ -24,11 +24,35 @@ function channelDetailsV1(authUserId, channelId) {
   }
 }
 
-// channelJoinV1 stub function
+// channelJoinV1 function
 function channelJoinV1(authUserId, channelId) {
-  return {
-
+  let uIdList = data.users.filter((element) => {
+    return element.uId === authUserId;
+  });
+  let cIdList = data.channels.filter((element) => {
+    return element.channelId === channelId;
+  });
+  let MemberInChannel = data.channels.filter((element) => {
+    return (element.channelId === channelId && element.allMembers.includes(authUserId));
+  });
+  let privateChannel = data.channels.filter((element) => {
+    return (element.channelId === channelId && element.isPublic === false);
+  });
+  let GlobalOwner = data.users.filter((element) => {
+    return (element.uId === authUserId && element.GlobalOwner === true);
+  });
+  if (uIdList.length === 0 ||
+    cIdList.length === 0 ||
+    MemberInChannel === 1 ||
+    (privateChannel === 1 && MemberInChannel === 0 && GlobalOwner === 0)) {
+    return { error: 'error' };
   }
+  for (const element of data.channels) {
+    if (channelId === element.channelId) {
+      element.allMembers.push(authUserId);
+    }
+  }
+  return {};
 }
 
 //channelInviteV1 stub function
