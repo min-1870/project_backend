@@ -1,4 +1,3 @@
-
 import { channelsListV1, channelsListAllV1 } from './channels';
 import { clearV1 } from './other';
 import { getData, setData } from './dataStore';
@@ -28,6 +27,46 @@ describe('Test suite for channels functions', () => {
         setData(data)
     });
 
+//----------------------------channelsList
+
+    test('channels list valid authUserId with channels returns list of channels', () => {
+        let data = getData();
+        data.channels.push({
+            channelId,
+            name: channelName,
+            allMembers: [channelCreator]
+        });
+        setData(data);
+        const channelListResult = channelsListV1(channelCreatorId)
+
+        expect(channelListResult).toStrictEqual({
+            channels: [
+                {
+                    channelId,
+                    name: channelName
+                }
+            ]
+        });
+    }); 
+
+    test('channels list valid authUserId with no channels returns empty list', () => {
+        const channelListResult = channelsListV1(channelCreatorId)
+
+        expect(channelListResult).toStrictEqual({
+            channels: []
+        });
+    }); 
+
+    test('channels list invalid authUserId', () => {
+        const channelListResult = channelsListV1(24092001)
+
+        expect(channelListResult).toStrictEqual({
+            error: 'error'
+        });
+    }); 
+    
+    //----------------------------channelsListAllV1
+    
     test('channelsListAllV1 invalid authUserId', () => {
 
       expect(channelsListAllV1(24092001)).toStrictEqual({       //input random ID
@@ -73,6 +112,5 @@ describe('Test suite for channels functions', () => {
             ]
         });
 
-    }); 
-    
+    });
 });
