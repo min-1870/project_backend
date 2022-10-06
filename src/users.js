@@ -10,7 +10,9 @@ export function userProfileV1( authUserId, uID ){
         if (i >= data.users.length) {
             return {error: 'authUserId is not valid'};
         }
-        if (data.users[i]['uID'] === authUserId) {
+        // console.log(data.users[i]['uId']);
+        // console.log(authUserId);
+        if (data.users[i]['uId'] === authUserId) {
             break;
         }  
         i ++;
@@ -19,9 +21,9 @@ export function userProfileV1( authUserId, uID ){
     i = 0;  // checking if uID is valid
     while (true) {
         if (i >= data.users.length) {
-            return {error: 'uID is not valid'};
+            return {error: 'uId is not valid'};
         }
-        if (data.users[i]['uID'] === uID) {
+        if (data.users[i]['uId'] === uID) {
             break;
         }  
         i ++;
@@ -30,7 +32,7 @@ export function userProfileV1( authUserId, uID ){
 
     
     return {
-      uId: data.users[i]['uID'],
+      uId: data.users[i]['uId'],
       email: data.users[i]['email'],
       nameFirst: data.users[i]['nameFirst'],
       nameLast: data.users[i]['nameLast'],
