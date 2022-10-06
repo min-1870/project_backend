@@ -70,6 +70,13 @@ export function channelsListV1(authUserId){
     }
 }
 
+/** <channelsListAllV1>
+  * Provides an array of all channels, including private
+  * channels (and their associated details)
+  * 
+  * @param {number} authUserId - a user ID in the dataStore
+  * @returns {{channels}} - Array of objects, where each object contains types { channelId, name }
+*/
 export function channelsListAllV1( authUserId ){
     let data = getData()
     
