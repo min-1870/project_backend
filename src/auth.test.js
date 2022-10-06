@@ -61,7 +61,8 @@ describe('Test Suite for authLoginV1 function', () => {
     });
 
     test('Successful authLoginV1', () => {   
-        const authId = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
+        let authId = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
+        authId = authId.authUserId;
         expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({authUserId: authId});    
     });
 

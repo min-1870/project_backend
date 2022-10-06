@@ -10,6 +10,8 @@ export function userProfileV1( authUserId, uID ){
         if (i >= data.users.length) {
             return {error: 'authUserId is not valid'};
         }
+        // console.log(data.users[i]['uId']);
+        // console.log(authUserId);
         if (data.users[i]['uId'] === authUserId) {
             break;
         }  

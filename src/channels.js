@@ -2,7 +2,6 @@ import { getData } from './dataStore.js'
 
 let nextChannelId = 1;
 
-
 //channelsCreateV1 stub fucntion
 export function channelsCreateV1( authUserId, name, isPublic ){
     if (name.length < 1 || name.length > 20) {
@@ -68,7 +67,6 @@ export function channelsListAllV1( authUserId ){
         channels: data.channels.map(({channelId, name}) => ({channelId, name}))
       }
   }
-
 
 function isAuthUserIdValid(authUserId, data) {
     return getUser(authUserId, data) != null

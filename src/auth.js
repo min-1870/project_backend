@@ -68,7 +68,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
   if (fullname.length > 20) {
     fullname = fullname.substring(0,20)
   };
-
+  
   i = 0;  // checking if handleStr already exist and making unique if not already
   let j = 0;
   let finalchar = (fullname.length);
@@ -104,6 +104,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
   uniqueuserID ++;
   data.users.push(temp);
   setData(data);
+  
   return {authUserId: uuID};
 };
 
