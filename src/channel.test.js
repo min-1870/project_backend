@@ -1,5 +1,6 @@
 import { channelMessagesV1 } from './channel.js';
 import { clearV1 } from './other.js';
+import { getData, setData } from './dataStore';
 
 describe('Test set for the function channelMessagesV1', () => {
   const testUser = {  //profile of the test user1

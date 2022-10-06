@@ -50,7 +50,7 @@ export function channelMessagesV1 ( authUserId, channelId, start ) {
   }else if(start < 0 || start > data.channels.find(channel => channel.channelId == channelId).messages.length){                //if starting point is out of range, return error
     return {error: "Invalid start"}
 
-  }else if(data.channels.find(channel => channel.channelId == channelId).allMembers.find(user => user.uId == authUserId)){    //if the user is not the member of the channel, return error
+  }else if(data.channels.find(channel => channel.channelId == channelId).allMembers.find(user => user.uId == authUserId) == null){    //if the user is not the member of the channel, return error
     return {error: "Not a member of the channel"}
 
   }
