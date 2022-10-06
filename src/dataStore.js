@@ -8,7 +8,7 @@ let data = {
     nameFirst: string,
     nameLast: string,
     handleStr: string,
-    GlobalOwner: boolean
+    isglobalowner: boolean
     */
   ],
   channels: [
