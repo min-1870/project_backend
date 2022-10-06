@@ -9,7 +9,6 @@ describe('Test set for the function channelJoinV1', () => {
   beforeEach(() => {
     clearV1();
   });
-
   test('channelId does not refer to a valid channel', () => {
     const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
     const channelId = channelsCreateV1(authUserId, 'name', true);

@@ -22,7 +22,6 @@ export function channelDetailsV1(authUserId, channelId) {
   };
   return {details}
 };
-
   /*
   return {
   
