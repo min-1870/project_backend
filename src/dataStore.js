@@ -18,7 +18,7 @@ let data = {
     name (string),
     ownerMembers: [object],
     allMembers: [object],
-    messages: [string]
+    messages: [object]
     */
   ]    
 };
