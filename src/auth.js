@@ -90,6 +90,11 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
     i ++;
   };
 
+  let ownerglob = false;
+  if (data.users.length === 0) {
+    ownerglob = true;
+  };
+
 
   let uuID = uniqueuserID;
   const temp = {
@@ -98,7 +103,8 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
     password: password,
     nameFirst: nameFirst,
     nameLast: nameLast,
-    handleStr: fullname
+    handleStr: fullname,
+    GlobalOwner: ownerglob
   }
   
   uniqueuserID ++;

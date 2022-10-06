@@ -1,8 +1,25 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
 let data = {
-  users: [   
+  users: [  
+    /*
+    uId: number,
+    email: string,
+    password: string,
+    nameFirst: string,
+    nameLast: string,
+    handleStr: string,
+    GlobalOwner: boolean
+    */
   ],
   channels: [
+    /*
+    channelId: number,
+    isPublic (boolean),
+    name (string),
+    ownerMembers: [object],
+    allMembers: [object],
+    messages: [string]
+    */
   ]    
 };
 
