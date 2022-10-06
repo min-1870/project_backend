@@ -24,6 +24,14 @@ function channelDetailsV1(authUserId, channelId) {
   }
 }
 
+/**
+  * <channelJoinV1>
+  * Given a channelId of a channel that the authorised user can join, 
+  * adds them to that channel.
+  * 
+  * @param {number} authUserId - uId in user
+  * @param {number} channelId - channelId in channel
+*/
 // channelJoinV1 function
 export function channelJoinV1(authUserId, channelId) {
   let data = getData();
@@ -56,6 +64,16 @@ export function channelJoinV1(authUserId, channelId) {
   return {};
 }
 
+/**
+  * <channelInviteV1>
+  * Invites a user with ID uId to join a channel with ID channelId. 
+  * Once invited, the user is added to the channel immediately. 
+  * In both public and private channels, all members are able to invite users.
+  * 
+  * @param {number} authUserId - uId in user
+  * @param {number} channelId - channelId in channel
+  * @param {number} uId - uId in user
+*/
 //channelInviteV1 function
 export function channelInviteV1(authUserId, channelId, uId) {
   let data = getData();
