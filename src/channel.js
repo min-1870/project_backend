@@ -33,19 +33,19 @@ export function channelJoinV1(authUserId, channelId) {
   let cIdList = data.channels.filter((element) => {
     return element.channelId === channelId;
   });
-  let MemberInChannel = data.channels.filter((element) => {
+  let memberInChannel = data.channels.filter((element) => {
     return (element.channelId === channelId && element.allMembers.includes(authUserId));
   });
   let privateChannel = data.channels.filter((element) => {
     return (element.channelId === channelId && element.isPublic === false);
   });
-  let GlobalOwner = data.users.filter((element) => {
-    return (element.uId === authUserId && element.isGlobalOwner === true);
+  let globalOwner = data.users.filter((element) => {
+    return (element.uId === authUserId && element.isGlobalOwner);
   });
   if (uIdList.length === 0 ||
     cIdList.length === 0 ||
-    MemberInChannel === 1 ||
-    (privateChannel === 1 && MemberInChannel === 0 && GlobalOwner === 0)) {
+    memberInChannel.length === 1 ||
+    (privateChannel.length === 1 && MemberInChannel.length === 0 && globalOwner.length === 0)) {
     return { error: 'error' };
   }
   for (const element of data.channels) {
@@ -68,7 +68,7 @@ export function channelInviteV1(authUserId, channelId, uId) {
   let cIdList = data.channels.filter((element) => {
     return element.channelId === channelId;
   });
-  let MemberInChannel = data.channels.filter((element) => {
+  let memberInChannel = data.channels.filter((element) => {
     return (element.channelId === channelId && element.allMembers.includes(uId));
   });
   let authorisedUserNotMember = data.channels.filter((element) => {
@@ -77,8 +77,8 @@ export function channelInviteV1(authUserId, channelId, uId) {
   if (uIdList.length === 0 ||
     authIdList.length === 0 ||
     cIdList.length === 0 ||
-    MemberInChannel === 1 ||
-    authorisedUserNotMember === 1) {
+    memberInChannel.length === 1 ||
+    authorisedUserNotMember.length === 1) {
     return { error: 'error' };
   }
   for (const element of data.channels) {
