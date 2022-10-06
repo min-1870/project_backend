@@ -1,4 +1,3 @@
-
 import { authRegisterV1 } from './auth.js';
 import { channelsCreateV1 } from './channels.js';
 import { channelJoinV1, channelInviteV1, channelMessagesV1 } from './channel.js';
@@ -34,6 +33,13 @@ describe('Test set for the function channelJoinV1', () => {
     const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
     const channelId = channelsCreateV1(authUserId, 'name', true);
     expect(channelJoinV1(authUserId + 1, channelId)).toStrictEqual({ error: 'error' });
+  });
+
+  test('channelJoinV1 can run correctly', () => {
+    const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
+    const channelId = channelsCreateV1(authUserId, 'name', true);
+    const authUserId2 = authRegisterV1('email2@email.com', 'password2', 'nameFirst2', 'nameLast2');
+    expect(channelJoinV1(authUserId2, channelId)).toStrictEqual({});
   });
 });
 
@@ -81,6 +87,14 @@ describe('Test set for the function channelInviteV1', () => {
     const authUserId2 = authRegisterV1('email2@email.com', 'password2', 'nameFirst2', 'nameLast2');
     const uId = authUserId2;
     expect(channelInviteV1(authUserId + 1, channelId, uId)).toStrictEqual({ error: 'error' });
+  });
+
+  test('channelInviteV1 can run correctly', () => {
+    const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
+    const channelId = channelsCreateV1(authUserId, 'name', true);
+    const authUserId2 = authRegisterV1('email2@email.com', 'password2', 'nameFirst2', 'nameLast2');
+    const uId = authUserId2;
+    expect(channelInviteV1(authUserId, channelId, uId)).toStrictEqual({});
   });
 });
 
