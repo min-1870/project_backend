@@ -62,7 +62,23 @@ function channelInviteV1(authUserId, channelId) {
   }
 }
 
-//channelMessagesV1 stub function
+/** <channelMessagesV1>
+  * Given a channel with ID channelId that the authorised user
+  * is a member of, returns up to 50 messages between index
+  * "start" and "start + 50". Message with index 0 (i.e. the
+  * first element in the returned array of messages) is the
+  * most recent message in the channel. This function returns
+  * a new index "end". If there are more messages to return
+  * after this function call, "end" equals "start + 50". If
+  * this function has returned the least recent messages in
+  * the channel, "end" equals -1 to indicate that there are no
+  * more messages to load after this return.
+  * 
+  * @param {number} authUserId - a user ID in the dataStore
+  * @param {number} channelId - a channel ID in the dataStore
+  * @param {number} start - the index of the starting point
+  * @returns {{messages: array, start: number, end: number}} - an object contains the messages and information of pages
+*/
 export function channelMessagesV1 ( authUserId, channelId, start ) {
   let data = getData()
 
