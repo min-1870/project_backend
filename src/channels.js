@@ -2,8 +2,16 @@ import { getData } from './dataStore.js'
 
 let nextChannelId = 1;
 
-//channelsCreateV1 stub fucntion
-export function channelsCreateV1( authUserId, name, isPublic ){
+/**
+ * Creates a new channel with the given name, that is either a public or private channel. 
+ * The user who created it automatically joins the channel.
+ * 
+ * @param {number} authUserId - The creator's user ID.
+ * @param {string} name - The name of the channel to create.
+ * @param {boolean} isPublic - Whether the new channel is a public channel or not.
+ * @returns { channelId: number } object.
+ */
+export function channelsCreateV1(authUserId, name, isPublic){
     if (name.length < 1 || name.length > 20) {
         return { error: 'error' }
     }
@@ -35,6 +43,13 @@ export function channelsCreateV1( authUserId, name, isPublic ){
     }
 }
 
+/**
+ * Provides an array of all channels (and their associated details) 
+ * that the authorised user is part of.
+ * 
+ * @param {number} authUserId - The user ID to list the channels for.
+ * @returns { channels: [{channelId: number, name: string }] } object.
+ */
 export function channelsListV1(authUserId){
     let data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
@@ -55,17 +70,18 @@ export function channelsListV1(authUserId){
     }
 }
 
-//channelsListAllV1 stub fucntion
 export function channelsListAllV1( authUserId ){
     let data = getData()
     
-    if (!isAuthUserIdValid(authUserId, data)){    //if the uesr ID is not valid return error
-      return { error: 'error' }; 
+    // If the uesr ID is not valid return error
+    if (!isAuthUserIdValid(authUserId, data)) {
+        return { error: 'error' }; 
     }
 
-    return {        //return every channels in the data without  Id & name only
+     // Return every channels in the data without Id & name only
+    return {
         channels: data.channels.map(({channelId, name}) => ({channelId, name}))
-      }
+    }
   }
 
 function isAuthUserIdValid(authUserId, data) {
