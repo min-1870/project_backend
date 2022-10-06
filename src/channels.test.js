@@ -26,8 +26,49 @@ describe('Test suite for channels functions', () => {
         }
         setData(data)
     });
+  
+    //happy path for channelsCreateV1
+    test('create new public channel success', () => {
+        const createChannelResult = channelsCreateV1(channelCreatorId, channelName, true)
 
-//----------------------------channelsList
+        expect(createChannelResult).toStrictEqual({
+            channelId: expect.any(Number)
+        });
+    });
+
+    test('create new private channel success', () => {
+        const createChannelResult = channelsCreateV1(channelCreatorId, channelName, false)
+
+        expect(createChannelResult).toStrictEqual({
+            channelId: expect.any(Number)
+        });
+    });
+
+    //unhappy path for both Create and List
+    test('create new channel name less than 1 return error', () => {
+        const createChannelResult = channelsCreateV1(channelCreatorId, '', false)
+
+        expect(createChannelResult).toStrictEqual({
+            error: 'error'
+        });
+    });
+
+    test('create new channel name more than 20 return error', () => {
+        const createChannelResult = channelsCreateV1(channelCreatorId, 'helloisitmeyoulookingforhelloagain', false)
+
+        expect(createChannelResult).toStrictEqual({
+            error: 'error'
+        });
+    });
+
+    test('create new channel creator is invalid return error', () => {
+        const createChannelResult = channelsCreateV1(24092001, channelName, false)
+
+        expect(createChannelResult).toStrictEqual({
+            error: 'error'
+        });
+    });
+    //----------------------------channelsList
 
     test('channels list valid authUserId with channels returns list of channels', () => {
         let data = getData();
@@ -114,3 +155,4 @@ describe('Test suite for channels functions', () => {
 
     });
 });
+
