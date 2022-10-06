@@ -1,10 +1,7 @@
-<<<<<<< src/channels.js
 import { getData } from './dataStore.js'
 
 let nextChannelId = 1;
-=======
-import { getData } from './dataStore'
->>>>>>> src/channels.js
+
 
 //channelsCreateV1 stub fucntion
 export function channelsCreateV1( authUserId, name, isPublic ){
@@ -72,19 +69,11 @@ export function channelsListAllV1( authUserId ){
       }
   }
 
-<<<<<<< src/channels.js
-
 
 function isAuthUserIdValid(authUserId, data) {
     return getUser(authUserId, data) != null
 }
-  
-=======
-function isAuthUserIdValid(authUserId, data) {
-    return getUser(authUserId, data) != null
-}
 
->>>>>>> src/channels.js
 function getUser(authUserId, data) {
     return data.users.find(user => user.uId == authUserId)
 }

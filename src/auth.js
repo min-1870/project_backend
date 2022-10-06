@@ -23,7 +23,7 @@ export function authLoginV1(email, password) {
   if (data.users[i]['password'] !== password) {
     return {error: 'Wrong password'};
   } else {
-    return data.users[i]['uID'];
+    return {authUserId: data.users[i]['uId']};
   }
 
 
@@ -93,7 +93,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
 
   let uuID = uniqueuserID;
   const temp = {
-    uID: uuID,
+    uId: uuID,
     email: email,
     password: password,
     nameFirst: nameFirst,
@@ -104,7 +104,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
   uniqueuserID ++;
   data.users.push(temp);
   setData(data);
-  return uuID;
+  return {authUserId: uuID};
 };
 
 // Helper function to remove non alpha-numeric characters from string

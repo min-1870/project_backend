@@ -13,7 +13,7 @@ describe('Test Suite for authRegisterV1 function', () => {
         authRegisterV1('moniker2@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker');
         authRegisterV1('moniker3@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker');
         authRegisterV1('moniker4@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker');
-        expect(authRegisterV1('moniker@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker')).toStrictEqual(expect.any(Number));    
+        expect(authRegisterV1('moniker@hotmail.com', 'pvssword', '7real43E', 'MoNi9IO64kerMoNi9IO64kerMoNi9IO64ker')).toStrictEqual({authUserId: expect.any(Number)});    
     });
 
     test('error passing invalid email through authRegisterV1', () => {   
@@ -62,7 +62,7 @@ describe('Test Suite for authLoginV1 function', () => {
 
     test('Successful authLoginV1', () => {   
         const authId = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
-        expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual(authId);    
+        expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({authUserId: authId});    
     });
 
     test('Error passing invalid email through authLoginV1', () => {   
