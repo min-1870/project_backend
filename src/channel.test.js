@@ -204,7 +204,7 @@ describe('Test set for the function channelDetailsV1', () => {
         name: testChannel.name,
         isPublic: true,
         ownerMembers: [testUser],
-        allMembers: [testUser],
+        allMembers: [testUser]
       }
     );
   });
@@ -215,7 +215,7 @@ describe('Test set for the function channelDetailsV1', () => {
         name: testChannel2.name,
         isPublic: false,
         ownerMembers: [testUser2],
-        allMembers: [testUser2],
+        allMembers: [testUser2]
       }
     );
   });

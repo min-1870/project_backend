@@ -64,9 +64,9 @@ export function channelsListV1(authUserId){
             channelId: channel.channelId,
             name: channel.name
             })) || []
-  
+
     return {
-      channels
+      channels: channels
     }
 }
 
@@ -84,7 +84,7 @@ export function channelsListAllV1( authUserId ){
     if (!isAuthUserIdValid(authUserId, data)) {
         return { error: 'error' }; 
     }
-
+    
      // Return every channels in the data without Id & name only
     return {
         channels: data.channels.map(({channelId, name}) => ({channelId, name}))

@@ -29,7 +29,7 @@ export function channelDetailsV1(authUserId, channelId) {
     name: rightChannel.name,
     isPublic: rightChannel.isPublic, 
     ownerMembers: rightChannel.ownerMembers, 
-    allMembers: rightChannel.allMembers,
+    allMembers: rightChannel.allMembers
   }
 };
 
@@ -140,7 +140,6 @@ export function channelInviteV1(authUserId, channelId, uId) {
 */
 export function channelMessagesV1(authUserId, channelId, start) {
   let data = getData()
-
   if (data.channels.find(channel => channel.channelId == channelId) == null) {   //if the channel Id is not exist, return error
     return { error: "Invalid channel ID" }
 
@@ -170,6 +169,6 @@ export function channelMessagesV1(authUserId, channelId, start) {
   return {
     messages: slicedMessages,
     start: start,
-    end: end,
+    end: end
   }
 }
