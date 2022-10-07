@@ -2,18 +2,23 @@ import { channelsCreateV1,channelsListV1, channelsListAllV1 } from './channels';
 import { clearV1 } from './other';
 import { getData, setData } from './dataStore';
 
-describe('Test suite for channels functions', () => {
-    const channelCreatorId = 1;          // Test userID
-    const channelName = 'Cat Channel';   // Test channel
-    const channelCreator = {  // Profile of the test user
-        uId: channelCreatorId,
-        namesFirst: 'Adam',
-        namesLast: 'Johnston',
-        email: 'test@gmail.com',
-        handleStr: 'adamjohnston',
-        password: 'test123'
-    }
-    const channelId = 10000;  
+
+
+const channelCreatorId = 1;          // Test userID
+const channelName = 'Cat Channel';   // Test channel
+const channelCreator = {  // Profile of the test user
+    uId: channelCreatorId,
+    namesFirst: 'Adam',
+    namesLast: 'Johnston',
+    email: 'test@gmail.com',
+    handleStr: 'adamjohnston',
+    password: 'test123'
+}
+const channelId = 10000;  
+
+
+
+describe('Test set for the function channelsCreate', () => {
 
     beforeEach(() => {
         // Before every test reset and add a new test user
@@ -27,8 +32,7 @@ describe('Test suite for channels functions', () => {
         }
         setData(data)
     });
-  
-    // ----------------------------channelsCreate
+
     test('create new public channel success', () => {
         const createChannelResult = channelsCreateV1(channelCreatorId, channelName, true)
 
@@ -104,7 +108,24 @@ describe('Test suite for channels functions', () => {
             error: 'error'
         });
     });
-    // ----------------------------channelsList
+});
+
+
+
+describe('Test set for the function channelsList', () => {
+
+    beforeEach(() => {
+        // Before every test reset and add a new test user
+        clearV1()
+        let data = getData()
+        data = {
+            users: [
+                channelCreator
+            ],
+            channels: []
+        }
+        setData(data)
+    });
 
     test('channels list valid authUserId with channels returns list of channels', () => {
         let data = getData();
@@ -141,8 +162,24 @@ describe('Test suite for channels functions', () => {
             error: 'error'
         });
     }); 
-    
-    //----------------------------channelsListAllV1
+});
+
+
+
+describe('Test set for the function channelsListAllV1', () => {    
+
+    beforeEach(() => {
+        // Before every test reset and add a new test user
+        clearV1()
+        let data = getData()
+        data = {
+            users: [
+                channelCreator
+            ],
+            channels: []
+        }
+        setData(data)
+    });
     
     test('channelsListAllV1 invalid authUserId', () => {
 
