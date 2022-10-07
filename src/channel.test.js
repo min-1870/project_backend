@@ -122,48 +122,6 @@ describe('Test set for the function channelMessagesV1', () => {
     setData(data)
   });
 
-test('authUserId and channelId correct for public channel', () => {
-  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId)
-  expect(findingchannelDetails).toStrictEqual({
-    channelDetails: {
-      name: `${authUser.nameFirst} ${authUser.nameLast}`,
-      isPublic: true,
-      ownerMembers: [testUser]
-      allMembers: [testUser],
-    }
-  });
-});
-
-test('authUserId and channelId correct for private channel', () => {
-  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId)
-  expect(findingchannelDetails).toStrictEqual({
-    channelDetails: {
-      name: `${nameFirst} ${nameLast}`,
-      isPublic: false,
-      ownerMembers: [testUser],
-      allMembers: [testUser],
-    }
-  });
-});
-
-
-test('channelId does not refer to a valid channel', () => {
-  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId +1)
-    expect(findingchannelDetails).toStrictEqual({error: 'Channel ID does not refer to a valid channel'})
-});
-
-test('user not a channel member', () => {
-  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId + 1)
-  expect(findingchannelDetails).toStrictEqual({error: 'User is not a channel member'})
-});
-
-
-test('authUserId is invalid', () => {
-  const findingchannelDetails = channelDetailsV1(testUser.authUserId + 1, testChannel.channelId)
-  expect(findingchannelDetails).toStrictEqual({error: 'User ID is invalid'})
-});
- 
-
   test('Checks the function return error for an invalid channelId', () => {
 
     expect(channelMessagesV1(1, 123144, 0)).toStrictEqual({ error: expect.any(String) });
@@ -193,3 +151,76 @@ test('authUserId is invalid', () => {
   });
 });
 
+describe('Test set for the function channelDetailsV1', () => {
+  const testUser = {  //profile of the test user1
+      uId: 1,
+      namesFirst: 'Adam',
+      namesLast: 'Johnston',
+      email: 'test@gmail.com',
+      handleStr: 'adamjohnston',
+      password: 'test123'
+  }
+  const testChannel = {  //profile of the test channel
+    channelId: 1,
+    isPublic: true,
+    name: 'testChannel',
+    ownerMembers: [testUser],
+    allMembers: [testUser],
+  } 
+
+
+  beforeEach(() => {       //before every test reset and add a new test user & channel
+    clearV1()
+    let data = getData()
+    data = {
+        users: [
+          testUser,
+        ],
+        channels: [
+          testChannel
+        ]
+    }
+    setData(data)
+  });
+
+  test('authUserId and channelId correct for public channel', () => {
+    const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId)
+    expect(findingchannelDetails).toStrictEqual({
+      channelDetails: {
+        name: testChannel.channelId,
+        isPublic: true,
+        ownerMembers: [testUser],
+        allMembers: [testUser],
+      }
+    });
+  });
+
+  test('authUserId and channelId correct for private channel', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId)
+    expect(findingchannelDetails).toStrictEqual({
+    channelDetails: {
+      name: testChannel.channelId,
+      isPublic: false,
+      ownerMembers: [testUser],
+      allMembers: [testUser],
+    }
+    });
+  });
+
+
+  test('channelId does not refer to a valid channel', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId + 1)
+    expect(findingchannelDetails).toStrictEqual({error: 'Channel ID does not refer to a valid channel'})
+  });
+
+  test('user not a channel member', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId + 1, testChannel.channelId + 2)
+    expect(findingchannelDetails).toStrictEqual({error: 'User is not a channel member'})
+  });
+
+
+  test('authUserId is invalid', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId + 1, testChannel.channelId)
+    expect(findingchannelDetails).toStrictEqual({error: 'User ID is invalid'})
+  });
+});
