@@ -1,4 +1,5 @@
-import { getData } from './dataStore'
+import { getData } from './dataStore.js'
+
 // channelDetailsV1 stub function
 export function channelDetailsV1(authUserId, channelId) {
   let data = getData();
@@ -11,17 +12,17 @@ export function channelDetailsV1(authUserId, channelId) {
   else if(data.channels.find(channel => channel.channelId === channelId).allMembers.find(user => user.uId === authUserId) == null){    //if the user is not the member of the channel, return error
     return {error: "User is not a member of channel"}
   }
-  else {
-    const rightChannel = data.channels.find(channel => channel.channelId === channelId);
-  }
-  const details = {
+
+  let rightChannel = data.channels.find(channel => channel.channelId === channelId);
+
+  return {
     name: rightChannel.name,
     isPublic: rightChannel.isPublic, 
     ownerMembers: rightChannel.ownerMembers, 
     allMembers: rightChannel.allMembers,
-  };
-  return {details}
+  }
 };
+
   /*
   return {
   
