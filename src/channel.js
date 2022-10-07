@@ -138,9 +138,9 @@ export function channelInviteV1(authUserId, channelId, uId) {
   };
   let uIdmarker = i;
   // console.log(data.channels[channelIndex]['allMembers'][0].uId);
-  console.log(uId);
+  // console.log(uId);
   for (const item of data.channels[channelIndex]['allMembers']) {
-    console.log(item.uId);
+    // console.log(item.uId);
     
     if (item.uId === uId){
       return { error: 'user already member of channel' };
@@ -164,7 +164,7 @@ export function channelInviteV1(authUserId, channelId, uId) {
   };
 
   data.channels[channelIndex]['allMembers'].push(data.users[uIdmarker]);
-  console.log(data.channels[channelIndex]['allMembers']);
+  // console.log(data.channels[channelIndex]['allMembers']);
   
    
 
