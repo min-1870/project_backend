@@ -39,7 +39,11 @@ export function channelsCreateV1(authUserId, name, isPublic){
     
     data.channels.push(newChannel)
     nextChannelId++;
+<<<<<<< src/channels.js
+    setData(data)
+=======
     setData(data);   
+>>>>>>> src/channels.js
     return {
         channelId: newChannel.channelId,
     }

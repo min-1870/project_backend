@@ -5,33 +5,84 @@ import { clearV1 } from './other.js';
 import { getData, setData } from './dataStore';
 
 describe('Test set for the function channelJoinV1', () => {
-  beforeEach(() => {
-    clearV1();
-  });
-  test('channelId does not refer to a valid channel', () => {
-    const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
-    const channelId = channelsCreateV1(authUserId, 'name', true);
-    const authUserId2 = authRegisterV1('email2@email.com', 'password2', 'nameFirst2', 'nameLast2');
-    expect(channelJoinV1(authUserId2, channelId + 1)).toStrictEqual({ error: 'error' });
-  });
+  const testUser = {  //profile of the test user1
+      uId: 1,
+      namesFirst: 'Adam',
+      namesLast: 'Johnston',
+      email: 'test@gmail.com',
+      handleStr: 'adamjohnston',
+      password: 'test123'
+  } 
+  const testUser2 = {  //profile of the test user1
+    uId: 2,
+    namesFirst: 'Adam2',
+    namesLast: 'Johnston2',
+    email: 'test@gmail.com',
+    handleStr: 'adam2johnston2',
+    password: 'test123',
+    isGlobalOwner: false
+}
+const testUser3 = {  //profile of the test user3
+  uId: 3,
+  namesFirst: 'Adam3',
+  namesLast: 'Johnston3',
+  email: 'test@gmail.com',
+  handleStr: 'adam3johnston3',
+  password: 'test123',
+  isGlobalOwner: true
+}
+  const testChannel = {  //profile of the test channel
+    channelId: 1,
+    isPublic: true,
+    name: 'testChannel',
+    ownerMembers: [testUser],
+    allMembers: [testUser],
+  } 
+  const testChannel2 = {  //profile of the test channel
+    channelId: 2,
+    isPublic: false,
+    name: 'testChannel2',
+    ownerMembers: [testUser],
+    allMembers: [testUser],
+  } 
 
-  test('the authorised user is already a member of the channel', () => {
-    const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
-    const channelId = channelsCreateV1(authUserId, 'name', true);
-    expect(channelJoinV1(authUserId, channelId)).toStrictEqual({ error: 'error' });
-  });
 
-  test('channelId refers to a channel that is private, when the authorised user is not already a channel member and is not a global owner', () => {
-    const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
-    const channelId = channelsCreateV1(authUserId, 'name', false);
-    const authUserId2 = authRegisterV1('email2@email.com', 'password2', 'nameFirst2', 'nameLast2');
-    expect(channelJoinV1(authUserId2, channelId)).toStrictEqual({ error: 'error' });
+  beforeEach(() => {       //before every test reset and add a new test user & channel
+    clearV1()
+    let data = getData()
+    data = {
+        users: [
+          testUser, testUser2, testUser3
+        ],
+        channels: [
+          testChannel, testChannel2
+        ]
+    }
+    setData(data)
   });
+  test('not valid User ID', () => {
+    expect(channelJoinV1(999, testChannel.channelId)).toStrictEqual({error: "Invalid user ID"})
+  });  
 
-  test('authUserId is invalid', () => {
-    const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
-    const channelId = channelsCreateV1(authUserId, 'name', true);
-    expect(channelJoinV1(authUserId + 1, channelId)).toStrictEqual({ error: 'error' });
+  test('not valid channel ID', () => {
+    expect(channelJoinV1(testUser2.uId, 999)).toStrictEqual({error: "Invalid channel ID"})
+  });  
+
+  test('normal user join private channel', () => {
+    expect(channelJoinV1(testUser2.uId, testChannel2.channelId)).toStrictEqual({error: "This is a private server"})
+  });  
+
+  test('globalowner user join private channel', () => {
+    expect(channelJoinV1(testUser3.uId, testChannel2.channelId)).toStrictEqual({})
+  });  
+
+  test('correct input return {}', () => {
+    expect(channelJoinV1(testUser2.uId, testChannel.channelId)).toStrictEqual({});
+  });
+  
+  test('correct input and join the channel', () => {
+    channelJoinV1(testUser2.uId, testChannel.channelId)
+    expect(getData().channels[0].allMembers).toEqual([testUser, testUser2]);
   });
 });
 

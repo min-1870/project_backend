@@ -1,4 +1,4 @@
-import { getData } from './dataStore.js'
+import { getData, setData } from './dataStore.js'
 
 /**
   * <channelDetailsV1>
@@ -45,7 +45,28 @@ export function channelDetailsV1(authUserId, channelId) {
 */
 // channelJoinV1 function
 export function channelJoinV1(authUserId, channelId) {
-  let data = getData();
+  let data = getData(); 
+  const user = data.users.find(user => user.uId == authUserId)
+  const channel = data.channels.find(channel => channel.channelId == channelId)
+
+  if (channel == null) {   //if the channel Id is not exist, return error
+    return { error: "Invalid channel ID" }
+
+  } else if (user == null) {           //if the user Id is not exist, return error
+    return { error: "Invalid user ID" }
+
+  } else if (channel.allMembers.find(user => user.uId == authUserId) != null){
+    return { error: "User are in the channel"}
+
+  } else if (channel.isPublic == false && user.isGlobalOwner == false){
+    return { error: "This is a private server"}
+  }
+
+  let newMember = data.users.find(user => user.uId == authUserId)                //find the user data
+  data.channels.find(channel => channel.channelId == channelId).allMembers.push(newMember) //find the channel and join the member
+  //don't neet to setData
+
+/*  
   let uIdList = data.users.filter((element) => {
     return element.uId === authUserId;
   });
@@ -73,7 +94,7 @@ export function channelJoinV1(authUserId, channelId) {
       element.allMembers.push(authUserId);
     }
   }
-  console.log(data.channels.allMembers);
+  */
   return {};
 }
 
