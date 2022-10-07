@@ -8,7 +8,6 @@ describe('Test set for the function channelJoinV1', () => {
   beforeEach(() => {
     clearV1();
   });
-
   test('channelId does not refer to a valid channel', () => {
     const authUserId = authRegisterV1('email@email.com', 'password', 'nameFirst', 'nameLast');
     const channelId = channelsCreateV1(authUserId, 'name', true);
@@ -122,6 +121,48 @@ describe('Test set for the function channelMessagesV1', () => {
     }
     setData(data)
   });
+
+test('authUserId and channelId correct for public channel', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId)
+  expect(findingchannelDetails).toStrictEqual({
+    channelDetails: {
+      name: `${authUser.nameFirst} ${authUser.nameLast}`,
+      isPublic: true,
+      ownerMembers: [testUser]
+      allMembers: [testUser],
+    }
+  });
+});
+
+test('authUserId and channelId correct for private channel', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId)
+  expect(findingchannelDetails).toStrictEqual({
+    channelDetails: {
+      name: `${nameFirst} ${nameLast}`,
+      isPublic: false,
+      ownerMembers: [testUser],
+      allMembers: [testUser],
+    }
+  });
+});
+
+
+test('channelId does not refer to a valid channel', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId +1)
+    expect(findingchannelDetails).toStrictEqual({error: 'Channel ID does not refer to a valid channel'})
+});
+
+test('user not a channel member', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId + 1)
+  expect(findingchannelDetails).toStrictEqual({error: 'User is not a channel member'})
+});
+
+
+test('authUserId is invalid', () => {
+  const findingchannelDetails = channelDetailsV1(testUser.authUserId + 1, testChannel.channelId)
+  expect(findingchannelDetails).toStrictEqual({error: 'User ID is invalid'})
+});
+ 
 
   test('Checks the function return error for an invalid channelId', () => {
 

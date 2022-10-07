@@ -1,7 +1,30 @@
 import { getData } from './dataStore'
 // channelDetailsV1 stub function
-function channelDetailsV1(authUserId, channelId) {
+export function channelDetailsV1(authUserId, channelId) {
+  let data = getData();
+  if (data.channels.find(channel => channel.channelId === channelId) == null){   //if the channel Id is not exist, return error
+    return {error: "Channel ID does not refer to a valid channel"}
+  }
+  else if (data.users.find(user => user.uId === authUserId) == null){           //if the user Id is not exist, return error
+    return {error: "User ID does not exist"}
+  }
+  else if(data.channels.find(channel => channel.channelId === channelId).allMembers.find(user => user.uId === authUserId) == null){    //if the user is not the member of the channel, return error
+    return {error: "User is not a member of channel"}
+  }
+  else {
+    const rightChannel = data.channels.find(channel => channel.channelId === channelId);
+  }
+  const details ={
+    name: rightChannel.name,
+    isPublic: rightChannel.isPublic, 
+    ownerMembers: rightChannel.ownerMembers, 
+    allMembers: rightChannel.allMembers,
+  };
+  return {details}
+};
+  /*
   return {
+  
     name: 'Hayden',
     ownerMembers: [
       {
@@ -22,6 +45,7 @@ function channelDetailsV1(authUserId, channelId) {
       }
     ],
   }
+  */
 }
 
 /**
