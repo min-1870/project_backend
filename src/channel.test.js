@@ -164,17 +164,17 @@ describe('Test set for the function channelDetailsV1', () => {
 
   test('channelId does not refer to a valid channel', () => {
   const findingchannelDetails = channelDetailsV1(testUser.authUserId, testChannel.channelId + 1)
-    expect(findingchannelDetails).toStrictEqual({error: 'Channel ID does not refer to a valid channel'})
+    expect(findingchannelDetails).toStrictEqual({error: expect.any(String)})
   });
 
   test('user not a channel member', () => {
   const findingchannelDetails = channelDetailsV1(testUser.authUserId + 1, testChannel.channelId + 2)
-    expect(findingchannelDetails).toStrictEqual({error: 'User is not a channel member'})
+    expect(findingchannelDetails).toStrictEqual({error: expect.any(String)})
   });
 
 
   test('authUserId is invalid', () => {
   const findingchannelDetails = channelDetailsV1(testUser.authUserId + 1, testChannel.channelId)
-    expect(findingchannelDetails).toStrictEqual({error: 'User ID is invalid'})
+    expect(findingchannelDetails).toStrictEqual({error: expect.any(String)})
   });
 });
