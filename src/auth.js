@@ -6,7 +6,17 @@ import validator from 'validator';
 
 let uniqueuserID = 0;
 
-// authLoginV1 stub function
+/**
+ * <authLoginV1>
+ * Given a registered user's email and password, returns their authUserId value
+ * 
+ * 
+ * @param {string} email- user's email
+ * @param {string} password - user's password
+ * * * 
+ * @returns {authUserId: authUserId} an object containing authUserId
+ */
+// authLoginV1 function
 export function authLoginV1(email, password) {
   let data = getData();
 
@@ -31,7 +41,19 @@ export function authLoginV1(email, password) {
   
 }
   
-
+/**
+ * <authRegisterV1>
+ * Given a user's first and last name, email and password, creates a new account for them and 
+ * returns new authUserId
+ * 
+ * 
+ * @param {string} email- user's email
+ * @param {string} password - user's password
+ *  * @param {string} nameFirst user's first name
+ * @param {string} nameLast - user's last name
+ * * * 
+ * @returns {authUserId: authUserId} an object containing authUserId
+ */
 // authRegisterV1 function
 export function authRegisterV1(email, password, nameFirst, nameLast) {
   let data = getData();
@@ -114,15 +136,18 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
   return {authUserId: uuID};
 };
 
+/**
+ * <onlyalphanumeric>
+ * Takes in a string and removes all non-alphanumeric values from it
+ * 
+ * 
+ * @param {string} handle - a username
+ * @param {string} password - user's password
+ * * * 
+ * @returns {string} - returns string containing only alphanumeric values
+ */
 // Helper function to remove non alpha-numeric characters from string
 function onlyalphanumeric(handle) {
-  let i = 0;
-  while (i < handle.length) {
-    if (handle[i] < 'A' || handle[i] > 'Z' && handle[i] < 'a' || handle[i] > 'z') {
-      handle = handle.substring(0, i) + handle.substring(i + 1);
-      i--;
-    }
-    i++;
-  };
+  handle = handle.replace(/[^a-z0-9]/gi, '');
   return handle;
 };

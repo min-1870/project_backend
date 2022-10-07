@@ -1,6 +1,16 @@
 import { getData } from './dataStore.js'
 
-// channelDetailsV1 stub function
+/**
+  * <channelDetailsV1>
+  * Given a channelId of a channel that the authorised user can join, 
+  * adds them to that channel.
+  * 
+  * @param {number} authUserId - uId in user
+  * @param {number} channelId - channelId in channel
+  *  * ...
+  * @returns {object} - An object containing basic details of the channel such as name, isPublic, ownerMembers and allMembers
+*/
+// channelDetailsV1 function
 export function channelDetailsV1(authUserId, channelId) {
   let data = getData();
   if (data.channels.find(channel => channel.channelId === channelId) == null){   //if the channel Id is not exist, return error
@@ -23,39 +33,15 @@ export function channelDetailsV1(authUserId, channelId) {
   }
 };
 
-  /*
-  return {
-  
-    name: 'Hayden',
-    ownerMembers: [
-      {
-        uId: 1,
-        email: 'example@gmail.com',
-        nameFirst: 'Hayden',
-        nameLast: 'Jacobs',
-        handleStr: 'haydenjacobs',
-      }
-    ],
-    allMembers: [
-      {
-        uId: 1,
-        email: 'example@gmail.com',
-        nameFirst: 'Hayden',
-        nameLast: 'Jacobs',
-        handleStr: 'haydenjacobs',
-      }
-    ],
-  }
-  */
-
-
 /**
   * <channelJoinV1>
   * Given a channelId of a channel that the authorised user can join, 
   * adds them to that channel.
   * 
   * @param {number} authUserId - uId in user
-  * @param {number} channelId - channelId in channel
+  * @param {number} channelId - channelId in channel 
+  * *   ...
+  * @returns {} - empty object returned
 */
 // channelJoinV1 function
 export function channelJoinV1(authUserId, channelId) {
@@ -98,7 +84,10 @@ export function channelJoinV1(authUserId, channelId) {
   * @param {number} authUserId - uId in user
   * @param {number} channelId - channelId in channel
   * @param {number} uId - uId in user
+  * * *   ...
+  * @returns {} - empty object returned
 */
+
 //channelInviteV1 function
 export function channelInviteV1(authUserId, channelId, uId) {
   let data = getData();

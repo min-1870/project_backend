@@ -2,6 +2,16 @@ import {
     getData,
   } from './dataStore.js'
 
+/**
+ * <userProfileV1>
+ * For a valid user, return info about their user ID, email, firstname , last name and handle
+ * 
+ * 
+ * @param {number} authUserId - userId of user asking to view
+ * @param {number} uId - userId of user to look at
+ * * * 
+ * @returns {} - empty object
+ */
 // userProfileV1 function
 export function userProfileV1( authUserId, uID ){
     let data = getData();
