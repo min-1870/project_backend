@@ -1,4 +1,4 @@
-import { getData } from './dataStore.js'
+import { getData, setData } from './dataStore.js'
 
 let nextChannelId = 1;
 
@@ -38,6 +38,7 @@ export function channelsCreateV1(authUserId, name, isPublic){
     } 
     data.channels.push(newChannel)
     nextChannelId++;
+    setData(data)
     return {
         channelId: newChannel.channelId,
     }
