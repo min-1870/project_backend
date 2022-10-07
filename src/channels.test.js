@@ -35,7 +35,8 @@ describe('Test set for the function channelsCreate', () => {
 
     test('create new public channel success', () => {
         const createChannelResult = channelsCreateV1(channelCreatorId, channelName, true)
-
+        // channelsCreateV1(channelCreatorId, 'asdsad', true)
+        // channelsCreateV1(channelCreatorId, 'cfdsf', true)
         expect(createChannelResult).toStrictEqual({
             channelId: expect.any(Number)
         });
@@ -159,7 +160,7 @@ describe('Test set for the function channelsList', () => {
         const channelListResult = channelsListV1(24092001)
 
         expect(channelListResult).toStrictEqual({
-            error: 'error'
+            error: 'authUserId is not valid'
         });
     }); 
 });
@@ -184,7 +185,7 @@ describe('Test set for the function channelsListAllV1', () => {
     test('channelsListAllV1 invalid authUserId', () => {
 
       expect(channelsListAllV1(24092001)).toStrictEqual({       //input random ID
-          error: 'error'
+          error: 'authUserId is not valid'
       });
     }); 
 

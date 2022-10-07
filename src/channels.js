@@ -36,9 +36,14 @@ export function channelsCreateV1(authUserId, name, isPublic){
         allMembers: [member],
         messages: [],
     } 
+    
     data.channels.push(newChannel)
     nextChannelId++;
+<<<<<<< src/channels.js
     setData(data)
+=======
+    setData(data);   
+>>>>>>> src/channels.js
     return {
         channelId: newChannel.channelId,
     }
@@ -54,7 +59,7 @@ export function channelsCreateV1(authUserId, name, isPublic){
 export function channelsListV1(authUserId){
     let data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
-        return { error: 'error' }
+        return { error: 'authUserId is not valid' }
     }
   
     const channels = data.channels
@@ -65,9 +70,9 @@ export function channelsListV1(authUserId){
             channelId: channel.channelId,
             name: channel.name
             })) || []
-  
+
     return {
-      channels
+      channels: channels
     }
 }
 
@@ -83,9 +88,9 @@ export function channelsListAllV1( authUserId ){
     
     // If the uesr ID is not valid return error
     if (!isAuthUserIdValid(authUserId, data)) {
-        return { error: 'error' }; 
+        return { error: 'authUserId is not valid' }; 
     }
-
+    
      // Return every channels in the data without Id & name only
     return {
         channels: data.channels.map(({channelId, name}) => ({channelId, name}))

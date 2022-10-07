@@ -29,7 +29,7 @@ export function channelDetailsV1(authUserId, channelId) {
     name: rightChannel.name,
     isPublic: rightChannel.isPublic, 
     ownerMembers: rightChannel.ownerMembers, 
-    allMembers: rightChannel.allMembers,
+    allMembers: rightChannel.allMembers
   }
 };
 
@@ -88,6 +88,7 @@ export function channelJoinV1(authUserId, channelId) {
     (privateChannel.length === 1 && MemberInChannel.length === 0 && globalOwner.length === 0)) {
     return { error: 'error' };
   }
+  console.log(data.channels.allMembers);
   for (const element of data.channels) {
     if (channelId === element.channelId) {
       element.allMembers.push(authUserId);
@@ -113,33 +114,85 @@ export function channelJoinV1(authUserId, channelId) {
 //channelInviteV1 function
 export function channelInviteV1(authUserId, channelId, uId) {
   let data = getData();
-  let uIdList = data.users.filter((element) => {
-    return element.uId === uId;
-  });
-  let authIdList = data.users.filter((element) => {
-    return element.uId === authUserId;
-  });
-  let cIdList = data.channels.filter((element) => {
-    return element.channelId === channelId;
-  });
-  let memberInChannel = data.channels.filter((element) => {
-    return (element.channelId === channelId && element.allMembers.includes(uId));
-  });
-  let authorisedUserNotMember = data.channels.filter((element) => {
-    return (element.channelId === channelId && !element.allMembers.includes(authUserId));
-  });
-  if (uIdList.length === 0 ||
-    authIdList.length === 0 ||
-    cIdList.length === 0 ||
-    memberInChannel.length === 1 ||
-    authorisedUserNotMember.length === 1) {
-    return { error: 'error' };
-  }
-  for (const element of data.channels) {
-    if (channelId === element.channelId) {
-      element.allMembers.push(uId);
+  // console.log(data);
+
+  let i =0;  // checking if channelId exists
+  while (true) {
+    if (i >= data.channels.length) {
+      return {error: 'Channel ID does not refer to a valid channel'};
     }
+   
+  
+    if (data.channels[i]['channelId'] === channelId) {
+      break;
+    }
+    
+    i ++;
+  };
+  let channelIndex = i;
+
+  i =0;  // checking if authId exists
+  while (true) {
+    if (i >= data.users.length) {
+      return {error: 'authUserId does not exist'};
+    }
+    // console.log(authUserId);
+    // console.log(uId);
+    // console.log(data.channels[i]['uId']);
+    if (data.users[i]['uId'] === authUserId) {
+      break;
+    }
+    
+    i ++;
+  };
+
+  i =0;  // checking if uId exists
+  while (true) {
+    if (i >= data.users.length) {
+      return {error: 'User ID does not exist'};
+    }
+    if (data.users[i]['uId'] === uId) {
+      break;
+    }
+    
+    i ++;
+  };
+  let uIdmarker = i;
+  // console.log(data.channels[channelIndex]['allMembers'][0].uId);
+  // console.log(uId);
+  for (const item of data.channels[channelIndex]['allMembers']) {
+    // console.log(item.uId);
+    
+    if (item.uId === uId){
+      return { error: 'user already member of channel' };
+    }
+    
   }
+
+  i =0;  // checking if authId exists
+  while (true) {
+    if (i >= data.channels[channelIndex]['allMembers'].length) {
+      return {error: 'authUserId is not member of channel'};
+    }
+    // console.log(authUserId);
+    // console.log(uId);
+    // console.log(data.channels[i]['uId']);
+    if (data.channels[channelIndex]['allMembers'][i]['uId'] === authUserId) {
+      break;
+    }
+    
+    i ++;
+  };
+
+  data.channels[channelIndex]['allMembers'].push(data.users[uIdmarker]);
+  // console.log(data.channels[channelIndex]['allMembers']);
+  
+   
+
+
+  
+
+
   return {};
 }
 
@@ -162,7 +215,6 @@ export function channelInviteV1(authUserId, channelId, uId) {
 */
 export function channelMessagesV1(authUserId, channelId, start) {
   let data = getData()
-
   if (data.channels.find(channel => channel.channelId == channelId) == null) {   //if the channel Id is not exist, return error
     return { error: "Invalid channel ID" }
 
@@ -192,6 +244,6 @@ export function channelMessagesV1(authUserId, channelId, start) {
   return {
     messages: slicedMessages,
     start: start,
-    end: end,
+    end: end
   }
 }
