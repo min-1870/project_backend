@@ -1,4 +1,4 @@
-import { getData } from './dataStore.js'
+import { getData, setData } from './dataStore.js'
 
 let nextChannelId = 1;
 
@@ -36,8 +36,10 @@ export function channelsCreateV1(authUserId, name, isPublic){
         allMembers: [member],
         messages: [],
     } 
+    
     data.channels.push(newChannel)
     nextChannelId++;
+    setData(data);   
     return {
         channelId: newChannel.channelId,
     }
@@ -53,7 +55,7 @@ export function channelsCreateV1(authUserId, name, isPublic){
 export function channelsListV1(authUserId){
     let data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
-        return { error: 'error' }
+        return { error: 'authUserId is not valid' }
     }
   
     const channels = data.channels
@@ -82,7 +84,7 @@ export function channelsListAllV1( authUserId ){
     
     // If the uesr ID is not valid return error
     if (!isAuthUserIdValid(authUserId, data)) {
-        return { error: 'error' }; 
+        return { error: 'authUserId is not valid' }; 
     }
     
      // Return every channels in the data without Id & name only
