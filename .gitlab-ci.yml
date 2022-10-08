@@ -1,0 +1,18 @@
+image: comp1531/basic:latest
+
+stages:
+  - checks
+
+before_script:
+  - npm install
+
+tests:
+  stage: checks
+  script:
+    - SERVER_LOG=$(mktemp)
+    - npm run start >& $SERVER_LOG &
+    - timeout 10s grep -q "⚡️ Server listening on port" <(tail -f $SERVER_LOG) || exit 1
+    - timeout -s SIGINT 180s npm run test src/**.ts || (cat $SERVER_LOG && exit 1)
+    - kill -SIGINT %1
+    - sleep 2
+    - cat $SERVER_LOG

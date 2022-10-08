@@ -1,5 +1,5 @@
-function echo(value) {
-  if (value.echo && value.echo === 'echo') {
+function echo(value: string) {
+  if (value === 'echo') {
     return { error: 'error' };
   }
   return value;
