@@ -49,7 +49,7 @@ In this iteration, you are expected to:
 1. Make adjustments to your existing code as per any feedback given by your tutor for iteration 1.
 2. Migrate to Typescript
 
-    * Change `.js` file extension to `.ts`.
+    * Change `.js` file extension to `.ts` for both tests and function files. You **must** do this step to avoid import errors.
 
     * Run `npm run tsc` and incrementally fix all type errors.
     

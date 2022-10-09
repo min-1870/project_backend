@@ -2,8 +2,8 @@
     "scripts": {
         "test": "jest",
         "tsc": "tsc --noImplicitAny",
-        "lint": "eslint src/**.ts",
-        "lint-fix": "eslint --fix src/**.ts",
+        "lint": "eslint src/**.{ts,js}",
+        "lint-fix": "eslint --fix src/**.{ts,js}",
         "start": "ts-node -T src/server.ts",
         "posttest": "pkill -f 'node_modules/sync-rpc/lib/worker.js' > /dev/null 2>&1"
     },
