@@ -83,11 +83,11 @@ In this iteration, you are expected to:
 
     * You will be heavily marked for your use of thoughtful project management and use of git effectively. The degree to which your team works effectively will also be assessed.
 
-    * As for iteration 1, all task tracking and management will need to be done via the GitLab Issue Board or another tracking application approved by your tutor.
+    * As with iteration 1, all task tracking and management will need to be done via the GitLab Issue Board or another tracking application approved by your tutor.
 
-    * As for iteration 1, regular group meetings must be documented with meeting minutes which should be stored at a timestamped location in your repo (e.g. uploading a word doc/pdf or writing in the GitLab repo wiki after each meeting).
+    * As with iteration 1, regular group meetings must be documented with meeting minutes which should be stored at a timestamped location in your repo (e.g. uploading a word doc/pdf or writing in the GitLab repo wiki after each meeting).
 
-    * As for iteration 1, you must be able to demonstrate evidence of regular standups.
+    * As with iteration 1, you must be able to demonstrate evidence of regular standups.
 
     * You are required to regularly and thoughtfully make merge requests for the smallest reasonable units, and merge them into `master`.
 
@@ -277,7 +277,7 @@ For this and for all future milestones, you should consider the other expectatio
 The formula used for automarking in this iteration is:
 
 `Automark = 90*(t * i) + 5*e + 5*f`
-(Mark equals 95% of `t` multiplied by `i` plus 5% of `e` plus 5% of `f`). This formula produces a value between 0 and 1.
+(Mark equals 90% of `t` multiplied by `i` plus 5% of `e` plus 5% of `f`). This formula produces a value between 0 and 1.
 
 Where:
  * `t` is the mark between 0-1 you receive for your tests running against your code (100% = your implementation passes all of your tests)
