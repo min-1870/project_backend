@@ -1,5 +1,27 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-let data = {};
+let data = {
+  users: [  
+    /*
+    uId: number,
+    email: string,
+    password: string,
+    nameFirst: string,
+    nameLast: string,
+    handleStr: string,
+    isGlobalOwner: boolean
+    */
+  ],
+  channels: [
+    /*
+    channelId: number,
+    isPublic (boolean),
+    name (string),
+    ownerMembers: [object],
+    allMembers: [object],
+    messages: [object]
+    */
+  ]    
+};
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
 
