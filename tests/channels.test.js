@@ -1,4 +1,4 @@
-import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels.js';
+import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels.ts';
 import { clearV1 } from '../src/other.js';
 import { getData, setData } from '../src/dataStore.js';
 

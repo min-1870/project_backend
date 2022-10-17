@@ -1,5 +1,3 @@
-import { authRegisterV1 } from '../src/auth.js';
-import { channelsCreateV1 } from '../src/channels.js';
 import { channelJoinV1, channelInviteV1, channelMessagesV1, channelDetailsV1 } from '../src/channel.js';
 import { clearV1 } from '../src/other.js';
 import { getData, setData } from '../src/dataStore';

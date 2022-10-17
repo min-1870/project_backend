@@ -1,24 +1,50 @@
 import { getData, setData } from './dataStore.js'
 
+type channelId = { channelId: number };
+type error = { error: string };
+type channels = { channels: { channelId: number, name: string }[] };
+type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
+type dataStoreUser = {
+    uId: number,
+    email: string,
+    password: string,
+    nameFirst: string,
+    nameLast: string,
+    handleStr: string,
+    isGlobalOwner: boolean
+  }
+type message = { messageId: number, uId: number, message: string, timeSent: number};
+type dataStore =  {
+    users: dataStoreUser[]
+    ,
+    channels: {
+      channelId: number,
+      isPublic: boolean,
+      name: string,
+      ownerMembers: user[],
+      allMembers: user[],
+      messages: message[]
+    }[]    
+  };
 let nextChannelId = 1;
 
 /**
  * Creates a new channel with the given name, that is either a public or private channel. 
  * The user who created it automatically joins the channel.
  *
- * @param {number} authUserId - The creator's user ID.
- * @param {string} name - The name of the channel to create.
- * @param {boolean} isPublic - Whether the new channel is a public channel or not.
- * @returns { channelId: number } object.
+ * @param { number } authUserId - The creator's user ID.
+ * @param { string } name - The name of the channel to create.
+ * @param { boolean } isPublic - Whether the new channel is a public channel or not.
+ * @returns { channelId }
  */
-export function channelsCreateV1(authUserId, name, isPublic){
+export function channelsCreateV1(authUserId: number, name: string, isPublic: boolean): (channelId | error) {
     if (name.length < 1 || name.length > 20) {
-        return { error: 'error' }
+        return { error: 'name is not between 1 and 20 characters' }
     }
   
     const data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
-        return { error: 'error' }
+        return { error: 'Invalid user ID' }
     }
     const user = getUser(authUserId, data)
     const member = {
@@ -51,10 +77,10 @@ export function channelsCreateV1(authUserId, name, isPublic){
  * Provides an array of all channels (and their associated details) 
  * that the authorised user is part of.
  *
- * @param {number} authUserId - The user ID to list the channels for.
- * @returns { channels: [{channelId: number, name: string }] } object.
+ * @param { number } authUserId - The user ID to list the channels for.
+ * @returns { channels } 
  */
-export function channelsListV1(authUserId){
+export function channelsListV1(authUserId: number) : (channels | error) {
     const data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
         return { error: 'authUserId is not valid' }
@@ -78,10 +104,10 @@ export function channelsListV1(authUserId){
   * Provides an array of all channels, including private
   * channels (and their associated details)
   *
-  * @param {number} authUserId - a user ID in the dataStore
-  * @returns {{channels}} - Array of objects, where each object contains types { channelId, name }
+  * @param { number } authUserId - a user ID in the dataStore
+  * @returns { channels } - Array of objects, where each object contains types { channelId, name }
 */
-export function channelsListAllV1( authUserId ){
+export function channelsListAllV1(authUserId: number): (channels | error) {
     const data = getData()
 
     if (!isAuthUserIdValid(authUserId, data)) {
@@ -90,14 +116,14 @@ export function channelsListAllV1( authUserId ){
     
     // Return every channels in the data without Id & name only
     return {
-        channels: data.channels.map(({channelId, name}) => ({channelId, name}))
+        channels: data.channels.map(({ channelId, name }) => ({ channelId, name }))
     }
-  }
+}
 
-function isAuthUserIdValid(authUserId, data) {
+function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
     return getUser(authUserId, data) != null
 }
 
-function getUser(authUserId, data) {
+function getUser(authUserId: number, data: dataStore): dataStoreUser {
     return data.users.find(user => user.uId == authUserId)
 }
