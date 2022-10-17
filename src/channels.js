@@ -5,7 +5,7 @@ let nextChannelId = 1;
 /**
  * Creates a new channel with the given name, that is either a public or private channel. 
  * The user who created it automatically joins the channel.
- * 
+ *
  * @param {number} authUserId - The creator's user ID.
  * @param {string} name - The name of the channel to create.
  * @param {boolean} isPublic - Whether the new channel is a public channel or not.
@@ -16,7 +16,7 @@ export function channelsCreateV1(authUserId, name, isPublic){
         return { error: 'error' }
     }
   
-    let data = getData()
+    const data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
         return { error: 'error' }
     }
@@ -50,12 +50,12 @@ export function channelsCreateV1(authUserId, name, isPublic){
 /**
  * Provides an array of all channels (and their associated details) 
  * that the authorised user is part of.
- * 
+ *
  * @param {number} authUserId - The user ID to list the channels for.
  * @returns { channels: [{channelId: number, name: string }] } object.
  */
 export function channelsListV1(authUserId){
-    let data = getData()
+    const data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
         return { error: 'authUserId is not valid' }
     }
@@ -74,22 +74,21 @@ export function channelsListV1(authUserId){
     }
 }
 
-/** <channelsListAllV1>
+/**
   * Provides an array of all channels, including private
   * channels (and their associated details)
-  * 
+  *
   * @param {number} authUserId - a user ID in the dataStore
   * @returns {{channels}} - Array of objects, where each object contains types { channelId, name }
 */
 export function channelsListAllV1( authUserId ){
-    let data = getData()
-    
-    // If the uesr ID is not valid return error
+    const data = getData()
+
     if (!isAuthUserIdValid(authUserId, data)) {
         return { error: 'authUserId is not valid' }; 
     }
     
-     // Return every channels in the data without Id & name only
+    // Return every channels in the data without Id & name only
     return {
         channels: data.channels.map(({channelId, name}) => ({channelId, name}))
     }
