@@ -1,6 +1,6 @@
-import {userProfileV1} from './users.js';
-import {authRegisterV1} from './auth.js';
-import {clearV1} from './other.js';
+import {userProfileV1} from '../src/users.js';
+import {authRegisterV1} from '../src/auth.js';
+import {clearV1} from '../src/other.js';
 
 describe('Test Suite for userProfileV1', () => {
 
