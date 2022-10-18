@@ -13,12 +13,12 @@ let nextChannelId = 1;
  */
 export function channelsCreateV1(authUserId, name, isPublic){
     if (name.length < 1 || name.length > 20) {
-        return { error: 'error' }
+        return { error: 'name is not between 1 and 20 characters' }
     }
   
     const data = getData()
     if (!isAuthUserIdValid(authUserId, data)) {
-        return { error: 'error' }
+        return { error: 'Invalid user ID' }
     }
     const user = getUser(authUserId, data)
     const member = {
