@@ -1,31 +1,12 @@
-import { getData, setData } from './dataStore.js'
+import { getData, setData } from './dataStore.js';
+import {
+    channelId,
+    error,
+    channels,
+    dataStoreUser,
+    dataStore,
+} from './types';
 
-type channelId = { channelId: number };
-type error = { error: string };
-type channels = { channels: { channelId: number, name: string }[] };
-type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
-type dataStoreUser = {
-    uId: number,
-    email: string,
-    password: string,
-    nameFirst: string,
-    nameLast: string,
-    handleStr: string,
-    isGlobalOwner: boolean
-  }
-type message = { messageId: number, uId: number, message: string, timeSent: number};
-type dataStore =  {
-    users: dataStoreUser[]
-    ,
-    channels: {
-      channelId: number,
-      isPublic: boolean,
-      name: string,
-      ownerMembers: user[],
-      allMembers: user[],
-      messages: message[]
-    }[]    
-  };
 let nextChannelId = 1;
 
 /**
