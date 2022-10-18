@@ -1,8 +1,8 @@
-import { authRegisterV1 } from './auth.js';
-import { channelsCreateV1 } from './channels.js';
-import { channelJoinV1, channelInviteV1, channelMessagesV1, channelDetailsV1 } from './channel.js';
-import { clearV1 } from './other.js';
-import { getData, setData } from './dataStore';
+import { authRegisterV1 } from '../src/auth.js';
+import { channelsCreateV1 } from '../src/channels.js';
+import { channelJoinV1, channelInviteV1, channelMessagesV1, channelDetailsV1 } from '../src/channel.js';
+import { clearV1 } from '../src/other.js';
+import { getData, setData } from '../src/dataStore';
 
 describe('Test set for the function channelJoinV1', () => {
   const testUser = {  //profile of the test user1

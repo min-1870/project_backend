@@ -1,8 +1,6 @@
-import { channelsCreateV1,channelsListV1, channelsListAllV1 } from './channels';
-import { clearV1 } from './other';
-import { getData, setData } from './dataStore';
-
-
+import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels.js';
+import { clearV1 } from '../src/other.js';
+import { getData, setData } from '../src/dataStore.js';
 
 const channelCreatorId = 1;          // Test userID
 const channelName = 'Cat Channel';   // Test channel
