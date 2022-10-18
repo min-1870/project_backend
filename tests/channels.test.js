@@ -1,7 +1,6 @@
-import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels.js';
+import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels.ts';
 import { authRegisterV1 } from '../src/auth.js';
 import { clearV1 } from '../src/other.js';
-import { getData, setData } from '../src/dataStore.js';
 
 const channelCreatorId = 1;
 const channelName = 'Cat Channel';
