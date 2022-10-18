@@ -1,10 +1,10 @@
 import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels.ts';
+import { authRegisterV1 } from '../src/auth.js';
 import { clearV1 } from '../src/other.js';
-import { getData, setData } from '../src/dataStore.js';
 
-const channelCreatorId = 1;          // Test userID
-const channelName = 'Cat Channel';   // Test channel
-const channelCreator = {  // Profile of the test user
+const channelCreatorId = 1;
+const channelName = 'Cat Channel';
+const channelCreator = {
     uId: channelCreatorId,
     namesFirst: 'Adam',
     namesLast: 'Johnston',
@@ -14,27 +14,16 @@ const channelCreator = {  // Profile of the test user
 }
 const channelId = 10000;  
 
-
+beforeEach(() => {
+    // Before every test reset and add a new test user
+    clearV1()
+    authRegisterV1(channelCreator.email, channelCreator.password, channelCreator.namesFirst, channelCreator.namesLast);
+});
 
 describe('Test set for the function channelsCreate', () => {
 
-    beforeEach(() => {
-        // Before every test reset and add a new test user
-        clearV1()
-        let data = getData()
-        data = {
-            users: [
-                channelCreator
-            ],
-            channels: []
-        }
-        setData(data)
-    });
-
     test('create new public channel success', () => {
         const createChannelResult = channelsCreateV1(channelCreatorId, channelName, true)
-        // channelsCreateV1(channelCreatorId, 'asdsad', true)
-        // channelsCreateV1(channelCreatorId, 'cfdsf', true)
         expect(createChannelResult).toStrictEqual({
             channelId: expect.any(Number)
         });
@@ -113,19 +102,6 @@ describe('Test set for the function channelsCreate', () => {
 
 describe('Test set for the function channelsList', () => {
 
-    beforeEach(() => {
-        // Before every test reset and add a new test user
-        clearV1()
-        let data = getData()
-        data = {
-            users: [
-                channelCreator
-            ],
-            channels: []
-        }
-        setData(data)
-    });
-
     test('channels list valid authUserId with channels returns list of channels', () => {
         let data = getData();
         data.channels.push({
@@ -165,45 +141,32 @@ describe('Test set for the function channelsList', () => {
 
 
 
-describe('Test set for the function channelsListAllV1', () => {    
-
-    beforeEach(() => {
-        // Before every test reset and add a new test user
-        clearV1()
-        let data = getData()
-        data = {
-            users: [
-                channelCreator
-            ],
-            channels: []
-        }
-        setData(data)
-    });
+describe('Test set for the function channelsListAllV1', () => {
     
     test('channelsListAllV1 invalid authUserId', () => {
 
-      expect(channelsListAllV1(24092001)).toStrictEqual({       //input random ID
+      expect(channelsListAllV1(24092001)).toStrictEqual({
           error: 'authUserId is not valid'
       });
     }); 
 
     test('channelsListAllV1 valid authUserId returns empty list', () => {
 
-      expect(channelsListAllV1(channelCreatorId)).toStrictEqual({   //did not add any test channel
+      expect(channelsListAllV1(channelCreatorId)).toStrictEqual({
         channels: []
       });
     }); 
 
     test('channelsListAllV1 valid authUserId returns list of all channels', () => {
         let data = getData();
-        data.channels.push({            //added the test channel 1 (public)
+        data.channels.push({
             channelId: channelId,
             isPublic: true,
             name: channelName,
             ownerMembers: [channelCreator],
             allMembers: [channelCreator]
         });
-        data.channels.push({            //added the test channel 2 (private)
+        data.channels.push({
             channelId: channelId+1,
             isPublic: false,
             name: channelName+'2',
@@ -212,7 +175,7 @@ describe('Test set for the function channelsListAllV1', () => {
         });
         setData(data);
 
-        expect(channelsListAllV1(channelCreatorId)).toStrictEqual({ //received both test channel
+        expect(channelsListAllV1(channelCreatorId)).toStrictEqual({
             channels: [
                 {
                     channelId: channelId,
