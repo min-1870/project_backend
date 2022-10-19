@@ -1,3 +1,4 @@
+import { channel } from 'diagnostics_channel';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
@@ -12,6 +13,7 @@ const TEST_INVALID_TOKEN = '';
 const TEST_CHANNEL_NAME = 'Test channel';
 const LONG_CHANNEL_NAME = 'This is a very long channel name';
 const SHORT_CHANNEL_NAME = '';
+const TEST_INVALID_CHANNELID = '';
 let token: string;
 
 beforeEach(() => {
@@ -95,6 +97,18 @@ describe('HTTP tests for /channels/create/v2', () => {
 });
 
 describe('HTTP tests for /channels/list/v2', () => {
+  let channelId: number;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as { channelId: number };
+    channelId = jsonResponse.channelId;
+  });
+
   test('channels list successful', () => {
     const res = sendPostRequestToEndpoint('/channels/list/v2', {
       token
@@ -102,7 +116,12 @@ describe('HTTP tests for /channels/list/v2', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      channels: expect.any(String)
+      channels: [
+        {
+          channelId,
+          name: TEST_CHANNEL_NAME
+        }
+      ]
     });
   });
 
