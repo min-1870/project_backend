@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore.js'
+import { getData } from './dataStore.js';
 import {
   error,
   message,
@@ -19,22 +19,22 @@ import {
 export function channelDetailsV1(authUserId: number, channelId: number): ({name: string, isPublic: boolean, ownerMembers: dataStoreUser[], allMembers: dataStoreUser[]} | error) {
   const data = getData();
   if (data.channels.find(channel => channel.channelId === channelId) == null) {
-    return { error: "Channel ID does not refer to a valid channel" }
+    return { error: 'Channel ID does not refer to a valid channel' };
   } else if (data.users.find(user => user.uId === authUserId) == null) {
-    return {error: "User ID does not exist"}
-  } else if(data.channels.find(channel => channel.channelId === channelId).allMembers.find(user => user.uId === authUserId) == null){    //if the user is not the member of the channel, return error
-    return { error: "User is not a member of channel" }
+    return { error: 'User ID does not exist' };
+  } else if (data.channels.find(channel => channel.channelId === channelId).allMembers.find(user => user.uId === authUserId) == null) { // if the user is not the member of the channel, return error
+    return { error: 'User is not a member of channel' };
   }
 
   const rightChannel = data.channels.find(channel => channel.channelId === channelId);
 
   return {
     name: rightChannel.name,
-    isPublic: rightChannel.isPublic, 
-    ownerMembers: rightChannel.ownerMembers, 
+    isPublic: rightChannel.isPublic,
+    ownerMembers: rightChannel.ownerMembers,
     allMembers: rightChannel.allMembers
-  }
-};
+  };
+}
 
 /**
   * Given a channelId of a channel that the authorised user can join,
@@ -45,29 +45,29 @@ export function channelDetailsV1(authUserId: number, channelId: number): ({name:
   *
   * @returns {} - empty object returned
 */
-export function channelJoinV1(authUserId: number, channelId: number): ({} | error) {
-  const data: dataStore = getData(); 
-  const user: dataStoreUser | null = data.users.find(user => user.uId == authUserId)
-  const channel: dataStoreChannel = data.channels.find(channel => channel.channelId == channelId)
+export function channelJoinV1(authUserId: number, channelId: number): ({null} | error) {
+  const data: dataStore = getData();
+  const user: dataStoreUser | null = data.users.find(user => user.uId === authUserId);
+  const channel: dataStoreChannel = data.channels.find(channel => channel.channelId === channelId);
 
   if (channel == null) {
-    return { error: "Invalid channel ID" }
+    return { error: 'Invalid channel ID' };
   } else if (user == null) {
-    return { error: "Invalid user ID" }
-  } else if (channel.allMembers.find(user => user.uId == authUserId) != null){
-    return { error: "User are in the channel"}
-  } else if (!channel.isPublic && !user.isGlobalOwner){
-    return { error: "This is a private server" }
+    return { error: 'Invalid user ID' };
+  } else if (channel.allMembers.find(user => user.uId === authUserId) != null) {
+    return { error: 'User are in the channel' };
+  } else if (!channel.isPublic && !user.isGlobalOwner) {
+    return { error: 'This is a private server' };
   }
-  
-  data.channels.find(channel => channel.channelId == channelId)
-    .allMembers.push(user)
+
+  data.channels.find(channel => channel.channelId === channelId)
+    .allMembers.push(user);
   return {};
 }
 
 /**
-  * Invites a user with ID uId to join a channel with ID channelId. 
-  * Once invited, the user is added to the channel immediately. 
+  * Invites a user with ID uId to join a channel with ID channelId.
+  * Once invited, the user is added to the channel immediately.
   * In both public and private channels, all members are able to invite users.
   *
   * @param {number} authUserId - uId in user
@@ -76,64 +76,63 @@ export function channelJoinV1(authUserId: number, channelId: number): ({} | erro
   *
   * @returns {} - empty object returned
 */
-export function channelInviteV1(authUserId: number, channelId: number, uId: number): ({} | error) {
-  let data: dataStore = getData();
+export function channelInviteV1(authUserId: number, channelId: number, uId: number): (Record<string, never> | error) {
+  const data: dataStore = getData();
 
-  let i: number = 0;
+  let i = 0;
   while (true) {
     if (i >= data.channels.length) {
       return { error: 'Channel ID does not refer to a valid channel' };
     }
-   
-  
-    if (data.channels[i]['channelId'] === channelId) {
+
+    if (data.channels[i].channelId === channelId) {
       break;
     }
-    
+
     i++;
   }
-  let channelIndex: number = i;
+  const channelIndex: number = i;
 
   i = 0;
   while (true) {
     if (i >= data.users.length) {
-      return {error: 'authUserId does not exist'};
+      return { error: 'authUserId does not exist' };
     }
-    if (data.users[i]['uId'] === authUserId) {
+    if (data.users[i].uId === authUserId) {
       break;
     }
-    
+
     i++;
   }
 
   i = 0;
   while (true) {
     if (i >= data.users.length) {
-      return {error: 'User ID does not exist'};
+      return { error: 'User ID does not exist' };
     }
-    if (data.users[i]['uId'] === uId) {
+    if (data.users[i].uId === uId) {
       break;
     }
     i++;
   }
-  let uIdmarker: number = i;
-  for (const item of data.channels[channelIndex]['allMembers']) {
-    if (item.uId === uId){
+  const uIdmarker: number = i;
+  for (const item of data.channels[channelIndex].allMembers) {
+    if (item.uId === uId) {
       return { error: 'user already member of channel' };
     }
   }
 
   i = 0;
   while (true) {
-    if (i >= data.channels[channelIndex]['allMembers'].length) {
+    if (i >= data.channels[channelIndex].allMembers.length) {
       return { error: 'authUserId is not member of channel' };
     }
-    if (data.channels[channelIndex]['allMembers'][i]['uId'] === authUserId) {
+    if (data.channels[channelIndex].allMembers[i].uId === authUserId) {
       break;
     }
     i++;
   }
-  data.channels[channelIndex]['allMembers'].push(data.users[uIdmarker]);
+  data.channels[channelIndex].allMembers.push(data.users[uIdmarker]);
   return {};
 }
 
@@ -148,42 +147,39 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
   * this function has returned the least recent messages in
   * the channel, "end" equals -1 to indicate that there are no
   * more messages to load after this return.
-  * 
+  *
   * @param {number} authUserId - a user ID in the dataStore
   * @param {number} channelId - a channel ID in the dataStore
   * @param {number} start - the index of the starting point
   * @returns {{messages: array, start: number, end: number}} - an object contains the messages and information of pages
 */
-export function channelMessagesV1(authUserId: number, channelId: number, start: number): ( {messages: message[], start: number, end: number } | error) {
-  let data: dataStore= getData()
-  if (data.channels.find(channel => channel.channelId == channelId) == null) {
-    return { error: "Invalid channel ID" }
-
-  } else if (data.users.find(user => user.uId == authUserId) == null) {
-    return { error: "Invalid user ID" }
-
-  } else if (start < 0 || start > data.channels.find(channel => channel.channelId == channelId).messages.length) {                //if starting point is out of range, return error
-    return { error: "Invalid start" }
-
-  } else if (data.channels.find(channel => channel.channelId == channelId).allMembers.find(user => user.uId == authUserId) == null) {    //if the user is not the member of the channel, return error
-    return { error: "Not a member of the channel" }
+export function channelMessagesV1(authUserId: number, channelId: number, start: number): ({messages: message[], start: number, end: number } | error) {
+  const data: dataStore = getData();
+  if (data.channels.find(channel => channel.channelId === channelId) == null) {
+    return { error: 'Invalid channel ID' };
+  } else if (data.users.find(user => user.uId === authUserId) == null) {
+    return { error: 'Invalid user ID' };
+  } else if (start < 0 || start > data.channels.find(channel => channel.channelId === channelId).messages.length) { // if starting point is out of range, return error
+    return { error: 'Invalid start' };
+  } else if (data.channels.find(channel => channel.channelId === channelId).allMembers.find(user => user.uId === authUserId) == null) { // if the user is not the member of the channel, return error
+    return { error: 'Not a member of the channel' };
   }
 
-  let messages: message[] = data.channels.find(channel => channel.channelId == channelId).messages
+  const messages: message[] = data.channels.find(channel => channel.channelId === channelId).messages;
   let slicedMessages: message[];
   let end: number;
 
   if (start + 50 >= messages.length) {
-    end = -1
-    slicedMessages = messages.slice(start)
+    end = -1;
+    slicedMessages = messages.slice(start);
   } else {
-    end = start + 50
-    slicedMessages = messages.slice(start, end)
+    end = start + 50;
+    slicedMessages = messages.slice(start, end);
   }
 
   return {
     messages: slicedMessages,
     start: start,
     end: end
-  }
+  };
 }
