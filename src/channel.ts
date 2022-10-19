@@ -45,7 +45,7 @@ export function channelDetailsV1(authUserId: number, channelId: number): ({name:
   *
   * @returns {} - empty object returned
 */
-export function channelJoinV1(authUserId: number, channelId: number): ({null} | error) {
+export function channelJoinV1(authUserId: number, channelId: number): (Record<string, never> | error) {
   const data: dataStore = getData();
   const user: dataStoreUser | null = data.users.find(user => user.uId === authUserId);
   const channel: dataStoreChannel = data.channels.find(channel => channel.channelId === channelId);
