@@ -93,3 +93,27 @@ describe('HTTP tests for /channels/create/v2', () => {
     });
   });
 });
+
+describe('HTTP tests for /channels/list/v2', () => {
+  test('channels list successful', () => {
+    const res = sendPostRequestToEndpoint('/channels/list/v2', {
+      token
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      channels: expect.any(String)
+    });
+  });
+
+  test('channels list with invalid token fail', () => {
+    const res = sendPostRequestToEndpoint('/channels/list/v2', {
+      token: TEST_INVALID_TOKEN
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+});
