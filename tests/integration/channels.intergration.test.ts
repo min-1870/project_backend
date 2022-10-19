@@ -12,12 +12,8 @@ const TEST_INVALID_TOKEN = '';
 const TEST_CHANNEL_NAME = 'Test channel';
 const LONG_CHANNEL_NAME = 'This is a very long channel name';
 const SHORT_CHANNEL_NAME = '';
-const TEST_CHANNEL_ID = '123VALID';
-const TEST_INVALID_CHANNELID = '';
-const TEST_INVALID_UID = '';
-const TEST_UID = 'Bobby12345';
+
 let token: string;
-let authUserId: number;
 
 beforeEach(() => {
   const res = sendPostRequestToEndpoint('/auth/register/v2', {
@@ -136,71 +132,6 @@ describe('HTTP tests for /channels/list/v2', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
       error: expect.any(String)
-    });
-  });
-});
-
-describe('HTTP tests for /channels/addowner/v1', () => {
-  test('Add owner with uId successful', () => {
-    const res = sendPostRequestToEndpoint('/channels/addowner/v1', {
-      token: token,
-      channelId: TEST_CHANNEL_ID,
-      uId: authUserId
-    });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({});
-  });
-
-  test('Add owner with invalid channelID returns fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/addowner/v1', {
-      token: token,
-      channelId: TEST_INVALID_CHANNELID,
-      uId: authUserId
-    });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
-  });
-
-  test('Add owner with invalid uID returns fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/addowner/v1', {
-      token: token,
-      channelId: TEST_CHANNEL_ID,
-      uId: TEST_INVALID_UID
-    });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
-  });
-
-  test('Add owner with user who is not a member of the channel returns fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/addowner/v1', {
-      token,
-      channelId: TEST_CHANNEL_ID,
-      uId: TEST_INVALID_UID
-    });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      channels: expect.any({})
-    });
-  });
-
-  test('Add owner with invalid token returns fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/addowner/v1', {
-      token: TEST_INVALID_TOKEN,
-      channelId: TEST_CHANNEL_ID,
-      uId: TEST_UID
-    });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      channels: expect.any({})
     });
   });
 });
