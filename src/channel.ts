@@ -1,4 +1,11 @@
 import { getData, setData } from './dataStore.js'
+import {
+  error,
+  message,
+  dataStore,
+  dataStoreUser,
+  dataStoreChannel
+} from './types';
 
 /**
   * Given a channelId of a channel that the authorised user can join,
@@ -9,7 +16,7 @@ import { getData, setData } from './dataStore.js'
   *
   * @returns {object} - An object containing basic details of the channel such as name, isPublic, ownerMembers and allMembers
 */
-export function channelDetailsV1(authUserId, channelId) {
+export function channelDetailsV1(authUserId: number, channelId: number): ({name: string, isPublic: boolean, ownerMembers: dataStoreUser[], allMembers: dataStoreUser[]} | error) {
   const data = getData();
   if (data.channels.find(channel => channel.channelId === channelId) == null) {
     return { error: "Channel ID does not refer to a valid channel" }
@@ -38,10 +45,10 @@ export function channelDetailsV1(authUserId, channelId) {
   *
   * @returns {} - empty object returned
 */
-export function channelJoinV1(authUserId, channelId) {
-  const data = getData(); 
-  const user = data.users.find(user => user.uId == authUserId)
-  const channel = data.channels.find(channel => channel.channelId == channelId)
+export function channelJoinV1(authUserId: number, channelId: number): ({} | error) {
+  const data: dataStore = getData(); 
+  const user: dataStoreUser | null = data.users.find(user => user.uId == authUserId)
+  const channel: dataStoreChannel = data.channels.find(channel => channel.channelId == channelId)
 
   if (channel == null) {
     return { error: "Invalid channel ID" }
@@ -52,10 +59,9 @@ export function channelJoinV1(authUserId, channelId) {
   } else if (!channel.isPublic && !user.isGlobalOwner){
     return { error: "This is a private server" }
   }
-
-  let newMember = data.users.find(user => user.uId == authUserId)
+  
   data.channels.find(channel => channel.channelId == channelId)
-    .allMembers.push(newMember)
+    .allMembers.push(user)
   return {};
 }
 
@@ -70,10 +76,10 @@ export function channelJoinV1(authUserId, channelId) {
   *
   * @returns {} - empty object returned
 */
-export function channelInviteV1(authUserId, channelId, uId) {
-  let data = getData();
+export function channelInviteV1(authUserId: number, channelId: number, uId: number): ({} | error) {
+  let data: dataStore = getData();
 
-  let i = 0;
+  let i: number = 0;
   while (true) {
     if (i >= data.channels.length) {
       return { error: 'Channel ID does not refer to a valid channel' };
@@ -86,7 +92,7 @@ export function channelInviteV1(authUserId, channelId, uId) {
     
     i++;
   }
-  let channelIndex = i;
+  let channelIndex: number = i;
 
   i = 0;
   while (true) {
@@ -110,7 +116,7 @@ export function channelInviteV1(authUserId, channelId, uId) {
     }
     i++;
   }
-  let uIdmarker = i;
+  let uIdmarker: number = i;
   for (const item of data.channels[channelIndex]['allMembers']) {
     if (item.uId === uId){
       return { error: 'user already member of channel' };
@@ -148,8 +154,8 @@ export function channelInviteV1(authUserId, channelId, uId) {
   * @param {number} start - the index of the starting point
   * @returns {{messages: array, start: number, end: number}} - an object contains the messages and information of pages
 */
-export function channelMessagesV1(authUserId, channelId, start) {
-  let data = getData()
+export function channelMessagesV1(authUserId: number, channelId: number, start: number): ( {messages: message[], start: number, end: number } | error) {
+  let data: dataStore= getData()
   if (data.channels.find(channel => channel.channelId == channelId) == null) {
     return { error: "Invalid channel ID" }
 
@@ -163,9 +169,9 @@ export function channelMessagesV1(authUserId, channelId, start) {
     return { error: "Not a member of the channel" }
   }
 
-  let messages = data.channels.find(channel => channel.channelId == channelId).messages
-  let slicedMessages
-  let end;
+  let messages: message[] = data.channels.find(channel => channel.channelId == channelId).messages
+  let slicedMessages: message[];
+  let end: number;
 
   if (start + 50 >= messages.length) {
     end = -1
