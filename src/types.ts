@@ -18,14 +18,15 @@ export type dataStoreUser = {
     nameFirst: string,
     nameLast: string,
     handleStr: string,
-    isGlobalOwner: boolean
+    isGlobalOwner: boolean,
+    sessionTokens: string[]
 }
 
 // Message output type.
 export type message = { messageId: number, uId: number, message: string, timeSent: number };
 
 // Data model stored in the data store.
-export type dataStore =  {
+export type dataStore = {
     users: dataStoreUser[],
     channels: {
       channelId: number,
@@ -34,5 +35,5 @@ export type dataStore =  {
       ownerMembers: user[],
       allMembers: user[],
       messages: message[]
-    }[]    
+    }[]
 }
