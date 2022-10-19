@@ -3,7 +3,7 @@ import { echo } from './echo';
 import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
-import { channelsCreateV1 } from './channels';
+import { channelsCreateV1, channelsListV1 } from './channels';
 import { getData } from './dataStore.js';
 import { dataStore, dataStoreUser } from './types';
 
@@ -65,3 +65,10 @@ function getAuthUserIdFromToken(token: string): number {
   }
   return null;
 }
+
+app.post('/channels/list/v2', (req: Request, res: Response) => {
+  const { token } = req.body;
+  const authUserId = getAuthUserIdFromToken(token);
+  const result = channelsListV1(authUserId);
+  res.json(result);
+});
