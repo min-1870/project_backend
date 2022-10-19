@@ -1,5 +1,5 @@
-import { authRegisterV1, authLoginV1 } from './auth.js';
-import { clearV1 } from './other.js';
+import { authRegisterV1, authLoginV1 } from '../src/auth.js';
+import { clearV1 } from '../src/other.js';
 
 describe('Test Suite for authRegisterV1 function', () => {
 
