@@ -1,4 +1,3 @@
-import { channel } from 'diagnostics_channel';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
@@ -13,7 +12,6 @@ const TEST_INVALID_TOKEN = '';
 const TEST_CHANNEL_NAME = 'Test channel';
 const LONG_CHANNEL_NAME = 'This is a very long channel name';
 const SHORT_CHANNEL_NAME = '';
-const TEST_INVALID_CHANNELID = '';
 let token: string;
 
 beforeEach(() => {
