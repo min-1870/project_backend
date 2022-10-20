@@ -1,6 +1,6 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW
 let data = {
-  users: [  
+  users: [
     /*
     uId: number,
     email: string,
@@ -20,7 +20,7 @@ let data = {
     allMembers: [object],
     messages: [object]
     */
-  ]    
+  ]
 };
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1

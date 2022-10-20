@@ -22,6 +22,10 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
   if (name.length < 1 || name.length > 20) {
     return { error: 'name is not between 1 and 20 characters' };
   }
+<<<<<<< src/channels.ts
+=======
+
+>>>>>>> src/channels.ts
   const data = getData();
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'Invalid user ID' };
@@ -42,6 +46,7 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
     allMembers: [member],
     messages: [],
   };
+
   data.channels.push(newChannel);
   nextChannelId++;
   setData(data);
@@ -62,13 +67,16 @@ export function channelsListV1(authUserId: number) : (channels | error) {
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'authUserId is not valid' };
   }
+
   const channels = data.channels
     .filter(channel => channel.allMembers
       .find(member => member.uId === authUserId) != null)
-    .map(channel => ({
-      channelId: channel.channelId,
-      name: channel.name
-    })) || [];
+    .map(channel => (
+      {
+        channelId: channel.channelId,
+        name: channel.name
+      })) || [];
+
   return {
     channels: channels
   };
@@ -83,9 +91,11 @@ export function channelsListV1(authUserId: number) : (channels | error) {
 */
 export function channelsListAllV1(authUserId: number): (channels | error) {
   const data = getData();
+
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'authUserId is not valid' };
   }
+
   // Return every channels in the data without Id & name only
   return {
     channels: data.channels.map(({ channelId, name }) => ({ channelId, name }))
