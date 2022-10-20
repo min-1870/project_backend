@@ -22,7 +22,8 @@ export type dataStoreUser = {
     nameFirst: string,
     nameLast: string,
     handleStr: string,
-    isGlobalOwner: boolean
+    isGlobalOwner: boolean,
+    sessionTokens: string[]
 }
 
 // The channelId output type.

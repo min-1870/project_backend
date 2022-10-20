@@ -22,7 +22,10 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
   if (name.length < 1 || name.length > 20) {
     return { error: 'name is not between 1 and 20 characters' };
   }
+<<<<<<< src/channels.ts
+=======
 
+>>>>>>> src/channels.ts
   const data = getData();
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'Invalid user ID' };
@@ -47,7 +50,6 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
   data.channels.push(newChannel);
   nextChannelId++;
   setData(data);
-
   return {
     channelId: newChannel.channelId,
   };
