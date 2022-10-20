@@ -1,4 +1,4 @@
-import { dataStore } from "./types";
+import { dataStore } from './types';
 
 // YOU SHOULD MODIFY THIS OBJECT BELOW
 let data:dataStore = {

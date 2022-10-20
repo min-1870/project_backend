@@ -18,7 +18,7 @@ let uniqueuserID = 0;
 export function authLoginV1(email:string, password:string): (authUserId|error) {
   const data:dataStore = getData();
 
-  let i:number = 0;
+  let i = 0;
   // checking if email has already been used
   while (true) {
     if (i >= data.users.length) {
@@ -54,7 +54,7 @@ export function authRegisterV1(email:string, password:string, nameFirst:string, 
     return { error: 'Invalid Email' };
   }
 
-  let i:number = 0;
+  let i = 0;
   // checking if email has already been used
   while (true) {
     if (i >= data.users.length) {
@@ -85,7 +85,7 @@ export function authRegisterV1(email:string, password:string, nameFirst:string, 
 
   // checking if handleStr already exist and making unique if not already
   i = 0;
-  let j:number = 0;
+  let j = 0;
   while (true) {
     if (i >= data.users.length) {
       break;
@@ -103,7 +103,7 @@ export function authRegisterV1(email:string, password:string, nameFirst:string, 
     i++;
   }
 
-  let ownerglob:boolean = false;
+  let ownerglob = false;
   if (data.users.length === 0) {
     ownerglob = true;
   }
@@ -117,7 +117,7 @@ export function authRegisterV1(email:string, password:string, nameFirst:string, 
     nameLast: nameLast,
     handleStr: fullname,
     isGlobalOwner: ownerglob,
-    sessionTokens: ['']         //----------------I manually added a dummy for the typescript
+    sessionTokens: [''] // ----------------I manually added a dummy for the typescript
   };
 
   uniqueuserID++;

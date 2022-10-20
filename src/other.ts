@@ -10,7 +10,7 @@ import {
  * * *
  * @returns {} - empty object
  */
-export function clearV1(): {} {
+export function clearV1(): Record<string, never> {
   const data = {
     users: [
     ],

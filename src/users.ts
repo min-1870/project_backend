@@ -13,7 +13,7 @@ import {
  * @returns {} - empty object
  */
 // userProfileV1 function
-export function userProfileV1(authUserId:number, uID:number): {} {
+export function userProfileV1(authUserId:number, uID:number): any {
   const data = getData();
   let i = 0; // checking if authUserId is valid
   while (true) {
