@@ -1,6 +1,7 @@
-import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels.ts';
-import { authRegisterV1 } from '../src/auth.js';
-import { clearV1 } from '../src/other.js';
+import { channelsCreateV1,channelsListV1, channelsListAllV1 } from '../src/channels';
+import { authRegisterV1 } from '../src/auth';
+import { clearV1 } from '../src/other';
+import { getData, setData } from '../src/dataStore';
 
 const channelCreatorId = 1;
 const channelName = 'Cat Channel';
@@ -14,16 +15,18 @@ const channelCreator = {
 }
 const channelId = 10000;  
 
-beforeEach(() => {
-    // Before every test reset and add a new test user
-    clearV1()
-    authRegisterV1(channelCreator.email, channelCreator.password, channelCreator.namesFirst, channelCreator.namesLast);
-});
+
 
 describe('Test set for the function channelsCreate', () => {
 
+    beforeEach(() => {
+        // Before every test reset and add a new test user
+        clearV1()
+        authRegisterV1(channelCreator.email, channelCreator.password, channelCreator.namesFirst, channelCreator.namesLast);
+    });
+
     test('create new public channel success', () => {
-        const createChannelResult = channelsCreateV1(channelCreatorId, channelName, true)
+        const createChannelResult:any = channelsCreateV1(channelCreatorId, channelName, true)
         expect(createChannelResult).toStrictEqual({
             channelId: expect.any(Number)
         });
@@ -48,7 +51,7 @@ describe('Test set for the function channelsCreate', () => {
     });
 
     test('create new private channel success', () => {
-        const createChannelResult = channelsCreateV1(channelCreatorId, channelName, false)
+        const createChannelResult:any = channelsCreateV1(channelCreatorId, channelName, false)
 
         expect(createChannelResult).toStrictEqual({
             channelId: expect.any(Number)
@@ -77,7 +80,7 @@ describe('Test set for the function channelsCreate', () => {
         const createChannelResult = channelsCreateV1(channelCreatorId, '', false)
 
         expect(createChannelResult).toStrictEqual({
-            error: 'error'
+            error: "name is not between 1 and 20 characters"
         });
     });
 
@@ -85,7 +88,7 @@ describe('Test set for the function channelsCreate', () => {
         const createChannelResult = channelsCreateV1(channelCreatorId, 'helloisitmeyoulookingforhelloagain', false)
 
         expect(createChannelResult).toStrictEqual({
-            error: 'error'
+            error: "name is not between 1 and 20 characters"
         });
     });
 
@@ -93,7 +96,7 @@ describe('Test set for the function channelsCreate', () => {
         const createChannelResult = channelsCreateV1(24092001, channelName, false)
 
         expect(createChannelResult).toStrictEqual({
-            error: 'error'
+            error: 'Invalid user ID'
         });
     });
 });
@@ -102,8 +105,14 @@ describe('Test set for the function channelsCreate', () => {
 
 describe('Test set for the function channelsList', () => {
 
+    beforeEach(() => {
+        // Before every test reset and add a new test user
+        clearV1()
+        authRegisterV1(channelCreator.email, channelCreator.password, channelCreator.namesFirst, channelCreator.namesLast);
+    });
+
     test('channels list valid authUserId with channels returns list of channels', () => {
-        let data = getData();
+        let data:any = getData();
         data.channels.push({
             channelId,
             name: channelName,
@@ -143,6 +152,12 @@ describe('Test set for the function channelsList', () => {
 
 describe('Test set for the function channelsListAllV1', () => {
     
+beforeEach(() => {
+    // Before every test reset and add a new test user
+    clearV1()
+    authRegisterV1(channelCreator.email, channelCreator.password, channelCreator.namesFirst, channelCreator.namesLast);
+});
+
     test('channelsListAllV1 invalid authUserId', () => {
 
       expect(channelsListAllV1(24092001)).toStrictEqual({
@@ -158,7 +173,7 @@ describe('Test set for the function channelsListAllV1', () => {
     }); 
 
     test('channelsListAllV1 valid authUserId returns list of all channels', () => {
-        let data = getData();
+        let data:any = getData();
         data.channels.push({
             channelId: channelId,
             isPublic: true,

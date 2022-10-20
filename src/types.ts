@@ -29,6 +29,9 @@ export type dataStoreUser = {
 // The channelId output type.
 export type channelId = { channelId: number };
 
+// The authUserId output type.
+export type authUserId = { authUserId: number };
+
 // The error output type.
 export type error = { error: string };
 

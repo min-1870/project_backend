@@ -1,8 +1,9 @@
 import {
   setData,
   getData,
-} from './dataStore.js';
+} from './dataStore';
 import validator from 'validator';
+import { authUserId, error, dataStore, dataStoreUser } from './types';
 
 let uniqueuserID = 0;
 
@@ -12,12 +13,12 @@ let uniqueuserID = 0;
  * @param {string} email - user's email
  * @param {string} password - user's password
  *
- * @returns {authUserId: authUserId} an object containing authUserId
+ * @returns {authUserId} an object containing authUserId
  */
-export function authLoginV1(email, password) {
-  const data = getData();
+export function authLoginV1(email:string, password:string): (authUserId|error) {
+  const data:dataStore = getData();
 
-  let i = 0;
+  let i:number = 0;
   // checking if email has already been used
   while (true) {
     if (i >= data.users.length) {
@@ -44,16 +45,16 @@ export function authLoginV1(email, password) {
  * @param {string} nameFirst - user's first name
  * @param {string} nameLast - user's last name
  *
- * @returns {authUserId: authUserId} an object containing authUserId
+ * @returns {authUserId} an object containing authUserId
  */
-export function authRegisterV1(email, password, nameFirst, nameLast) {
-  const data = getData();
+export function authRegisterV1(email:string, password:string, nameFirst:string, nameLast:string): (authUserId|error) {
+  const data:dataStore = getData();
 
   if (!(validator.isEmail(email))) { // checking if email is valid
     return { error: 'Invalid Email' };
   }
 
-  let i = 0;
+  let i:number = 0;
   // checking if email has already been used
   while (true) {
     if (i >= data.users.length) {
@@ -84,7 +85,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
 
   // checking if handleStr already exist and making unique if not already
   i = 0;
-  let j = 0;
+  let j:number = 0;
   while (true) {
     if (i >= data.users.length) {
       break;
@@ -102,20 +103,21 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
     i++;
   }
 
-  let ownerglob = false;
+  let ownerglob:boolean = false;
   if (data.users.length === 0) {
     ownerglob = true;
   }
 
-  const uuID = uniqueuserID;
-  const temp = {
+  const uuID:number = uniqueuserID;
+  const temp:dataStoreUser = {
     uId: uuID,
     email: email,
     password: password,
     nameFirst: nameFirst,
     nameLast: nameLast,
     handleStr: fullname,
-    isGlobalOwner: ownerglob
+    isGlobalOwner: ownerglob,
+    sessionTokens: ['']         //----------------I manually added a dummy for the typescript
   };
 
   uniqueuserID++;
@@ -133,7 +135,7 @@ export function authRegisterV1(email, password, nameFirst, nameLast) {
  *
  * @returns {string} - returns string containing only alphanumeric values
  */
-function onlyalphanumeric(handle) {
+function onlyalphanumeric(handle:string): string {
   handle = handle.replace(/[^a-z0-9]/gi, '');
   return handle;
 }
