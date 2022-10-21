@@ -4,7 +4,6 @@ import {
   channelId,
   error,
   channels,
-  user,
   dataStoreChannel,
 } from './types';
 

@@ -26,5 +26,5 @@ export function userProfileV1(authUserId: number, uID: number): {user: user}|err
 
   const dataStoreUser = getDataStoreUser(uID, data);
 
-  return {user: dataStoreUserToUser(dataStoreUser)};
+  return { user: dataStoreUserToUser(dataStoreUser) };
 }
