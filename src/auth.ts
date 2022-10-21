@@ -7,6 +7,7 @@ import { authUserId, error, dataStoreUser } from './types';
 import { isEmailUsed, isHandleStrExist } from './utils';
 
 let uniqueuserID = 0;
+let totallyUnpredictableToken = 0;
 
 /**
  * Given a registered user's email and password, returns their authUserId value
@@ -28,7 +29,13 @@ export function authLoginV1(email:string, password:string): (authUserId|error) {
   if (data.users[i].password !== password) {
     return { error: 'Wrong password' };
   } else {
-    return { authUserId: data.users[i].uId };
+    const ret = {
+      token: totallyUnpredictableToken.toString(),
+      authUserId: data.users[i].uId
+    };
+    data.users[i].sessionTokens.push(totallyUnpredictableToken.toString());
+    totallyUnpredictableToken++;
+    return ret;
   }
 }
 
@@ -85,6 +92,7 @@ export function authRegisterV1(email: string, password: string,
   const isGlobalOwner = data.users.length === 0;
 
   const uuID: number = uniqueuserID;
+  const currentsessionID: string = totallyUnpredictableToken.toString();
   const temp: dataStoreUser = {
     uId: uuID,
     email: email,
@@ -93,14 +101,17 @@ export function authRegisterV1(email: string, password: string,
     nameLast: nameLast,
     handleStr: fullname,
     isGlobalOwner,
-    sessionTokens: []
+    sessionTokens: [totallyUnpredictableToken.toString()]
   };
-
+  totallyUnpredictableToken++;
   uniqueuserID++;
   data.users.push(temp);
   setData(data);
 
-  return { authUserId: uuID };
+  return {
+    authUserId: uuID,
+    token: currentsessionID
+  };
 }
 
 /**

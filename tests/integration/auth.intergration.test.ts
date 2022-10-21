@@ -2,6 +2,7 @@ import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
   OK,
+  sendDeleteRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'moniker2@hotmail.com';
@@ -9,17 +10,10 @@ const PASSWORD = 'pvssword';
 const NAME_FIRST = '7re$#%^@$#al43E';
 const NAME_LAST = 'MoN(*#@@#!i9IO64kerMoNi9IO64kerMoNi9IO64ker';
 
-//   beforeEach(() => {
-// const res = sendPostRequestToEndpoint('/auth/register/v2', {
-//   email: EMAIL,
-//   password: PASSWORD,
-//   nameFirst: NAME_FIRST,
-//   nameLast: NAME_LAST
-// });
+beforeEach(() => {
+  sendDeleteRequestToEndpoint('/clear/v1', {});
 
-//     const jsonResponse = parseJsonResponse(res) as unknown as { token: string, authUserId: number };
-//     token = jsonResponse.token;
-//   });
+});
 
 describe('HTTP tests for /auth/register/v2', () => {
   // happy path

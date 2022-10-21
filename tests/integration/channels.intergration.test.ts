@@ -3,7 +3,7 @@ import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
   OK,
-  clearDataForIntegrationTests,
+  sendDeleteRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -18,7 +18,7 @@ const SHORT_CHANNEL_NAME = '';
 let token: string;
 
 beforeEach(() => {
-  clearDataForIntegrationTests();
+  sendDeleteRequestToEndpoint('/clear/v1', {});
 
   const res = sendPostRequestToEndpoint('/auth/register/v2', {
     email: EMAIL,

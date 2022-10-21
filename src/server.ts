@@ -6,6 +6,7 @@ import cors from 'cors';
 import { channelsCreateV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken } from './utils';
 import { clearV1 } from './other';
+import { authLoginV1, authRegisterV1 } from './auth';
 
 // Set up web app
 const app = express();
@@ -25,6 +26,22 @@ app.get('/echo', (req: Request, res: Response, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/auth/register/v2', (req: Request, res: Response) => {
+  const { email, password, nameFirst, nameLast } = req.body;
+
+  const result = authRegisterV1(email, password, nameFirst, nameLast);
+
+  res.json(result);
+});
+
+app.post('/auth/login/v2', (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  const result = authLoginV1(email, password);
+
+  res.json(result);
 });
 
 app.post('/channels/create/v2', (req: Request, res: Response) => {

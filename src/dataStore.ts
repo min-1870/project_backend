@@ -11,6 +11,7 @@ let data: dataStore = {
     nameLast: string,
     handleStr: string,
     isGlobalOwner: boolean
+    sessionTokens: [string]
     */
   ],
   channels: [
