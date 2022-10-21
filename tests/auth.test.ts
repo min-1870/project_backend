@@ -9,7 +9,7 @@ describe('Test Suite for authRegisterV1 function', () => {
   test('Successful authRegisterV1', () => {
     authRegisterV1('moniker2@hotmail.com', 'pvssword', '7re$#%^@$#al43E', 'MoN(*#@@#!i9IO64kerMoNi9IO64kerMoNi9IO64ker');
     authRegisterV1('moniker3@hotmail.com', 'pvssword', '7re^$$":}:L#$#$#43E', 'MoNi9I*(((O64kerMoNi9IO64kerMoNi9IO64ker');
-    expect(authRegisterV1('moniker@hotmail.com', 'pvssword', '7real"}:}:43E', 'MoNi9IO64kerMoNi9IO64kerMo_***)(Ni9IO64ker')).toStrictEqual({ authUserId: expect.any(Number) });
+    expect(authRegisterV1('moniker@hotmail.com', 'pvssword', '7real"}:}:43E', 'MoNi9IO64kerMoNi9IO64kerMo_***)(Ni9IO64ker')).toStrictEqual({ authUserId: expect.any(Number), token: expect.any(String) });
   });
 
   test('error passing invalid email through authRegisterV1', () => {
@@ -48,9 +48,9 @@ describe('Test Suite for authLoginV1 function', () => {
   });
 
   test('Successful authLoginV1', () => {
-    let authId:any = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker');
-    authId = authId.authUserId;
-    expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({ authUserId: authId });
+    authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker');
+
+    expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({ authUserId: expect.any(Number), token: expect.any(String) });
   });
 
   test('Error passing invalid email through authLoginV1', () => {

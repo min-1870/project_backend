@@ -37,7 +37,7 @@ export type channel = {
 }
 
 // The authUserId output type.
-export type authUserId = { authUserId: number };
+export type authUserId = { authUserId: number, token: string};
 
 // The error output type.
 export type error = { error: string };
