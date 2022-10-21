@@ -1,5 +1,5 @@
-import { authRegisterV1, authLoginV1 } from '../src/auth.js';
-import { clearV1 } from '../src/other.js';
+import { authRegisterV1, authLoginV1 } from '../src/auth';
+import { clearV1 } from '../src/other';
 
 describe('Test Suite for authRegisterV1 function', () => {
 
@@ -60,7 +60,7 @@ describe('Test Suite for authLoginV1 function', () => {
     });
 
     test('Successful authLoginV1', () => {   
-        let authId = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
+        let authId:any = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker')
         authId = authId.authUserId;
         expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({authUserId: authId});    
     });
