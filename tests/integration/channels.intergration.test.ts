@@ -1,7 +1,9 @@
+import { authResponse, channelId } from '../../src/types';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
   OK,
+  clearDataForIntegrationTests,
 } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -16,6 +18,8 @@ const SHORT_CHANNEL_NAME = '';
 let token: string;
 
 beforeEach(() => {
+  clearDataForIntegrationTests();
+
   const res = sendPostRequestToEndpoint('/auth/register/v2', {
     email: EMAIL,
     password: PASSWORD,
@@ -23,12 +27,11 @@ beforeEach(() => {
     nameLast: NAME_LAST
   });
 
-  const jsonResponse = parseJsonResponse(res) as unknown as { token: string, authUserId: number };
+  const jsonResponse = parseJsonResponse(res) as unknown as authResponse;
   token = jsonResponse.token;
 });
 
 describe('HTTP tests for /channels/create/v2', () => {
-  // happy path
   test('Create public channel successful', () => {
     const res = sendPostRequestToEndpoint('/channels/create/v2', {
       token: token,
@@ -104,7 +107,7 @@ describe('HTTP tests for /channels/list/v2', () => {
       isPublic: true
     });
 
-    const jsonResponse = parseJsonResponse(res) as unknown as { channelId: number };
+    const jsonResponse = parseJsonResponse(res) as unknown as channelId;
     channelId = jsonResponse.channelId;
   });
 
