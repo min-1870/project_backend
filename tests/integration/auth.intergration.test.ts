@@ -12,7 +12,6 @@ const NAME_LAST = 'MoN(*#@@#!i9IO64kerMoNi9IO64kerMoNi9IO64ker';
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
-
 });
 
 describe('HTTP tests for /auth/register/v2', () => {

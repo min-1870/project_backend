@@ -48,9 +48,9 @@ describe('Test Suite for authLoginV1 function', () => {
   });
 
   test('Successful authLoginV1', () => {
-    let authId:any = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker');
-    authId = authId.authUserId;
-    expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({authUserId: expect.any(Number), token: expect.any(String)});
+    authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker');
+
+    expect(authLoginV1('moniker@hotmail.com', 'pvssword')).toStrictEqual({ authUserId: expect.any(Number), token: expect.any(String) });
   });
 
   test('Error passing invalid email through authLoginV1', () => {
