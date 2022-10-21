@@ -1,4 +1,4 @@
-import { setData } from './dataStore';
+import { getData, setData } from './dataStore';
 import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user } from './types';
 
 export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
@@ -59,4 +59,17 @@ export function toOutputChannelDetail(channel: dataStoreChannel): channel {
 export function addUserToChannel(user: dataStoreUser, channelId: number, data: dataStore) {
   data.channels.find(channel => channel.channelId === channelId).allMembers.push(toOutputUser(user));
   setData(data);
+}
+
+export function getAuthUserIdFromToken(token: string): number {
+  const data: dataStore = getData();
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    for (let j = 0; j < user.sessionTokens.length; j++) {
+      if (user.sessionTokens[j] === token) {
+        return user.uId;
+      }
+    }
+  }
+  return null;
 }
