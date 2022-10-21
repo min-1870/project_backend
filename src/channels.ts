@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore.js';
+import { getData, setData } from './dataStore';
 import {
   channelId,
   error,
@@ -22,10 +22,7 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
   if (name.length < 1 || name.length > 20) {
     return { error: 'name is not between 1 and 20 characters' };
   }
-<<<<<<< src/channels.ts
-=======
 
->>>>>>> src/channels.ts
   const data = getData();
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'Invalid user ID' };

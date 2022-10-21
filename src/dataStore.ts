@@ -1,5 +1,7 @@
+import { dataStore } from './types';
+
 // YOU SHOULD MODIFY THIS OBJECT BELOW
-let data = {
+let data:dataStore = {
   users: [
     /*
     uId: number,
@@ -40,12 +42,12 @@ Example usage
 */
 
 // Use get() to access the data
-function getData() {
+function getData():dataStore {
   return data;
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData) {
+function setData(newData:dataStore) {
   data = newData;
 }
 

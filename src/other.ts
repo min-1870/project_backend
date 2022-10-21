@@ -1,6 +1,6 @@
 import {
   setData,
-} from './dataStore.js';
+} from './dataStore';
 /**
  * <clearV1>
  * Resets the internal data of the application to its initial state
@@ -10,7 +10,7 @@ import {
  * * *
  * @returns {} - empty object
  */
-export function clearV1() {
+export function clearV1(): Record<string, never> {
   const data = {
     users: [
     ],

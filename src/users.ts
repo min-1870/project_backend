@@ -1,6 +1,6 @@
 import {
   getData,
-} from './dataStore.js';
+} from './dataStore';
 
 /**
  * <userProfileV1>
@@ -8,12 +8,12 @@ import {
  *
  *
  * @param {number} authUserId - userId of user asking to view
- * @param {number} uId - userId of user to look at
+ * @param {number} uID - userId of user to look at
  * * *
  * @returns {} - empty object
  */
 // userProfileV1 function
-export function userProfileV1(authUserId, uID) {
+export function userProfileV1(authUserId:number, uID:number): any {
   const data = getData();
   let i = 0; // checking if authUserId is valid
   while (true) {

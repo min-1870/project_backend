@@ -1,5 +1,5 @@
-import { channelJoinV1, channelInviteV1, channelMessagesV1, channelDetailsV1 } from '../src/channel.js';
-import { clearV1 } from '../src/other.js';
+import { channelJoinV1, channelInviteV1, channelMessagesV1, channelDetailsV1 } from '../src/channel';
+import { clearV1 } from '../src/other';
 import { getData, setData } from '../src/dataStore';
 
 describe('Test set for the function channelJoinV1', () => {
@@ -47,7 +47,7 @@ const testUser3 = {  //profile of the test user3
 
   beforeEach(() => {       //before every test reset and add a new test user & channel
     clearV1()
-    let data = getData()
+    let data:any = getData()
     data = {
         users: [
           testUser, testUser2, testUser3
@@ -119,7 +119,7 @@ describe('Test set for the function channelInviteV1', () => {
 
   beforeEach(() => {       //before every test reset and add a new test user & channel
     clearV1()
-    let data = getData()
+    let data:any = getData()
     data = {
         users: [
           testUser, testUser2
@@ -190,7 +190,7 @@ describe('Test set for the function channelMessagesV1', () => {
 
   beforeEach(() => {       //before every test reset and add a new test user & channel
     clearV1()
-    let data = getData()
+    let data:any = getData()
     data = {
       users: [
         testUser, testUser2
@@ -266,7 +266,7 @@ describe('Test set for the function channelDetailsV1', () => {
 
   beforeEach(() => {       //before every test reset and add a new test user & channel
     clearV1()
-    let data = getData()
+    let data:any = getData()
     data = {
         users: [
           testUser, testUser2

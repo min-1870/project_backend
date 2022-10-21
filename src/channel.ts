@@ -1,4 +1,4 @@
-import { getData } from './dataStore.js';
+import { getData } from './dataStore';
 import {
   error,
   message,
@@ -16,7 +16,7 @@ import {
   *
   * @returns {object} - An object containing basic details of the channel such as name, isPublic, ownerMembers and allMembers
 */
-export function channelDetailsV1(authUserId: number, channelId: number): ({name: string, isPublic: boolean, ownerMembers: dataStoreUser[], allMembers: dataStoreUser[]} | error) {
+export function channelDetailsV1(authUserId: number, channelId: number): ({name: string, isPublic: boolean, ownerMembers: any[], allMembers: any[]} | error) {
   const data = getData();
   if (data.channels.find(channel => channel.channelId === channelId) == null) {
     return { error: 'Channel ID does not refer to a valid channel' };
