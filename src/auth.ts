@@ -3,7 +3,8 @@ import {
   getData,
 } from './dataStore';
 import validator from 'validator';
-import { authUserId, error, dataStore, dataStoreUser } from './types';
+import { authUserId, error, dataStoreUser } from './types';
+import { isEmailUsed, isHandleStrExist } from './utils';
 
 let uniqueuserID = 0;
 
@@ -16,19 +17,14 @@ let uniqueuserID = 0;
  * @returns {authUserId} an object containing authUserId
  */
 export function authLoginV1(email:string, password:string): (authUserId|error) {
-  const data:dataStore = getData();
+  const data = getData();
 
-  let i = 0;
+  const i = 0;
   // checking if email has already been used
-  while (true) {
-    if (i >= data.users.length) {
-      return { error: 'Email address is not registered' };
-    }
-    if (data.users[i].email === email) {
-      break;
-    }
-    i++;
+  if (!isEmailUsed(email, data.users)) {
+    return { error: 'Email address is not registered' };
   }
+
   if (data.users[i].password !== password) {
     return { error: 'Wrong password' };
   } else {
@@ -47,23 +43,16 @@ export function authLoginV1(email:string, password:string): (authUserId|error) {
  *
  * @returns {authUserId} an object containing authUserId
  */
-export function authRegisterV1(email:string, password:string, nameFirst:string, nameLast:string): (authUserId|error) {
-  const data:dataStore = getData();
+export function authRegisterV1(email: string, password: string,
+  nameFirst: string, nameLast: string): (authUserId|error) {
+  const data = getData();
 
   if (!(validator.isEmail(email))) { // checking if email is valid
     return { error: 'Invalid Email' };
   }
 
-  let i = 0;
-  // checking if email has already been used
-  while (true) {
-    if (i >= data.users.length) {
-      break;
-    }
-    if (data.users[i].email === email) {
-      return { error: 'Email address already in use' };
-    }
-    i++;
+  if (isEmailUsed(email, data.users)) {
+    return { error: 'Email address already in use' };
   }
 
   if (password.length < 6) {
@@ -84,40 +73,27 @@ export function authRegisterV1(email:string, password:string, nameFirst:string, 
   }
 
   // checking if handleStr already exist and making unique if not already
-  i = 0;
   let j = 0;
-  while (true) {
-    if (i >= data.users.length) {
-      break;
+  while (isHandleStrExist(fullname, data.users)) {
+    if (j !== 0) {
+      fullname = fullname.substring(0, fullname.length - 1);
     }
-    if (data.users[i].handleStr === fullname) {
-      if (j !== 0) {
-        fullname = fullname.substring(0, fullname.length - 1);
-      }
-
-      fullname = fullname + j;
-      j++;
-      i = 0;
-    }
-
-    i++;
+    fullname = fullname + j;
+    j++;
   }
 
-  let ownerglob = false;
-  if (data.users.length === 0) {
-    ownerglob = true;
-  }
+  const isGlobalOwner = data.users.length === 0;
 
-  const uuID:number = uniqueuserID;
-  const temp:dataStoreUser = {
+  const uuID: number = uniqueuserID;
+  const temp: dataStoreUser = {
     uId: uuID,
     email: email,
     password: password,
     nameFirst: nameFirst,
     nameLast: nameLast,
     handleStr: fullname,
-    isGlobalOwner: ownerglob,
-    sessionTokens: [''] // ----------------I manually added a dummy for the typescript
+    isGlobalOwner,
+    sessionTokens: []
   };
 
   uniqueuserID++;
