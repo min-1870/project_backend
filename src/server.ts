@@ -64,14 +64,11 @@ app.post('/channels/list/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
-
-
-
 app.get('/user/profile/v2', (req: Request, res: Response) => {
   const token = req.query.token;
   const uId = req.query.uId;
   const authUserId = getAuthUserIdFromToken(token.toString());
-  let uuId = parseInt(uId.toString());
+  const uuId = parseInt(uId.toString());
   const result = userProfileV1(authUserId, uuId);
   res.json(result);
 });

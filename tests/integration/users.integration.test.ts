@@ -1,4 +1,3 @@
-import { TokenClass } from 'typescript';
 import { authResponse } from '../../src/types';
 import {
   parseJsonResponse,
@@ -8,7 +7,6 @@ import {
   sendPostRequestToEndpoint,
 } from './integrationTestUtils';
 
-
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
 const NAME_FIRST = 'Barty';
@@ -17,7 +15,7 @@ let token: string;
 let uId: number;
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
-let res = sendPostRequestToEndpoint('/auth/register/v2', {
+  let res = sendPostRequestToEndpoint('/auth/register/v2', {
     email: EMAIL,
     password: PASSWORD,
     nameFirst: NAME_FIRST,
@@ -59,7 +57,7 @@ describe('HTTP tests for /user/profile/v2', () => {
   test('error passing invalid uId', () => {
     const res = sendGetRequestToEndpoint('/user/profile/v2', {
       token: token,
-      uId: (uId+12133)
+      uId: (uId + 12133)
     });
 
     expect(res.statusCode).toBe(OK);
@@ -70,7 +68,7 @@ describe('HTTP tests for /user/profile/v2', () => {
 
   test('error passing invalid authUserId', () => {
     const res = sendGetRequestToEndpoint('/user/profile/v2', {
-      token: (token+434),
+      token: (token + 434),
       uId: uId
     });
 
@@ -79,8 +77,4 @@ describe('HTTP tests for /user/profile/v2', () => {
       error: expect.any(String)
     });
   });
-
-
-
-
 });
