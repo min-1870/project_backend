@@ -2,10 +2,10 @@ import { getData, setData } from './dataStore';
 import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user } from './types';
 
 export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
-  return getUser(authUserId, data) != null;
+  return getDataStoreUser(authUserId, data) != null;
 }
 
-export function getUser(userId: number, data: dataStore): dataStoreUser {
+export function getDataStoreUser(userId: number, data: dataStore): dataStoreUser {
   return data.users.find(user => user.uId === userId);
 }
 
@@ -25,13 +25,13 @@ export function isHandleStrExist(handleStr: string, users: dataStoreUser[]): boo
   return users.some(user => user.handleStr === handleStr);
 }
 
-export function toOutputUser(user: dataStoreUser): user {
+export function dataStoreUserToUser(dataStoreUser: dataStoreUser): user {
   return {
-    uId: user.uId,
-    email: user.email,
-    nameFirst: user.nameFirst,
-    nameLast: user.nameLast,
-    handleStr: user.handleStr
+    uId: dataStoreUser.uId,
+    email: dataStoreUser.email,
+    nameFirst: dataStoreUser.nameFirst,
+    nameLast: dataStoreUser.nameLast,
+    handleStr: dataStoreUser.handleStr
   };
 }
 
@@ -56,8 +56,8 @@ export function toOutputChannelDetail(channel: dataStoreChannel): channel {
 }
 
 // Add user to the channel. Assumes user and channel ID is valid.
-export function addUserToChannel(user: dataStoreUser, channelId: number, data: dataStore) {
-  data.channels.find(channel => channel.channelId === channelId).allMembers.push(toOutputUser(user));
+export function addUserToChannel(user: user, channelId: number, data: dataStore) {
+  data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
   setData(data);
 }
 

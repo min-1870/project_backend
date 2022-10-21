@@ -1,10 +1,9 @@
-import { getUser, isAuthUserIdValid, toOutputChannels } from './utils';
+import { dataStoreUserToUser, getDataStoreUser, isAuthUserIdValid, toOutputChannels } from './utils';
 import { getData, setData } from './dataStore';
 import {
   channelId,
   error,
   channels,
-  user,
   dataStoreChannel,
 } from './types';
 
@@ -28,14 +27,8 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'Invalid user ID' };
   }
-  const user = getUser(authUserId, data);
-  const member: user = {
-    uId: user.uId,
-    email: user.email,
-    nameFirst: user.nameFirst,
-    nameLast: user.nameLast,
-    handleStr: user.handleStr
-  };
+  const dataStoreUser = getDataStoreUser(authUserId, data);
+  const member = dataStoreUserToUser(dataStoreUser);
   const newChannel: dataStoreChannel = {
     channelId: nextChannelId,
     isPublic,
