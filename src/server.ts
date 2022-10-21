@@ -7,6 +7,7 @@ import { channelsCreateV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
+import { userProfileV1 } from './users';
 
 // Set up web app
 const app = express();
@@ -60,6 +61,18 @@ app.post('/channels/list/v2', (req: Request, res: Response) => {
   const { token } = req.body;
   const authUserId = getAuthUserIdFromToken(token);
   const result = channelsListV1(authUserId);
+  res.json(result);
+});
+
+
+
+
+app.get('/user/profile/v2', (req: Request, res: Response) => {
+  const token = req.query.token;
+  const uId = req.query.uId;
+  const authUserId = getAuthUserIdFromToken(token.toString());
+  let uuId = parseInt(uId.toString());
+  const result = userProfileV1(authUserId, uuId);
   res.json(result);
 });
 
