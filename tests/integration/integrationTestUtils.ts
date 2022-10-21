@@ -12,8 +12,8 @@ export function sendGetRequestToEndpoint(endpoint: string, qs: object): Response
     {
       qs,
     }
-  )
-  return res
+  );
+  return res;
 }
 
 export function sendDeleteRequestToEndpoint(endpoint: string, qs: object): Response {
@@ -23,8 +23,8 @@ export function sendDeleteRequestToEndpoint(endpoint: string, qs: object): Respo
     {
       qs,
     }
-  )
-  return res
+  );
+  return res;
 }
 
 export function sendPostRequestToEndpoint(endpoint: string, json: object): Response {
@@ -34,8 +34,8 @@ export function sendPostRequestToEndpoint(endpoint: string, json: object): Respo
     {
       json,
     }
-  )
-  return res
+  );
+  return res;
 }
 
 export function sendPutRequestToEndpoint(endpoint: string, json: object): Response {
@@ -45,10 +45,10 @@ export function sendPutRequestToEndpoint(endpoint: string, json: object): Respon
     {
       json,
     }
-  )
-  return res
+  );
+  return res;
 }
 
 export function parseJsonResponse(response: Response): string {
-  return JSON.parse(response.body as string)
+  return JSON.parse(response.body as string);
 }
