@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListV1 } from './channels';
-import { getData } from './dataStore.js';
+import { getData } from './dataStore';
 import { dataStore, dataStoreUser } from './types';
 
 // Set up web app
