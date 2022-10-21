@@ -75,7 +75,6 @@ export function channelsListV1(authUserId: number) : (channels | error) {
 */
 export function channelsListAllV1(authUserId: number): (channels | error) {
   const data = getData();
-
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'authUserId is not valid' };
   }

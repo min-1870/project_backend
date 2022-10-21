@@ -3,7 +3,7 @@ import { echo } from './echo';
 import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
-import { channelsCreateV1, channelsListV1 } from './channels';
+import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
@@ -61,6 +61,18 @@ app.post('/channels/list/v2', (req: Request, res: Response) => {
   const authUserId = getAuthUserIdFromToken(token);
   const result = channelsListV1(authUserId);
   res.json(result);
+});
+
+app.get('/channels/listAll/v2', (req: Request, res: Response) => {
+  const token = req.query.token as string;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'invalid token' });
+  } else {
+    const result = channelsListAllV1(authUserId);
+    return res.json(result);
+  }
 });
 
 app.delete('/clear/v1', (req: Request, res: Response) => {

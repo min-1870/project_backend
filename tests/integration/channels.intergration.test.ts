@@ -140,19 +140,18 @@ describe('HTTP tests for /channels/list/v2', () => {
   });
 });
 
-describe('HTTP tests for /channels/list/all/v2', () => {
+describe('HTTP tests for /channels/listAll/v2', () => {
   test('Test successful status code and return', () => {
-
-    //test user 2
+    // test user 2
     const user2Res = sendPostRequestToEndpoint('/auth/register/v2', {
-      email: EMAIL+'2',
-      password: PASSWORD+'2',
-      nameFirst: NAME_FIRST+'2',
-      nameLast: NAME_LAST+'2'
+      email: '2' + EMAIL,
+      password: '2' + PASSWORD,
+      nameFirst: NAME_FIRST + 'b',
+      nameLast: NAME_LAST + 'b'
     });
     const token2 = (parseJsonResponse(user2Res) as unknown as authResponse).token;
 
-    //test user 1's public channel
+    // test user 1's public channel
     const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
       token: token,
       name: TEST_CHANNEL_NAME,
@@ -160,42 +159,41 @@ describe('HTTP tests for /channels/list/all/v2', () => {
     });
     const channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
 
-    //test user 2's private channel
+    // test user 2's private channel
     const channel2Res = sendPostRequestToEndpoint('/channels/create/v2', {
       token: token2,
-      name: TEST_CHANNEL_NAME+'2',
+      name: TEST_CHANNEL_NAME + '2',
       isPublic: false
     });
     const channel2Id = (parseJsonResponse(channel2Res) as unknown as channelId).channelId;
 
-    const res = sendGetRequestToEndpoint('/channels/list/all/v2', {
+    const res = sendGetRequestToEndpoint('/channels/listAll/v2', {
       token: token
-    })
-    
+    });
+
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      channels:[
+      channels: [
         {
           channelId: channel1Id,
           name: TEST_CHANNEL_NAME
         },
         {
           channelId: channel2Id,
-          name: TEST_CHANNEL_NAME+'2'
+          name: TEST_CHANNEL_NAME + '2'
         }
       ]
-    })
+    });
   });
 
   test('Test return error when an invalid token is given', () => {
+    const res = sendGetRequestToEndpoint('/channels/listAll/v2', {
+      token: TEST_INVALID_TOKEN
+    });
 
-    const res = sendGetRequestToEndpoint('/channels/list/all/v2', {
-      token: 'APPLE'
-    })
-    
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: "invalid token"
-    })
+      error: 'invalid token'
+    });
   });
-;})
+});
