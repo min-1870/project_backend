@@ -5,9 +5,11 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "lib": [ "es6" ],
+    "target": "es5"
   },
   "exclude": [
     "**/**_broken.ts"
-  ]
+  ],
 }

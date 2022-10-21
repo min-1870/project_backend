@@ -40,11 +40,6 @@ describe('Test Suite for authRegisterV1 function', () => {
   test('error passing invalid last name through authRegisterV1 (too long)', () => {
     expect(authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'weqrewqreweqrewqreweqrewqreweqrewqreweqrewqreweqrewqre')).toStrictEqual({ error: expect.any(String) });
   });
-
-  // test('Testing if created authUserId is unique', () => {
-  //     const case_1 = authRegisterV1('moniker@hotmail.com', 'pvssword', 'real', 'moniker');
-
-  // });
 });
 
 describe('Test Suite for authLoginV1 function', () => {

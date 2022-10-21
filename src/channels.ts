@@ -1,10 +1,11 @@
+import { getUser, isAuthUserIdValid, toOutputChannels } from './utils';
 import { getData, setData } from './dataStore';
 import {
   channelId,
   error,
   channels,
-  dataStoreUser,
-  dataStore,
+  user,
+  dataStoreChannel,
 } from './types';
 
 let nextChannelId = 1;
@@ -28,14 +29,14 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
     return { error: 'Invalid user ID' };
   }
   const user = getUser(authUserId, data);
-  const member = {
+  const member: user = {
     uId: user.uId,
     email: user.email,
     nameFirst: user.nameFirst,
     nameLast: user.nameLast,
     handleStr: user.handleStr
   };
-  const newChannel = {
+  const newChannel: dataStoreChannel = {
     channelId: nextChannelId,
     isPublic,
     name,
@@ -67,16 +68,9 @@ export function channelsListV1(authUserId: number) : (channels | error) {
 
   const channels = data.channels
     .filter(channel => channel.allMembers
-      .find(member => member.uId === authUserId) != null)
-    .map(channel => (
-      {
-        channelId: channel.channelId,
-        name: channel.name
-      })) || [];
+      .find(member => member.uId === authUserId) != null) || [];
 
-  return {
-    channels: channels
-  };
+  return toOutputChannels(channels);
 }
 
 /**
@@ -94,15 +88,5 @@ export function channelsListAllV1(authUserId: number): (channels | error) {
   }
 
   // Return every channels in the data without Id & name only
-  return {
-    channels: data.channels.map(({ channelId, name }) => ({ channelId, name }))
-  };
-}
-
-function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
-  return getUser(authUserId, data) != null;
-}
-
-function getUser(authUserId: number, data: dataStore): dataStoreUser {
-  return data.users.find(user => user.uId === authUserId);
+  return toOutputChannels(data.channels);
 }

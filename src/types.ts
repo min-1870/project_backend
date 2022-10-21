@@ -1,8 +1,8 @@
 // The user output type.
 export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
 
-// Message output type.
-export type message = { messageId: number, uId: number, message: string, timeSent: number };
+// Messages output type.
+export type messages = { messageId: number, uId: number, message: string, timeSent: number };
 
 // The channel type that is stored in the data store.
 export type dataStoreChannel = {
@@ -11,7 +11,7 @@ export type dataStoreChannel = {
     name: string,
     ownerMembers: user[],
     allMembers: user[],
-    messages: message[]
+    messages: messages[]
 }
 
 // The user type that is stored in the data store.
@@ -28,6 +28,13 @@ export type dataStoreUser = {
 
 // The channelId output type.
 export type channelId = { channelId: number };
+
+export type channel = {
+  name: string,
+  isPublic: boolean,
+  ownerMembers: user[],
+  allMembers: user[]
+}
 
 // The authUserId output type.
 export type authUserId = { authUserId: number };
