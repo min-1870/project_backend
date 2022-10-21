@@ -46,6 +46,11 @@ app.post('/channels/list/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
+app.delete('/clear/v1', (req: Request, res: Response) => {
+  clearV1();
+  res.json({});
+});
+
 // for logging errors (print to terminal)
 app.use(morgan('dev'));
 
