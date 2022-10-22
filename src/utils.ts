@@ -91,6 +91,7 @@ export function removetoken(token: string): (Record<string, never> | error) {
     for (let j = 0; j < user.sessionTokens.length; j++) {
       if (user.sessionTokens[j] === token) {
         user.sessionTokens.splice(j, 1);
+        setData(data);
         return {};
       }
     }

@@ -1,3 +1,5 @@
+import { parse } from 'path';
+import { authResponse } from '../../src/types';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
@@ -216,15 +218,18 @@ describe('HTTP tests for /auth/login/v2', () => {
 
 describe('HTTP tests for /auth/logout/v1', () => {
   test('Successful auth logout', () => {
-    const token = sendPostRequestToEndpoint('/auth/register/v2', {
+    const ret = sendPostRequestToEndpoint('/auth/register/v2', {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
+  
+    const jsonResponse = parseJsonResponse(ret) as unknown as authResponse;
+    const token = jsonResponse.token;
 
     const res = sendPostRequestToEndpoint('/auth/logout/v1', {
-      token: token
+      token: token,
     });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});

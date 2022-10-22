@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListV1 } from './channels';
-import { getAuthUserIdFromToken } from './utils';
+import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { authRegisterRequest, authLoginRequest, channelsCreateRequest, channelsListRequest } from './types';
@@ -41,6 +41,14 @@ app.post('/auth/login/v2', (req: Request, res: Response) => {
   const { email, password } = req.body as authLoginRequest;
 
   const result = authLoginV1(encodeURI(email), encodeURI(password));
+
+  res.json(result);
+});
+
+app.post('/auth/logout/v1', (req: Request, res: Response) => {
+  const { token } = req.body 
+  
+  const result = removetoken(token);
 
   res.json(result);
 });
