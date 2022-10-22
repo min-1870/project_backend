@@ -274,19 +274,20 @@ describe('Test set for the function channelDetailsV1', () => {
     expect(findingChannelDetails).toStrictEqual({
       name: testChannel.name,
       isPublic: true,
-      ownerMembers: [testUser],
-      allMembers: [testUser]
+      ownerMembers: [testUserOutput],
+      allMembers: [testUserOutput]
     }
     );
   });
 
   test('authUserId and channelId correct for private channel', () => {
     const findingChannelDetails = channelDetailsV1(testUser2.uId, testChannel2.channelId) as channel;
+
     expect(findingChannelDetails).toStrictEqual({
       name: testChannel2.name,
       isPublic: false,
-      ownerMembers: [testUser2],
-      allMembers: [testUser2]
+      ownerMembers: [testUser2Output],
+      allMembers: [testUser2Output]
     }
     );
   });
@@ -321,6 +322,7 @@ describe('Test set for the function addOwner', () => {
     const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
 
     expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
+    expect(detailsResult.allMembers).toStrictEqual([testUser1, testUser2]);
   });
 
   test('channel owner add new owner to private channel success', () => {
@@ -328,9 +330,10 @@ describe('Test set for the function addOwner', () => {
 
     expect(addResult).toStrictEqual({});
 
-    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
+    const detailsResult = channelDetailsV1(testUser1.uId, privateChannelId) as channel;
 
     expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
+    expect(detailsResult.allMembers).toStrictEqual([testUser1, testUser2]);
   });
 
   test('global owner add new owner to public channel success', () => {
@@ -340,7 +343,8 @@ describe('Test set for the function addOwner', () => {
 
     const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
 
-    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser3]);
+    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
+    expect(detailsResult.allMembers).toStrictEqual([testUser1, testUser2]);
   });
 
   test('global owner add new owner to private channel success', () => {
@@ -348,9 +352,10 @@ describe('Test set for the function addOwner', () => {
 
     expect(addResult).toStrictEqual({});
 
-    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
+    const detailsResult = channelDetailsV1(testUser1.uId, privateChannelId) as channel;
 
-    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser3]);
+    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
+    expect(detailsResult.allMembers).toStrictEqual([testUser1, testUser2]);
   });
 
   test('channel owner add new owner with invalid channel id fails', () => {
