@@ -96,5 +96,5 @@ export function removetoken(token: string): (Record<string, never> | error) {
       }
     }
   }
-  return {error: "Token is Invalid"};
+  return { error: 'Token is Invalid' };
 }

@@ -1,4 +1,3 @@
-import { parse } from 'path';
 import { authResponse } from '../../src/types';
 import {
   sendPostRequestToEndpoint,
@@ -224,7 +223,7 @@ describe('HTTP tests for /auth/logout/v1', () => {
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-  
+
     const jsonResponse = parseJsonResponse(ret) as unknown as authResponse;
     const token = jsonResponse.token;
 
@@ -235,7 +234,6 @@ describe('HTTP tests for /auth/logout/v1', () => {
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
-
   test('Error passing invalid token through auth/logout/v2', () => {
     sendPostRequestToEndpoint('/auth/register/v2', {
       email: EMAIL,
@@ -244,7 +242,7 @@ describe('HTTP tests for /auth/logout/v1', () => {
       nameLast: NAME_LAST
     });
     const res = sendPostRequestToEndpoint('/auth/logout/v1', {
-      token: "this is definitely wrong"
+      token: 'this is definitely wrong'
     });
 
     expect(res.statusCode).toBe(OK);
@@ -252,6 +250,4 @@ describe('HTTP tests for /auth/logout/v1', () => {
       error: expect.any(String)
     });
   });
-
-  
 });
