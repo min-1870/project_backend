@@ -7,6 +7,7 @@ import { channelsCreateV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
+import { authRegisterRequest, autLoginRequest, channelsCreateRequest, channelsListRequest } from './types';
 
 // Set up web app
 const app = express();
@@ -29,23 +30,23 @@ app.get('/echo', (req: Request, res: Response, next) => {
 });
 
 app.post('/auth/register/v2', (req: Request, res: Response) => {
-  const { email, password, nameFirst, nameLast } = req.body;
+  const { email, password, nameFirst, nameLast } = req.body as authRegisterRequest;
 
-  const result = authRegisterV1(email, password, nameFirst, nameLast);
+  const result = authRegisterV1(encodeURI(email), encodeURI(password), encodeURI(nameFirst), encodeURI(nameLast));
 
   res.json(result);
 });
 
 app.post('/auth/login/v2', (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body as autLoginRequest;
 
-  const result = authLoginV1(email, password);
+  const result = authLoginV1(encodeURI(email), encodeURI(password));
 
   res.json(result);
 });
 
 app.post('/channels/create/v2', (req: Request, res: Response) => {
-  const { token, name, isPublic } = req.body;
+  const { token, name, isPublic } = req.body as channelsCreateRequest;
 
   // get the authUserId using token
   const authUserId = getAuthUserIdFromToken(token);
@@ -56,14 +57,14 @@ app.post('/channels/create/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.post('/channels/list/v2', (req: Request, res: Response) => {
-  const { token } = req.body;
+app.get('/channels/list/v2', (req: Request, res: Response) => {
+  const { token } = req.query as channelsListRequest;
   const authUserId = getAuthUserIdFromToken(token);
   const result = channelsListV1(authUserId);
   res.json(result);
 });
 
-app.delete('/clear/v1', (req: Request, res: Response) => {
+app.delete('/clear/v1', (_: Request, res: Response) => {
   clearV1();
   res.json({});
 });

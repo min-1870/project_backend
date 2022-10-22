@@ -4,6 +4,7 @@ import {
   parseJsonResponse,
   OK,
   sendDeleteRequestToEndpoint,
+  sendGetRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -112,7 +113,7 @@ describe('HTTP tests for /channels/list/v2', () => {
   });
 
   test('channels list successful', () => {
-    const res = sendPostRequestToEndpoint('/channels/list/v2', {
+    const res = sendGetRequestToEndpoint('/channels/list/v2', {
       token
     });
 
@@ -128,7 +129,7 @@ describe('HTTP tests for /channels/list/v2', () => {
   });
 
   test('channels list with invalid token fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/list/v2', {
+    const res = sendGetRequestToEndpoint('/channels/list/v2', {
       token: TEST_INVALID_TOKEN
     });
 

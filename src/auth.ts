@@ -4,7 +4,7 @@ import {
 } from './dataStore';
 import validator from 'validator';
 import { authUserId, error, dataStoreUser } from './types';
-import { isEmailUsed, isHandleStrExist } from './utils';
+import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleStrExist } from './utils';
 
 let uniqueuserID = 0;
 let totallyUnpredictableToken = 0;
@@ -17,23 +17,24 @@ let totallyUnpredictableToken = 0;
  *
  * @returns {authUserId} an object containing authUserId
  */
-export function authLoginV1(email:string, password:string): (authUserId|error) {
+export function authLoginV1(email: string, password: string): (authUserId | error) {
   const data = getData();
 
-  const i = 0;
   // checking if email has already been used
   if (!isEmailUsed(email, data.users)) {
     return { error: 'Email address is not registered' };
   }
 
-  if (data.users[i].password !== password) {
+  const user = getDataStoreUserByEmail(email, data);
+  if (user.password !== password) {
     return { error: 'Wrong password' };
   } else {
+    const token = totallyUnpredictableToken.toString();
     const ret = {
-      token: totallyUnpredictableToken.toString(),
-      authUserId: data.users[i].uId
+      token,
+      authUserId: user.uId
     };
-    data.users[i].sessionTokens.push(totallyUnpredictableToken.toString());
+    addSessionTokenForUser(user.uId, token, data);
     totallyUnpredictableToken++;
     return ret;
   }
@@ -51,7 +52,7 @@ export function authLoginV1(email:string, password:string): (authUserId|error) {
  * @returns {authUserId} an object containing authUserId
  */
 export function authRegisterV1(email: string, password: string,
-  nameFirst: string, nameLast: string): (authUserId|error) {
+  nameFirst: string, nameLast: string): (authUserId | error) {
   const data = getData();
 
   if (!(validator.isEmail(email))) { // checking if email is valid
@@ -95,13 +96,13 @@ export function authRegisterV1(email: string, password: string,
   const currentsessionID: string = totallyUnpredictableToken.toString();
   const temp: dataStoreUser = {
     uId: uuID,
-    email: email,
-    password: password,
-    nameFirst: nameFirst,
-    nameLast: nameLast,
+    email,
+    password,
+    nameFirst,
+    nameLast,
     handleStr: fullname,
     isGlobalOwner,
-    sessionTokens: [totallyUnpredictableToken.toString()]
+    sessionTokens: [currentsessionID]
   };
   totallyUnpredictableToken++;
   uniqueuserID++;
