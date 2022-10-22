@@ -1,8 +1,8 @@
-import { channelJoinV1, channelInviteV1, channelMessagesV1, channelDetailsV1 } from '../src/channel';
+import { channelJoinV1, channelInviteV1, channelMessagesV1, channelDetailsV1, channelAddOwnersV1 } from '../src/channel';
 import { clearV1 } from '../src/other';
 import { getData, setData } from '../src/dataStore';
 import { authRegisterV1 } from '../src/auth';
-import { authUserId, channel, channelId, user } from '../src/types';
+import { authUserId, channel, channelId, dataStoreChannel, error, user } from '../src/types';
 import { channelsCreateV1 } from '../src/channels';
 
 const TEST_USER_1_EMAIL = 'TEST1@gmail.com';
@@ -21,9 +21,9 @@ const TEST_NAME_LAST_1 = 'aaaa';
 const TEST_NAME_LAST_2 = 'gggg';
 const TEST_NAME_LAST_3 = 'ahhfds';
 
-let testUserId1: number; // This user begins with a private and a public channel.
-let testUserId2: number; // This user begins with no channel.
-let testUserId3: number; // This user begins with no channel, but is global owner.
+let testUserId1: number; // This user begins with owning a private and a public channel.
+let testUserId2: number; // This user begins with owning no channel.
+let testUserId3: number; // This user begins with owning no channel, but is global owner.
 
 let publicChannelId: number;
 let privateChannelId: number;
@@ -208,7 +208,7 @@ describe('Test set for the function channelMessagesV1', () => {
 });
 
 describe('Test set for the function channelDetailsV1', () => {
-  const testUser = { // profile of the test user1
+  const testUser = {
     uId: 1,
     nameFirst: 'Adam',
     nameLast: 'Johnston',
@@ -216,7 +216,14 @@ describe('Test set for the function channelDetailsV1', () => {
     handleStr: 'adamjohnston',
     password: 'test123'
   };
-  const testUser2 = { // profile of the test user1
+  const testUserOutput: user = {
+    uId: 1,
+    nameFirst: 'Adam',
+    nameLast: 'Johnston',
+    email: 'test@gmail.com',
+    handleStr: 'adamjohnston',
+  };
+  const testUser2 = {
     uId: 2,
     nameFirst: 'Adam2',
     nameLast: 'Johnston2',
@@ -224,22 +231,31 @@ describe('Test set for the function channelDetailsV1', () => {
     handleStr: 'adam2johnston2',
     password: 'test123'
   };
-  const testChannel = { // profile of the test channel
+  const testUser2Output: user = {
+    uId: 2,
+    nameFirst: 'Adam2',
+    nameLast: 'Johnston2',
+    email: 'test@gmail.com',
+    handleStr: 'adam2johnston2',
+  };
+  const testChannel: dataStoreChannel = {
     channelId: 1,
     isPublic: true,
     name: 'testChannel',
-    ownerMembers: [testUser],
-    allMembers: [testUser],
+    ownerMembers: [testUserOutput],
+    allMembers: [testUserOutput],
+    messages: []
   };
-  const testChannel2 = { // profile of the test channel
+  const testChannel2: dataStoreChannel = {
     channelId: 2,
     isPublic: false,
     name: 'testChannel2',
-    ownerMembers: [testUser2],
-    allMembers: [testUser2],
+    ownerMembers: [testUser2Output],
+    allMembers: [testUser2Output],
+    messages: []
   };
 
-  beforeEach(() => { // before every test reset and add a new test user & channel
+  beforeEach(() => {
     clearV1();
     let data = getData() as any;
     data = {
@@ -254,7 +270,7 @@ describe('Test set for the function channelDetailsV1', () => {
   });
 
   test('authUserId and channelId correct for public channel', () => {
-    const findingChannelDetails = channelDetailsV1(testUser.uId, testChannel.channelId);
+    const findingChannelDetails = channelDetailsV1(testUser.uId, testChannel.channelId) as channel;
     expect(findingChannelDetails).toStrictEqual({
       name: testChannel.name,
       isPublic: true,
@@ -265,7 +281,7 @@ describe('Test set for the function channelDetailsV1', () => {
   });
 
   test('authUserId and channelId correct for private channel', () => {
-    const findingChannelDetails = channelDetailsV1(testUser2.uId, testChannel2.channelId);
+    const findingChannelDetails = channelDetailsV1(testUser2.uId, testChannel2.channelId) as channel;
     expect(findingChannelDetails).toStrictEqual({
       name: testChannel2.name,
       isPublic: false,
@@ -288,5 +304,149 @@ describe('Test set for the function channelDetailsV1', () => {
   test('authUserId is invalid', () => {
     const findingChannelDetails = channelDetailsV1(999999, testChannel.channelId);
     expect(findingChannelDetails).toStrictEqual({ error: 'User ID does not exist' });
+  });
+});
+
+describe('Test set for the function addOwner', () => {
+  beforeEach(() => {
+    channelJoinV1(testUser2.uId, publicChannelId);
+    channelInviteV1(testUser1.uId, privateChannelId, testUser2.uId);
+  });
+
+  test('channel owner add new owner to public channel success', () => {
+    const addResult = channelAddOwnersV1(testUser1.uId, publicChannelId, testUserId2);
+
+    expect(addResult).toStrictEqual({});
+
+    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
+
+    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
+  });
+
+  test('channel owner add new owner to private channel success', () => {
+    const addResult = channelAddOwnersV1(testUser1.uId, privateChannelId, testUserId2);
+
+    expect(addResult).toStrictEqual({});
+
+    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
+
+    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
+  });
+
+  test('global owner add new owner to public channel success', () => {
+    const addResult = channelAddOwnersV1(testUserId3, publicChannelId, testUserId2);
+
+    expect(addResult).toStrictEqual({});
+
+    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
+
+    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser3]);
+  });
+
+  test('global owner add new owner to private channel success', () => {
+    const addResult = channelAddOwnersV1(testUserId3, privateChannelId, testUserId2);
+
+    expect(addResult).toStrictEqual({});
+
+    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
+
+    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser3]);
+  });
+
+  test('channel owner add new owner with invalid channel id fails', () => {
+    const addResult = channelAddOwnersV1(testUser1.uId, 99999, testUserId2) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('channel owner add new owner to public channel with invalid uId fails', () => {
+    const addResult = channelAddOwnersV1(testUser1.uId, publicChannelId, 123908) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('global owner add new owner to public with invalid uId fails', () => {
+    const addResult = channelAddOwnersV1(testUser3.uId, publicChannelId, 123908) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('channel owner add new owner to private channel with invalid uId fails', () => {
+    const addResult = channelAddOwnersV1(testUser1.uId, privateChannelId, 123908) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('global owner add new owner to private with invalid uId fails', () => {
+    const addResult = channelAddOwnersV1(testUser3.uId, privateChannelId, 123908) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('channel owner add new owner to public channel uId not a member fails', () => {
+    const user4RegisterResult = authRegisterV1('TEST_4_email@gmail.com', TEST_PASSWORD_3, TEST_NAME_FIRST_3, TEST_NAME_LAST_3) as authUserId;
+    const testUserId4 = user4RegisterResult.authUserId;
+
+    const addResult = channelAddOwnersV1(testUser1.uId, publicChannelId, testUserId4) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('channel owner add new owner to private channel uId not a member fails', () => {
+    const user4RegisterResult = authRegisterV1('TEST_4_email@gmail.com', TEST_PASSWORD_3, TEST_NAME_FIRST_3, TEST_NAME_LAST_3) as authUserId;
+    const testUserId4 = user4RegisterResult.authUserId;
+
+    const addResult = channelAddOwnersV1(testUser1.uId, privateChannelId, testUserId4) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('channel owner add new owner existing owner fails', () => {
+    let addResult = channelAddOwnersV1(testUser1.uId, publicChannelId, testUserId2);
+
+    expect(addResult).toStrictEqual({});
+
+    addResult = channelAddOwnersV1(testUser1.uId, publicChannelId, testUserId2);
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+
+    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
+
+    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
+  });
+
+  test('non owner add new owner fails', () => {
+    const user4RegisterResult = authRegisterV1('TEST_4_email@gmail.com', TEST_PASSWORD_3, TEST_NAME_FIRST_3, TEST_NAME_LAST_3) as authUserId;
+    const testUserId4 = user4RegisterResult.authUserId;
+
+    const addResult = channelAddOwnersV1(testUser2.uId, publicChannelId, testUserId4) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('add owner with invalid authUserId', () => {
+    const addResult = channelAddOwnersV1(234234, publicChannelId, testUser2.uId) as error;
+
+    expect(addResult).toStrictEqual({
+      error: expect.any(String)
+    });
   });
 });

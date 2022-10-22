@@ -70,7 +70,10 @@ export function channelJoinV1(authUserId: number, channelId: number): (Record<st
   *
   * @returns {} - empty object returned
 */
-export function channelInviteV1(authUserId: number, channelId: number, uId: number): (Record<string, never> | error) {
+export function channelInviteV1(
+  authUserId: number,
+  channelId: number,
+  uId: number): (Record<string, never> | error) {
   const data = getData();
 
   const channel = getDataStoreChannel(channelId, data);
@@ -115,7 +118,10 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
   * @param {number} start - the index of the starting point
   * @returns {{messages: array, start: number, end: number}} - an object contains the messages and information of pages
 */
-export function channelMessagesV1(authUserId: number, channelId: number, start: number): ({messages: messages[], start: number, end: number } | error) {
+export function channelMessagesV1(
+  authUserId: number,
+  channelId: number,
+  start: number): ({messages: messages[], start: number, end: number } | error) {
   const data = getData();
   const channel = getDataStoreChannel(channelId, data);
   if (channel == null) {
@@ -145,4 +151,11 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
     start: start,
     end: end
   };
+}
+
+export function channelAddOwnersV1(
+  authUserId: number,
+  channelId: number,
+  ownerToAddId: number): (Record<string, never> | error) {
+  return {};
 }
