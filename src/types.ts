@@ -56,7 +56,7 @@ export type authResponse = {
   authUserId: number
 }
 
-export type autLoginRequest = {
+export type authLoginRequest = {
   email: string,
   password: string
 }
