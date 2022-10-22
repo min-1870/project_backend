@@ -7,7 +7,7 @@ import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels'
 import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
-import { authRegisterRequest, autLoginRequest, channelsCreateRequest, channelsListAllRequest, channelsListRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelsCreateRequest, channelsListAllRequest, channelsListRequest } from './types';
 
 // Set up web app
 const app = express();
