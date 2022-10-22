@@ -7,7 +7,7 @@ import { channelsCreateV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
-import { authRegisterRequest, autLoginRequest, channelsCreateRequest, channelsListRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelsCreateRequest, channelsListRequest } from './types';
 
 // Set up web app
 const app = express();
@@ -38,7 +38,7 @@ app.post('/auth/register/v2', (req: Request, res: Response) => {
 });
 
 app.post('/auth/login/v2', (req: Request, res: Response) => {
-  const { email, password } = req.body as autLoginRequest;
+  const { email, password } = req.body as authLoginRequest;
 
   const result = authLoginV1(encodeURI(email), encodeURI(password));
 
