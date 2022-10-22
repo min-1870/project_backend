@@ -46,7 +46,7 @@ app.post('/auth/login/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.get('/channel/Messages/v2', (req: Request, res: Response) => {
+app.get('/channel/messages/v2', (req: Request, res: Response) => {
   const { token, channelId, start } = req.query as unknown as channelMessagesRequest;
   const authUserId = getAuthUserIdFromToken(token);
   let result: any;
@@ -54,7 +54,7 @@ app.get('/channel/Messages/v2', (req: Request, res: Response) => {
   if (authUserId == null) {
     result = { error: 'invalid token' };
   } else {
-    result = channelMessagesV1(authUserId, channelId, start);
+    result = channelMessagesV1(authUserId, Number(channelId), Number(start));
   }
   return res.json(result);
 });
