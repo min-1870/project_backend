@@ -1,3 +1,4 @@
+import { authResponse } from '../../src/types';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
@@ -205,6 +206,43 @@ describe('HTTP tests for /auth/login/v2', () => {
     const res = sendPostRequestToEndpoint('/auth/login/v2', {
       email: EMAIL,
       password: 'nappy',
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+});
+
+describe('HTTP tests for /auth/logout/v1', () => {
+  test('Successful auth logout', () => {
+    const ret = sendPostRequestToEndpoint('/auth/register/v2', {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+
+    const jsonResponse = parseJsonResponse(ret) as unknown as authResponse;
+    const token = jsonResponse.token;
+
+    const res = sendPostRequestToEndpoint('/auth/logout/v1', {
+      token: token,
+    });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('Error passing invalid token through auth/logout/v2', () => {
+    sendPostRequestToEndpoint('/auth/register/v2', {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+    const res = sendPostRequestToEndpoint('/auth/logout/v1', {
+      token: 'this is definitely wrong'
     });
 
     expect(res.statusCode).toBe(OK);
