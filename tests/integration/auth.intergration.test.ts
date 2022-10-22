@@ -15,7 +15,6 @@ beforeEach(() => {
 });
 
 describe('HTTP tests for /auth/register/v2', () => {
-  // happy path
   test('Successful authRegisterV1', () => {
     const res = sendPostRequestToEndpoint('/auth/register/v2', {
       email: EMAIL,
@@ -109,7 +108,6 @@ describe('HTTP tests for /auth/register/v2', () => {
 });
 
 describe('HTTP tests for /auth/login/v2', () => {
-  // happy path
   test('Successful authLogin', () => {
     sendPostRequestToEndpoint('/auth/register/v2', {
       email: EMAIL,
@@ -127,6 +125,55 @@ describe('HTTP tests for /auth/login/v2', () => {
     expect(parseJsonResponse(res)).toStrictEqual({
       token: expect.any(String),
       authUserId: expect.any(Number)
+    });
+  });
+
+  test('Successful authLogin with multiple registered users and duplicate names and password', () => {
+    const users = [
+      {
+        email: EMAIL,
+        password: PASSWORD,
+        nameFirst: NAME_FIRST,
+        nameLast: NAME_LAST
+      },
+      {
+        email: 'a1234@gmail.com',
+        password: '1234567',
+        nameFirst: 'nameFir',
+        nameLast: 'nameLas'
+      },
+      {
+        email: 'a555@gmail.com',
+        password: 'aPASSWord1324',
+        nameFirst: 'nam',
+        nameLast: 'bob'
+      },
+      {
+        email: 'a9999@gmail.com',
+        password: PASSWORD,
+        nameFirst: NAME_FIRST,
+        nameLast: NAME_LAST
+      },
+    ];
+    users.forEach(user => sendPostRequestToEndpoint('/auth/register/v2', {
+      email: user.email,
+      password: user.password,
+      nameFirst: user.nameFirst,
+      nameLast: user.nameLast
+    }));
+
+    users.forEach(user => {
+      const res = sendPostRequestToEndpoint('/auth/login/v2', {
+        email: user.email,
+        password: user.password,
+      });
+
+      expect(res.statusCode).toBe(OK);
+      const jsonResponse = parseJsonResponse(res);
+      expect(jsonResponse).toStrictEqual({
+        token: expect.any(String),
+        authUserId: expect.any(Number)
+      });
     });
   });
 
