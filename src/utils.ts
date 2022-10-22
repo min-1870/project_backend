@@ -9,6 +9,10 @@ export function getDataStoreUser(userId: number, data: dataStore): dataStoreUser
   return data.users.find(user => user.uId === userId);
 }
 
+export function getDataStoreUserByEmail(email: string, data: dataStore): dataStoreUser {
+  return data.users.find(user => user.email === email);
+}
+
 export function getDataStoreChannel(channelId: number, data: dataStore): dataStoreChannel {
   return data.channels.find(channel => channel.channelId === channelId);
 }
@@ -58,6 +62,12 @@ export function toOutputChannelDetail(channel: dataStoreChannel): channel {
 // Add user to the channel. Assumes user and channel ID is valid.
 export function addUserToChannel(user: user, channelId: number, data: dataStore) {
   data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
+  setData(data);
+}
+
+// Add session token to a user. Assumes user is a valid user.
+export function addSessionTokenForUser(userId: number, sessionToken: string, data: dataStore) {
+  data.users.find(user => user.uId === userId).sessionTokens.push(sessionToken);
   setData(data);
 }
 
