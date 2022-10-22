@@ -7,7 +7,8 @@ import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels'
 import { getAuthUserIdFromToken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
-import { authRegisterRequest, autLoginRequest, channelsCreateRequest, channelsListRequest } from './types';
+import { authRegisterRequest, autLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest } from './types';
+import { channelMessagesV1 } from './channel';
 
 // Set up web app
 const app = express();
@@ -43,6 +44,19 @@ app.post('/auth/login/v2', (req: Request, res: Response) => {
   const result = authLoginV1(encodeURI(email), encodeURI(password));
 
   res.json(result);
+});
+
+app.get('/channel/Messages/v2', (req: Request, res: Response) => {
+  const { token, channelId, start } = req.query as unknown as channelMessagesRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+  let result: any;
+
+  if (authUserId == null) {
+    result = { error: 'invalid token' };
+  } else {
+    result = channelMessagesV1(authUserId, channelId, start);
+  }
+  return res.json(result);
 });
 
 app.post('/channels/create/v2', (req: Request, res: Response) => {
