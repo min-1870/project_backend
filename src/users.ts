@@ -1,7 +1,8 @@
-import { getUser, isAuthUserIdValid, toOutputUser } from './utils';
+import { getDataStoreUser, isAuthUserIdValid, dataStoreUserToUser } from './utils';
 import {
   getData,
 } from './dataStore';
+import { error, user } from './types';
 
 /**
  * For a valid user, return info about their user ID, email, firstname , last name and handle
@@ -10,9 +11,9 @@ import {
  * @param {number} authUserId - userId of user asking to view
  * @param {number} uID - userId of user to look at
  * * *
- * @returns {} - empty object
+ * @returns {user} - Object containing uId, email, nameFirst, nameLast, handleStr
  */
-export function userProfileV1(authUserId: number, uID: number): any {
+export function userProfileV1(authUserId: number, uID: number): {user: user}|error {
   const data = getData();
 
   if (!isAuthUserIdValid(authUserId, data)) {
@@ -23,7 +24,7 @@ export function userProfileV1(authUserId: number, uID: number): any {
     return { error: 'uId is not valid' };
   }
 
-  const user = getUser(uID, data);
+  const dataStoreUser = getDataStoreUser(uID, data);
 
-  return toOutputUser(user);
+  return { user: dataStoreUserToUser(dataStoreUser) };
 }

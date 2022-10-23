@@ -5,7 +5,7 @@ import {
   dataStore,
   channel
 } from './types';
-import { addUserToChannel, getDataStoreChannel, getUser, isAuthUserIdValid, isUserMemberInChannel, toOutputChannelDetail } from './utils';
+import { addUserToChannel, getDataStoreChannel, getDataStoreUser, isAuthUserIdValid, isUserMemberInChannel, toOutputChannelDetail, dataStoreUserToUser } from './utils';
 
 /**
   * Given a channelId of a channel Given a channel with ID channelId
@@ -22,7 +22,7 @@ export function channelDetailsV1(authUserId: number, channelId: number): (channe
   const channel = getDataStoreChannel(channelId, data);
   if (channel == null) {
     return { error: 'Channel ID does not refer to a valid channel' };
-  } else if (getUser(authUserId, data) == null) {
+  } else if (getDataStoreUser(authUserId, data) == null) {
     return { error: 'User ID does not exist' };
   } else if (channel.allMembers.find(user => user.uId === authUserId) == null) {
     return { error: 'User is not a member of channel' };
@@ -42,20 +42,20 @@ export function channelDetailsV1(authUserId: number, channelId: number): (channe
 */
 export function channelJoinV1(authUserId: number, channelId: number): (Record<string, never> | error) {
   const data: dataStore = getData();
-  const user = getUser(authUserId, data);
+  const dataStoreUser = getDataStoreUser(authUserId, data);
   const channel = getDataStoreChannel(channelId, data);
 
   if (channel == null) {
     return { error: 'Invalid channel ID' };
-  } else if (user == null) {
+  } else if (dataStoreUser == null) {
     return { error: 'Invalid user ID' };
   } else if (channel.allMembers.find(user => user.uId === authUserId) != null) {
     return { error: 'User are in the channel' };
-  } else if (!channel.isPublic && !user.isGlobalOwner) {
+  } else if (!channel.isPublic && !dataStoreUser.isGlobalOwner) {
     return { error: 'This is a private server' };
   }
 
-  addUserToChannel(user, channel.channelId, data);
+  addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
   return {};
 }
 
@@ -81,8 +81,8 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'authUserId does not exist' };
   }
-  const user = getUser(uId, data);
-  if (user == null) {
+  const dataStoreUser = getDataStoreUser(uId, data);
+  if (dataStoreUser == null) {
     return { error: 'User ID does not exist' };
   }
 
@@ -94,7 +94,7 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
     return { error: 'authUserId is not member of channel' };
   }
 
-  addUserToChannel(user, channel.channelId, data);
+  addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
   return {};
 }
 

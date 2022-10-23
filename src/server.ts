@@ -3,11 +3,13 @@ import { echo } from './echo';
 import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
-import { channelsCreateV1, channelsListV1 } from './channels';
-import { getAuthUserIdFromToken } from './utils';
+import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
+import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest } from './types';
+import { channelMessagesV1 } from './channel';
 
 // Set up web app
 const app = express();
@@ -30,23 +32,42 @@ app.get('/echo', (req: Request, res: Response, next) => {
 });
 
 app.post('/auth/register/v2', (req: Request, res: Response) => {
-  const { email, password, nameFirst, nameLast } = req.body;
+  const { email, password, nameFirst, nameLast } = req.body as authRegisterRequest;
 
-  const result = authRegisterV1(email, password, nameFirst, nameLast);
+  const result = authRegisterV1(encodeURI(email), encodeURI(password), encodeURI(nameFirst), encodeURI(nameLast));
 
   res.json(result);
 });
 
 app.post('/auth/login/v2', (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password } = req.body as authLoginRequest;
 
-  const result = authLoginV1(email, password);
+  const result = authLoginV1(encodeURI(email), encodeURI(password));
 
   res.json(result);
 });
 
+app.post('/auth/logout/v1', (req: Request, res: Response) => {
+  const { token } = req.body;
+
+  const result = removetoken(token);
+
+  res.json(result);
+});
+
+app.get('/channel/messages/v2', (req: Request, res: Response) => {
+  const { token, channelId, start } = req.query as unknown as channelMessagesRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'invalid token' });
+  } else {
+    return res.json(channelMessagesV1(authUserId, Number(channelId), Number(start)));
+  }
+});
+
 app.post('/channels/create/v2', (req: Request, res: Response) => {
-  const { token, name, isPublic } = req.body;
+  const { token, name, isPublic } = req.body as channelsCreateRequest;
 
   // get the authUserId using token
   const authUserId = getAuthUserIdFromToken(token);
@@ -57,8 +78,8 @@ app.post('/channels/create/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.post('/channels/list/v2', (req: Request, res: Response) => {
-  const { token } = req.body;
+app.get('/channels/list/v2', (req: Request, res: Response) => {
+  const { token } = req.query as channelsListRequest;
   const authUserId = getAuthUserIdFromToken(token);
   const result = channelsListV1(authUserId);
   res.json(result);
@@ -73,7 +94,18 @@ app.get('/user/profile/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.delete('/clear/v1', (req: Request, res: Response) => {
+app.get('/channels/listAll/v2', (req: Request, res: Response) => {
+  const { token } = req.query as channelsListAllRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'invalid token' });
+  } else {
+    return res.json(channelsListAllV1(authUserId));
+  }
+});
+
+app.delete('/clear/v1', (_: Request, res: Response) => {
   clearV1();
   res.json({});
 });

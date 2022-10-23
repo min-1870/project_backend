@@ -55,3 +55,35 @@ export type authResponse = {
   token: string,
   authUserId: number
 }
+
+export type authLoginRequest = {
+  email: string,
+  password: string
+}
+
+export type authRegisterRequest = {
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string
+}
+
+export type channelMessagesRequest = {
+  token: string,
+  channelId: number,
+  start: number
+}
+
+export type channelsCreateRequest = {
+  token: string,
+  name: string,
+  isPublic: boolean
+}
+
+export type channelsListRequest = {
+  token: string
+}
+
+export type channelsListAllRequest = {
+  token: string
+}

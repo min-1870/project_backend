@@ -27,11 +27,13 @@ describe('Test Suite for userProfileV1', () => {
     const temp2 = authRegisterV1('gomugomu@hotmail.com', 'devilfruit', 'monkey', 'luffy') as authUserId;
 
     expect(userProfileV1(temp1.authUserId, temp2.authUserId)).toStrictEqual({
-      uId: temp2.authUserId,
-      email: 'gomugomu@hotmail.com',
-      nameFirst: 'monkey',
-      nameLast: 'luffy',
-      handleStr: 'monkeyluffy'
+      user: {
+        uId: temp2.authUserId,
+        email: 'gomugomu@hotmail.com',
+        nameFirst: 'monkey',
+        nameLast: 'luffy',
+        handleStr: 'monkeyluffy'
+      }
     });
   });
 });
