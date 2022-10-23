@@ -83,3 +83,7 @@ export type channelsCreateRequest = {
 export type channelsListRequest = {
   token: string
 }
+
+export type channelsListAllRequest = {
+  token: string
+}

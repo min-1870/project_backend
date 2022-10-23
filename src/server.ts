@@ -7,7 +7,7 @@ import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels'
 import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest } from './types';
 import { channelMessagesV1 } from './channel';
 
 // Set up web app
@@ -87,14 +87,13 @@ app.get('/channels/list/v2', (req: Request, res: Response) => {
 });
 
 app.get('/channels/listAll/v2', (req: Request, res: Response) => {
-  const token = req.query.token as string;
+  const { token } = req.query as channelsListAllRequest;
   const authUserId = getAuthUserIdFromToken(token);
 
   if (authUserId == null) {
     return res.json({ error: 'invalid token' });
   } else {
-    const result = channelsListAllV1(authUserId);
-    return res.json(result);
+    return res.json(channelsListAllV1(authUserId));
   }
 });
 
