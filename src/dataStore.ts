@@ -1,4 +1,5 @@
 import { dataStore } from './types';
+import fs from 'fs';
 
 // YOU SHOULD MODIFY THIS OBJECT BELOW
 let data: dataStore = {
@@ -26,6 +27,11 @@ let data: dataStore = {
   ]
 };
 
+// save function
+const saveDataStore = () => {
+  const jsonstr = JSON.stringify(data);
+  fs.writeFileSync('./database.json', jsonstr);
+};
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
 
 /*
@@ -50,6 +56,7 @@ function getData(): dataStore {
 // Use set(newData) to pass in the entire data object, with modifications made
 function setData(newData: dataStore) {
   data = newData;
+  saveDataStore();
 }
 
 export { getData, setData };
