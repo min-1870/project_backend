@@ -87,7 +87,7 @@ app.get('/channels/list/v2', (req: Request, res: Response) => {
 
 app.get('/user/profile/v2', (req: Request, res: Response) => {
   const { token, uId } = req.query as unknown as userProfileRequest;
- 
+
   const authUserId = getAuthUserIdFromToken(token.toString());
   const uuId = parseInt(uId.toString());
   const result = userProfileV1(authUserId, uuId);
