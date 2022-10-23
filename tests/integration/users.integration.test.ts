@@ -5,6 +5,7 @@ import {
   sendGetRequestToEndpoint,
   sendDeleteRequestToEndpoint,
   sendPostRequestToEndpoint,
+  sendPutRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -70,7 +71,7 @@ describe('HTTP tests for /user/profile/v2', () => {
     });
   });
 
-  test('error passing invalid authUserId', () => {
+  test('error passing invalid token', () => {
     const res = sendGetRequestToEndpoint('/user/profile/v2', {
       token: (token + 434),
       uId: uId
@@ -80,5 +81,77 @@ describe('HTTP tests for /user/profile/v2', () => {
     expect(parseJsonResponse(res)).toStrictEqual({
       error: expect.any(String)
     });
+  });
+});
+
+describe('HTTP tests for /user/profile/sethandle/v1', () => {
+  test('Failed due to invalid handleStr (length < 3)', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
+      token: token,
+      handleStr: 'ha'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Failed due to invalid handleStr (length > 20)', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
+      token: token,
+      handleStr: 'hahahahahahahahahahahahahahahahahahahaahahaha'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Failed due to invalid characters in handleStr', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
+      token: token,
+      handleStr: "ha'w'e<?*"
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Failed due to handleStr already in use', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
+      token: token,
+      handleStr: 'monkeyluffy'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Failed due to token invalid', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
+      token: (token + 443),
+      handleStr: 'monkeydamnluffy'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Successful implementation of user/profile/sethandle/v1', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
+      token: token,
+      handleStr: 'monkeydamnluffy'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });
