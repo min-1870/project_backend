@@ -11,8 +11,10 @@ const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
 const NAME_FIRST = 'Barty';
 const NAME_LAST = 'Potter';
+
 let token: string;
 let uId: number;
+
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
   let res = sendPostRequestToEndpoint('/auth/register/v2', {

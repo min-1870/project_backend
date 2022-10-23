@@ -68,6 +68,10 @@ export type authRegisterRequest = {
   nameLast: string
 }
 
+export type authLogoutRequest = {
+  token: string
+}
+
 export type channelMessagesRequest = {
   token: string,
   channelId: number,
