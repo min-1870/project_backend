@@ -46,11 +46,13 @@ describe('HTTP tests for /user/profile/v2', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      uId: uId,
-      email: 'gomugomu@hotmail.com',
-      nameFirst: 'monkey',
-      nameLast: 'luffy',
-      handleStr: 'monkeyluffy'
+      user: {
+        uId: uId,
+        email: 'gomugomu@hotmail.com',
+        nameFirst: 'monkey',
+        nameLast: 'luffy',
+        handleStr: 'monkeyluffy'
+      }
     });
   });
 
