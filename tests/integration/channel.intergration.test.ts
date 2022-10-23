@@ -11,10 +11,7 @@ const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
 const NAME_FIRST = 'Barty';
 const NAME_LAST = 'Potter';
-// const TEST_INVALID_TOKEN = '';
 const TEST_CHANNEL_NAME = 'Test channel';
-// const LONG_CHANNEL_NAME = 'This is a very long channel name';
-// const SHORT_CHANNEL_NAME = '';
 
 let token: string; // token of test user 1
 let token2: string; // token of test user 2

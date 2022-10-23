@@ -49,14 +49,12 @@ app.post('/auth/login/v2', (req: Request, res: Response) => {
 app.get('/channel/messages/v2', (req: Request, res: Response) => {
   const { token, channelId, start } = req.query as unknown as channelMessagesRequest;
   const authUserId = getAuthUserIdFromToken(token);
-  let result: any;
 
   if (authUserId == null) {
-    result = { error: 'invalid token' };
+    return res.json({ error: 'invalid token' });
   } else {
-    result = channelMessagesV1(authUserId, Number(channelId), Number(start));
+    return res.json(channelMessagesV1(authUserId, Number(channelId), Number(start)));
   }
-  return res.json(result);
 });
 
 app.post('/channels/create/v2', (req: Request, res: Response) => {
