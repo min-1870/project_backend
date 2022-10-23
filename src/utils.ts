@@ -98,3 +98,32 @@ export function removetoken(token: string): (Record<string, never> | error) {
   }
   return { error: 'Token is Invalid' };
 }
+
+export function userProfileHandleChange(token: string, handleStr: string): (Record<string, never> | error) {
+  const data: dataStore = getData();
+  if (handleStr.length < 3 || handleStr.length > 20) {
+    return { error: 'handleStr is not correct size' };
+  }
+  if (!(/^[A-Za-z0-9]*$/.test(handleStr))) {
+    return { error: 'handleStr has non-alphanumeric characters' };
+  }
+
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    if (user.handleStr === handleStr) {
+      return { error: 'handle is already in use' };
+    }
+  }
+
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    for (let j = 0; j < user.sessionTokens.length; j++) {
+      if (user.sessionTokens[j] === token) {
+        user.handleStr = handleStr;
+        setData(data);
+        return {};
+      }
+    }
+  }
+  return { error: 'Token is Invalid' };
+}

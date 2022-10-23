@@ -4,11 +4,11 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
-import { getAuthUserIdFromToken, removetoken } from './utils';
+import { getAuthUserIdFromToken, removetoken, userProfileHandleChange } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, userProfileSethandle } from './types';
 import { channelMessagesV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
@@ -106,9 +106,17 @@ app.get('/channels/listAll/v2', (req: Request, res: Response) => {
 app.get('/user/profile/v2', (req: Request, res: Response) => {
   const { token, uId } = req.query as unknown as userProfileRequest;
 
-  const authUserId = getAuthUserIdFromToken(token.toString());
+  const authUserId = getAuthUserIdFromToken(token);
   const uuId = parseInt(uId.toString());
   const result = userProfileV1(authUserId, uuId);
+  res.json(result);
+});
+
+app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
+  const { token, handleStr } = req.body as userProfileSethandle;
+
+  const result = userProfileHandleChange(token, handleStr);
+
   res.json(result);
 });
 
