@@ -56,7 +56,7 @@ export type authResponse = {
   authUserId: number
 }
 
-export type autLoginRequest = {
+export type authLoginRequest = {
   email: string,
   password: string
 }
@@ -81,5 +81,9 @@ export type channelsCreateRequest = {
 }
 
 export type channelsListRequest = {
+  token: string
+}
+
+export type channelsListAllRequest = {
   token: string
 }

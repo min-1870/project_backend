@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user } from './types';
+import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error } from './types';
 
 export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
   return getDataStoreUser(authUserId, data) != null;
@@ -82,4 +82,19 @@ export function getAuthUserIdFromToken(token: string): number {
     }
   }
   return null;
+}
+
+export function removetoken(token: string): (Record<string, never> | error) {
+  const data: dataStore = getData();
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    for (let j = 0; j < user.sessionTokens.length; j++) {
+      if (user.sessionTokens[j] === token) {
+        user.sessionTokens.splice(j, 1);
+        setData(data);
+        return {};
+      }
+    }
+  }
+  return { error: 'Token is Invalid' };
 }
