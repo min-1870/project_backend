@@ -8,7 +8,7 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest } from './types';
 import { channelMessagesV1 } from './channel';
 
 // Set up web app
@@ -86,8 +86,8 @@ app.get('/channels/list/v2', (req: Request, res: Response) => {
 });
 
 app.get('/user/profile/v2', (req: Request, res: Response) => {
-  const token = req.query.token;
-  const uId = req.query.uId;
+  const { token, uId } = req.query as unknown as userProfileRequest;
+ 
   const authUserId = getAuthUserIdFromToken(token.toString());
   const uuId = parseInt(uId.toString());
   const result = userProfileV1(authUserId, uuId);
