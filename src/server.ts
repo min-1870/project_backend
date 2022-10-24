@@ -8,8 +8,8 @@ import { getAuthUserIdFromToken, removetoken, userProfileHandleChange } from './
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, userProfileSethandle, channelJoinRequest } from './types';
-import { channelMessagesV1, channelJoinV1 } from './channel';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, userProfileSethandle, channelJoinRequest, channelInviteRequest } from './types';
+import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
 

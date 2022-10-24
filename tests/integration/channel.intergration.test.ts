@@ -15,6 +15,8 @@ const TEST_CHANNEL_NAME = 'Test channel';
 
 let token: string; // token of test user 1
 let token2: string; // token of test user 2
+let uId1: number; // uId of test user 1
+let uId2: number; // uId of test user 2
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -33,6 +35,11 @@ beforeEach(() => {
     nameLast: 'b' + NAME_LAST
   });
   token2 = (parseJsonResponse(res2) as unknown as authResponse).token;
+
+  const jsonResponse1 = parseJsonResponse(res1) as unknown as authResponse;
+  uId1 = jsonResponse1.authUserId;
+  const jsonResponse2 = parseJsonResponse(res2) as unknown as authResponse;
+  uId2 = jsonResponse2.authUserId;
 });
 
 describe('HTTP tests for channel/messages/v2', () => {
@@ -193,8 +200,6 @@ describe('HTTP tests for channel/join/v2', () => {
 
 describe('HTTP tests for channel/invite/v2', () => {
   let channel1Id: number;
-  let uId1: number;
-  let uId2: number;
   beforeEach(() => {
     const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
       token: token,
@@ -202,10 +207,6 @@ describe('HTTP tests for channel/invite/v2', () => {
       isPublic: true
     });
     channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
-    let jsonResponse1 = parseJsonResponse(res1) as unknown as authResponse;
-    uId1 = jsonResponse1.authUserId;
-    let jsonResponse2 = parseJsonResponse(res2) as unknown as authResponse;
-    uId2 = jsonResponse2.authUserId;
   });
 
   test('channelId does not refer to a valid channel', () => {
