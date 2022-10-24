@@ -4,12 +4,14 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
-import { getAuthUserIdFromToken, removetoken } from './utils';
+import { getAuthUserIdFromToken, removetoken, userProfileHandleChange } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, userProfileSethandle } from './types';
 import { channelMessagesV1 } from './channel';
+import fs from 'fs';
+import { setData } from './dataStore';
 
 // Set up web app
 const app = express();
@@ -30,6 +32,11 @@ app.get('/echo', (req: Request, res: Response, next) => {
     next(err);
   }
 });
+
+if (fs.existsSync('./database.json')) {
+  const dbstr = fs.readFileSync('./database.json');
+  setData(JSON.parse(String(dbstr)));
+}
 
 app.post('/auth/register/v2', (req: Request, res: Response) => {
   const { email, password, nameFirst, nameLast } = req.body as authRegisterRequest;
@@ -85,15 +92,6 @@ app.get('/channels/list/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.get('/user/profile/v2', (req: Request, res: Response) => {
-  const { token, uId } = req.query as unknown as userProfileRequest;
-
-  const authUserId = getAuthUserIdFromToken(token.toString());
-  const uuId = parseInt(uId.toString());
-  const result = userProfileV1(authUserId, uuId);
-  res.json(result);
-});
-
 app.get('/channels/listAll/v2', (req: Request, res: Response) => {
   const { token } = req.query as channelsListAllRequest;
   const authUserId = getAuthUserIdFromToken(token);
@@ -103,6 +101,23 @@ app.get('/channels/listAll/v2', (req: Request, res: Response) => {
   } else {
     return res.json(channelsListAllV1(authUserId));
   }
+});
+
+app.get('/user/profile/v2', (req: Request, res: Response) => {
+  const { token, uId } = req.query as unknown as userProfileRequest;
+
+  const authUserId = getAuthUserIdFromToken(token);
+  const uuId = parseInt(uId.toString());
+  const result = userProfileV1(authUserId, uuId);
+  res.json(result);
+});
+
+app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
+  const { token, handleStr } = req.body as userProfileSethandle;
+
+  const result = userProfileHandleChange(token, handleStr);
+
+  res.json(result);
 });
 
 app.delete('/clear/v1', (_: Request, res: Response) => {

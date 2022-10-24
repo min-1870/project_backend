@@ -96,3 +96,8 @@ export type channelsListRequest = {
 export type channelsListAllRequest = {
   token: string
 }
+
+export type userProfileSethandle = {
+  token: string,
+  handleStr: string
+}
