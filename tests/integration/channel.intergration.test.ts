@@ -116,6 +116,7 @@ describe('HTTP tests for channel/messages/v2', () => {
 
 describe('HTTP tests for channel/join/v2', () => {
   let channel1Id: number;
+  let channel2Id: number;
   beforeEach(() => {
     const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
       token: token,
