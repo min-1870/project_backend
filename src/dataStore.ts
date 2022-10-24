@@ -28,7 +28,10 @@ let data: dataStore = {
   dms: [
     /*
     dmId: number,
-    name: string
+    name: string,
+    ownerMembers: [object],
+    allMembers: [object],
+    messages: [object]
     */
   ]
 
