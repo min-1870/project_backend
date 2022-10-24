@@ -7,7 +7,7 @@ import { authUserId, error, dataStoreUser } from './types';
 import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleStrExist } from './utils';
 
 let uniqueuserID = 0;
-let totallyUnpredictableToken = 0;
+let totallyUnpredictableToken = 122;
 
 /**
  * Given a registered user's email and password, returns their authUserId value

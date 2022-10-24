@@ -4,11 +4,11 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
-import { getAuthUserIdFromToken, removetoken, userProfileHandleChange } from './utils';
+import { dmCreation, getAuthUserIdFromToken, removetoken, userProfileHandleChange } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, userProfileSethandle, channelJoinRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest } from './types';
 import { channelMessagesV1, channelJoinV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
@@ -125,9 +125,18 @@ app.get('/user/profile/v2', (req: Request, res: Response) => {
 });
 
 app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
-  const { token, handleStr } = req.body as userProfileSethandle;
+  const { token, handleStr } = req.body as userProfileSethandleRequest;
 
   const result = userProfileHandleChange(token, handleStr);
+
+  res.json(result);
+});
+
+app.post('/dm/create/v1', (req: Request, res: Response) => {
+  const { token, uIds } = req.body as dmCreateRequest;
+
+  // after get authUserId, we call channelsCreateV1
+  const result = dmCreation(token, uIds);
 
   res.json(result);
 });

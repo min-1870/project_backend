@@ -24,7 +24,14 @@ let data: dataStore = {
     allMembers: [object],
     messages: [object]
     */
+  ],
+  dms: [
+    /*
+    dmId: number,
+    name: string
+    */
   ]
+
 };
 
 // save function
