@@ -106,3 +106,9 @@ export type channelJoinRequest = {
   token: string,
   channelId: number,
 }
+
+export type channelInviteRequest = {
+  token: string,
+  channelId: number,
+  uId: number,
+}

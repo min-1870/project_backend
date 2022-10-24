@@ -193,6 +193,8 @@ describe('HTTP tests for channel/join/v2', () => {
 
 describe('HTTP tests for channel/invite/v2', () => {
   let channel1Id: number;
+  let uId1: number;
+  let uId2: number;
   beforeEach(() => {
     const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
       token: token,
@@ -200,6 +202,10 @@ describe('HTTP tests for channel/invite/v2', () => {
       isPublic: true
     });
     channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    let jsonResponse1 = parseJsonResponse(res1) as unknown as authResponse;
+    uId1 = jsonResponse1.authUserId;
+    let jsonResponse2 = parseJsonResponse(res2) as unknown as authResponse;
+    uId2 = jsonResponse2.authUserId;
   });
 
   test('channelId does not refer to a valid channel', () => {
@@ -232,7 +238,7 @@ describe('HTTP tests for channel/invite/v2', () => {
     const res = sendPostRequestToEndpoint('/channel/invite/v2', {
       token: token,
       channelId: channel1Id,
-      uId: uId,
+      uId: uId1,
     });
 
     expect(res.statusCode).toBe(OK);

@@ -115,6 +115,18 @@ app.post('/channel/join/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
+app.post('/channel/invite/v2', (req: Request, res: Response) => {
+  const { token, channelId, uId } = req.body as channelInviteRequest;
+
+  // get the authUserId using token
+  const authUserId = getAuthUserIdFromToken(token);
+
+  // after get authUserId, we call channelInviteV1
+  const result = channelInviteV1(authUserId, channelId, uId);
+
+  res.json(result);
+});
+
 app.get('/user/profile/v2', (req: Request, res: Response) => {
   const { token, uId } = req.query as unknown as userProfileRequest;
 
