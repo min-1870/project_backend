@@ -8,8 +8,8 @@ import { getAuthUserIdFromToken, removetoken, userProfileHandleChange } from './
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, userProfileSethandle } from './types';
-import { channelMessagesV1 } from './channel';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, userProfileSethandle, channelJoinRequest } from './types';
+import { channelMessagesV1, channelJoinV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
 
@@ -101,6 +101,18 @@ app.get('/channels/listAll/v2', (req: Request, res: Response) => {
   } else {
     return res.json(channelsListAllV1(authUserId));
   }
+});
+
+app.post('/channel/join/v2', (req: Request, res: Response) => {
+  const { token, channelId } = req.body as channelJoinRequest;
+
+  // get the authUserId using token
+  const authUserId = getAuthUserIdFromToken(token);
+
+  // after get authUserId, we call channelJoinV1
+  const result = channelJoinV1(authUserId, channelId);
+
+  res.json(result);
 });
 
 app.get('/user/profile/v2', (req: Request, res: Response) => {

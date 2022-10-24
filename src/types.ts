@@ -6,24 +6,24 @@ export type messages = { messageId: number, uId: number, message: string, timeSe
 
 // The channel type that is stored in the data store.
 export type dataStoreChannel = {
-    channelId: number,
-    isPublic: boolean,
-    name: string,
-    ownerMembers: user[],
-    allMembers: user[],
-    messages: messages[]
+  channelId: number,
+  isPublic: boolean,
+  name: string,
+  ownerMembers: user[],
+  allMembers: user[],
+  messages: messages[]
 }
 
 // The user type that is stored in the data store.
 export type dataStoreUser = {
-    uId: number,
-    email: string,
-    password: string,
-    nameFirst: string,
-    nameLast: string,
-    handleStr: string,
-    isGlobalOwner: boolean,
-    sessionTokens: string[]
+  uId: number,
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+  handleStr: string,
+  isGlobalOwner: boolean,
+  sessionTokens: string[]
 }
 
 // The channelId output type.
@@ -37,7 +37,7 @@ export type channel = {
 }
 
 // The authUserId output type.
-export type authUserId = { authUserId: number, token: string};
+export type authUserId = { authUserId: number, token: string };
 
 // The error output type.
 export type error = { error: string };
@@ -100,4 +100,9 @@ export type channelsListAllRequest = {
 export type userProfileSethandle = {
   token: string,
   handleStr: string
+}
+
+export type channelJoinRequest = {
+  token: string,
+  channelId: number,
 }
