@@ -26,6 +26,12 @@ export type dataStoreUser = {
     sessionTokens: string[]
 }
 
+// The dm type that is stored in the data store
+export type dataStoreDm = {
+  dmId: number,
+  name: string
+}
+
 // The channelId output type.
 export type channelId = { channelId: number };
 
@@ -48,7 +54,8 @@ export type channels = { channels: { channelId: number, name: string }[] };
 // Data model stored in the data store.
 export type dataStore = {
   users: dataStoreUser[],
-  channels: dataStoreChannel[]
+  channels: dataStoreChannel[],
+  dms: dataStoreDm[]
 }
 
 export type authResponse = {
