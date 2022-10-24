@@ -190,3 +190,91 @@ describe('HTTP tests for channel/join/v2', () => {
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });
+
+describe('HTTP tests for channel/invite/v2', () => {
+  let channel1Id: number;
+  beforeEach(() => {
+    const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    });
+    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+  });
+
+  test('channelId does not refer to a valid channel', () => {
+    const res = sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: token,
+      channelId: 99999999,
+      uId: uId2,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid channel ID'
+    });
+  });
+
+  test('uId does not refer to a valid user', () => {
+    const res = sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: token,
+      channelId: channel1Id,
+      uId: 99999999,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid user ID'
+    });
+  });
+
+  test('uId refers to a user who is already a member of the channel', () => {
+    const res = sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: token,
+      channelId: channel1Id,
+      uId: uId,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'User already in channel'
+    });
+  });
+
+  test('channelId is valid and the authorised user is not a member of the channel', () => {
+    const res = sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: token2,
+      channelId: channel1Id,
+      uId: uId2,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Permission denied, non-channel user cannot invite other user to the channel'
+    });
+  });
+
+  test('token is invalid', () => {
+    const res = sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: '99999999',
+      channelId: channel1Id,
+      uId: uId2,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid token'
+    });
+  });
+
+  test('correct input correct return ', () => {
+    const res = sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: token,
+      channelId: channel1Id,
+      uId: uId2,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+});
