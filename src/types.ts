@@ -104,7 +104,12 @@ export type channelsListAllRequest = {
   token: string
 }
 
-export type userProfileSethandle = {
+export type userProfileSethandleRequest = {
   token: string,
   handleStr: string
+}
+
+export type dmCreateRequest = {
+  token: string,
+  uIds: [number]
 }

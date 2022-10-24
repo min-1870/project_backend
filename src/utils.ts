@@ -1,6 +1,8 @@
 import { getData, setData } from './dataStore';
 import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error } from './types';
 
+let uniqueDmId = 0;
+
 export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
   return getDataStoreUser(authUserId, data) != null;
 }
@@ -126,4 +128,77 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
     }
   }
   return { error: 'Token is Invalid' };
+}
+
+export function dmCreation(token:string, uIds: [number]) {
+  const data: dataStore = getData();
+  console.log(data);
+  console.log(token);
+  console.log(uIds);
+  for (const item of uIds) {
+    if (data.users.find(user => user.uId === item) == null) {
+      return { error: 'Invalid uId in uIds'};
+    }
+  }
+  if (duplicateValueCheck(uIds) == true) {
+    return { error: 'Duplicate uId values entered'};
+  };
+
+  let DmName = dmNameGenerator(token, uIds);
+
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    for (let j = 0; j < user.sessionTokens.length; j++) {
+      if (user.sessionTokens[j] === token) {
+        data.dms.push({
+          dmId: uniqueDmId,
+          name: DmName
+        });
+        const ret = uniqueDmId;
+        uniqueDmId ++;
+        setData(data);
+        console.log(data);
+        return { dmId: ret};
+      }
+    }
+  }
+  return { error: 'Token is Invalid' };
+}
+
+function dmNameGenerator(token:string, uIds: [number]) {
+  const data: dataStore = getData();
+  const owner = getAuthUserIdFromToken(token);
+
+  let arr = [];
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    if (user.uId === owner) {
+      arr.push(user.handleStr);
+
+    }
+  }
+
+
+  for (const item of uIds) {
+    for (let i = 0; i < data.users.length; i++) {
+      const user: dataStoreUser = data.users[i];
+      if (user.uId === item) {
+        console.log(item);
+        arr.push(user.handleStr);
+      }
+    }
+  }
+  arr = arr.sort();
+
+  let ret = arr.join(', ')
+
+  return ret;
+}
+
+function duplicateValueCheck(array) {
+  if (array.length !== new Set(array).size) {
+    return true;
+  }
+
+  return false;
 }

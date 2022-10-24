@@ -46,7 +46,7 @@ describe('HTTP tests for /dm/create/v1', () => {
   test('Successful /dm/create/v1', () => {
     const res = sendPostRequestToEndpoint('/dm/create/v1', {
       token: token,
-      uIds: {uId}
+      uIds: [uId]
     });
 
     expect(res.statusCode).toBe(OK);
