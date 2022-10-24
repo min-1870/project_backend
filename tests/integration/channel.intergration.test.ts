@@ -113,3 +113,79 @@ describe('HTTP tests for channel/messages/v2', () => {
     });
   });
 });
+
+describe('HTTP tests for channel/join/v2', () => {
+  let channel1Id: number;
+  beforeEach(() => {
+    const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    });
+    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    const channel2Res = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME + '2',
+      isPublic: false
+    });
+    channel2Id = (parseJsonResponse(channel2Res) as unknown as channelId).channelId;
+  });
+
+  test('channelId does not refer to a valid channel', () => {
+    const res = sendPostRequestToEndpoint('/channel/join/v2', {
+      token: token2,
+      channelId: 99999999,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid channel ID'
+    });
+  });
+
+  test('the authorised user is already a member of the channel', () => {
+    const res = sendPostRequestToEndpoint('/channel/join/v2', {
+      token: token,
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'User already in channel'
+    });
+  });
+
+  test('channelId refers to a channel that is private and the authorised user is not already a channel member and is not a global owner', () => {
+    const res = sendPostRequestToEndpoint('/channel/join/v2', {
+      token: token2,
+      channelId: channel2Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'private channel not permit no global owner in'
+    });
+  });
+
+  test('token is invalid', () => {
+    const res = sendPostRequestToEndpoint('/channel/join/v2', {
+      token: '99999999',
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'invalid token'
+    });
+  });
+
+  test('correct input correct return ', () => {
+    const res = sendPostRequestToEndpoint('/channel/join/v2', {
+      token: token2,
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+});
