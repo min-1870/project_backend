@@ -80,7 +80,7 @@ beforeEach(() => {
 
 describe('Test set for the function channelJoinV1', () => {
   test('not valid User ID fails', () => {
-    expect(channelJoinV1(999, publicChannelId)).toStrictEqual({ error: 'Invalid user ID' });
+    expect(channelJoinV1(999, publicChannelId)).toStrictEqual({ error: 'Invalid token' });
   });
 
   test('not valid channel ID fails', () => {
@@ -88,7 +88,7 @@ describe('Test set for the function channelJoinV1', () => {
   });
 
   test('normal user join private channel fails', () => {
-    expect(channelJoinV1(testUserId2, privateChannelId)).toStrictEqual({ error: 'This is a private server' });
+    expect(channelJoinV1(testUserId2, privateChannelId)).toStrictEqual({ error: 'Permission denied, non-global owner is not allowed to access private channel' });
   });
 
   test('globalowner user join private channel success', () => {

@@ -164,7 +164,7 @@ describe('HTTP tests for channel/join/v2', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'private channel not permit no global owner in'
+      error: 'Permission denied, non-global owner is not allowed to access private channel'
     });
   });
 
@@ -176,7 +176,7 @@ describe('HTTP tests for channel/join/v2', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'invalid token'
+      error: 'Invalid token'
     });
   });
 
