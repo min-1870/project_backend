@@ -132,9 +132,7 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
 
 export function dmCreation(token:string, uIds: [number]) {
   const data: dataStore = getData();
-  console.log(data);
-  console.log(token);
-  console.log(uIds);
+
   for (const item of uIds) {
     if (data.users.find(user => user.uId === item) == null) {
       return { error: 'Invalid uId in uIds'};
@@ -157,7 +155,6 @@ export function dmCreation(token:string, uIds: [number]) {
         const ret = uniqueDmId;
         uniqueDmId ++;
         setData(data);
-        console.log(data);
         return { dmId: ret};
       }
     }
@@ -183,7 +180,6 @@ function dmNameGenerator(token:string, uIds: [number]) {
     for (let i = 0; i < data.users.length; i++) {
       const user: dataStoreUser = data.users[i];
       if (user.uId === item) {
-        console.log(item);
         arr.push(user.handleStr);
       }
     }

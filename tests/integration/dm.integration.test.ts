@@ -55,6 +55,18 @@ describe('HTTP tests for /dm/create/v1', () => {
     });
   });
 
+  test('Successful /dm/create/v1 with only owner', () => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: []
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      dmId: expect.any(Number)
+    });
+  });
+
   test('Failure due to invalid uId', () => {
     const res = sendPostRequestToEndpoint('/dm/create/v1', {
       token: token,
