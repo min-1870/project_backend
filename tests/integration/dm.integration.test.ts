@@ -2,10 +2,8 @@ import { authResponse } from '../../src/types';
 import {
   parseJsonResponse,
   OK,
-  sendGetRequestToEndpoint,
   sendDeleteRequestToEndpoint,
   sendPostRequestToEndpoint,
-  sendPutRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -15,7 +13,6 @@ const NAME_LAST = 'Potter';
 
 let token: string;
 let uId: number;
-
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -28,7 +25,6 @@ beforeEach(() => {
 
   let jsonResponse = parseJsonResponse(res) as unknown as authResponse;
   token = jsonResponse.token;
-
 
   res = sendPostRequestToEndpoint('/auth/register/v2', {
     email: 'gomugomu@hotmail.com',
@@ -102,9 +98,4 @@ describe('HTTP tests for /dm/create/v1', () => {
       error: expect.any(String)
     });
   });
-
-
-  
-
-  
 });

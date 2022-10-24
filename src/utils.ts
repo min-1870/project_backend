@@ -135,14 +135,14 @@ export function dmCreation(token:string, uIds: [number]) {
 
   for (const item of uIds) {
     if (data.users.find(user => user.uId === item) == null) {
-      return { error: 'Invalid uId in uIds'};
+      return { error: 'Invalid uId in uIds' };
     }
   }
-  if (duplicateValueCheck(uIds) == true) {
-    return { error: 'Duplicate uId values entered'};
-  };
+  if (duplicateValueCheck(uIds) === true) {
+    return { error: 'Duplicate uId values entered' };
+  }
 
-  let DmName = dmNameGenerator(token, uIds);
+  const DmName = dmNameGenerator(token, uIds);
 
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
@@ -153,9 +153,9 @@ export function dmCreation(token:string, uIds: [number]) {
           name: DmName
         });
         const ret = uniqueDmId;
-        uniqueDmId ++;
+        uniqueDmId++;
         setData(data);
-        return { dmId: ret};
+        return { dmId: ret };
       }
     }
   }
@@ -171,10 +171,8 @@ function dmNameGenerator(token:string, uIds: [number]) {
     const user: dataStoreUser = data.users[i];
     if (user.uId === owner) {
       arr.push(user.handleStr);
-
     }
   }
-
 
   for (const item of uIds) {
     for (let i = 0; i < data.users.length; i++) {
@@ -186,7 +184,7 @@ function dmNameGenerator(token:string, uIds: [number]) {
   }
   arr = arr.sort();
 
-  let ret = arr.join(', ')
+  const ret = arr.join(', ');
 
   return ret;
 }
