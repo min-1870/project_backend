@@ -101,8 +101,6 @@ export function deleteDm(token:string, dmId:number) {
     return { error: 'dmId is Invalid' };
   }
   for (const item of data.dms) {
-    console.log(item.dmId);
-    console.log(dmId);
     if (item.dmId.toString() === dmId.toString()) {
       if (item.ownerMembers[0].uId !== getAuthUserIdFromToken(token)) {
         return { error: 'user is not owner of dm' };

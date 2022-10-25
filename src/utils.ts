@@ -147,7 +147,7 @@ export function getDataStoreMessage(messageId: number, data: dataStore): message
 // -----FUNCTIONS ABOUT DM ONLY
 
 export function getDataStoreDm(dmId: number, data: dataStore): dataStoreDm {
-  return data.dms.find(channel => channel.dmId === dmId);
+  return data.dms.find(channel => channel.dmId.toString() === dmId.toString());
 }
 
 export function toOutputDms(dms: dataStoreDm[]): dms {
