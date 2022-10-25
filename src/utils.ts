@@ -7,11 +7,6 @@ export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean 
   return getDataStoreUser(authUserId, data) != null;
 }
 
-export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
-  // console.log(data);
-  return getDataStoreDm(dmId, data) != null;
-}
-
 export function getDataStoreUser(userId: number, data: dataStore): dataStoreUser {
   return data.users.find(user => user.uId === userId);
 }
@@ -161,6 +156,10 @@ export function toOutputDms(dms: dataStoreDm[]): dms {
   };
 }
 
+export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
+  // console.log(data);
+  return getDataStoreDm(dmId, data) != null;
+}
 // -----OTHERS
 
 export function duplicateValueCheck(array) {
