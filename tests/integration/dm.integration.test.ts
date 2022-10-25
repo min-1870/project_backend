@@ -130,6 +130,32 @@ describe('HTTP tests for /dm/list/v1', () => {
     });
   });
 
+  test('dm list successful with multiple lists', () => {
+    sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: []
+    });
+
+    const res = sendGetRequestToEndpoint('/dm/list/v1', {
+      token
+    });
+
+    expect(res.statusCode).toBe(OK);
+    // console.log(parseJsonResponse(res))
+    expect(parseJsonResponse(res)).toStrictEqual({
+      dms: [
+        {
+          dmId,
+          name: expect.any(String)
+        },
+        {
+          dmId: expect.any(Number),
+          name: expect.any(String)
+        }
+      ]
+    });
+  });
+
   test('dm list with invalid token fail', () => {
     const res = sendGetRequestToEndpoint('/dm/list/v1', {
       token: (token + 643535)
