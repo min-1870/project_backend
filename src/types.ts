@@ -114,6 +114,12 @@ export type channelJoinRequest = {
   channelId: number,
 }
 
+export type channelInviteRequest = {
+  token: string,
+  channelId: number,
+  uId: number,
+}
+
 export type dmCreateRequest = {
   token: string,
   uIds: [number]

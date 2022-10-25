@@ -108,23 +108,23 @@ describe('Test set for the function channelJoinV1', () => {
 
 describe('Test set for the function channelInviteV1', () => {
   test('channelId does not refer to a valid channel', () => {
-    expect(channelInviteV1(testUserId1, 765, testUserId2)).toStrictEqual({ error: 'Channel ID does not refer to a valid channel' });
+    expect(channelInviteV1(testUserId1, 765, testUserId2)).toStrictEqual({ error: 'Invalid channel ID' });
   });
 
   test('authUserId is invalid', () => {
-    expect(channelInviteV1(639, publicChannelId, testUserId2)).toStrictEqual({ error: 'authUserId does not exist' });
+    expect(channelInviteV1(639, publicChannelId, testUserId2)).toStrictEqual({ error: 'Invalid token' });
   });
 
   test('uId is invalid', () => {
-    expect(channelInviteV1(testUserId1, publicChannelId, 243)).toStrictEqual({ error: 'User ID does not exist' });
+    expect(channelInviteV1(testUserId1, publicChannelId, 243)).toStrictEqual({ error: 'Invalid user ID' });
   });
 
   test('uId refers to a user who is already a member of the channel', () => {
-    expect(channelInviteV1(testUserId1, publicChannelId, testUserId1)).toStrictEqual({ error: 'user already member of channel' });
+    expect(channelInviteV1(testUserId1, publicChannelId, testUserId1)).toStrictEqual({ error: 'User already in channel' });
   });
 
   test('channelId is valid and the authorised user is not a member of the channel', () => {
-    expect(channelInviteV1(testUserId2, publicChannelId, testUserId3)).toStrictEqual({ error: 'authUserId is not member of channel' });
+    expect(channelInviteV1(testUserId2, publicChannelId, testUserId3)).toStrictEqual({ error: 'Permission denied, non-channel user cannot invite other user to the channel' });
   });
 
   test('successful public channelInviteV1', () => {

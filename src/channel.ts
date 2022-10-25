@@ -75,23 +75,23 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
 
   const channel = getDataStoreChannel(channelId, data);
   if (channel == null) {
-    return { error: 'Channel ID does not refer to a valid channel' };
+    return { error: 'Invalid channel ID' };
   }
 
   if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'authUserId does not exist' };
+    return { error: 'Invalid token' };
   }
   const dataStoreUser = getDataStoreUser(uId, data);
   if (dataStoreUser == null) {
-    return { error: 'User ID does not exist' };
+    return { error: 'Invalid user ID' };
   }
 
   if (isUserMemberInChannel(channel, uId)) {
-    return { error: 'user already member of channel' };
+    return { error: 'User already in channel' };
   }
 
   if (!isUserMemberInChannel(channel, authUserId)) {
-    return { error: 'authUserId is not member of channel' };
+    return { error: 'Permission denied, non-channel user cannot invite other user to the channel' };
   }
 
   addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
