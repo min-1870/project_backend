@@ -8,7 +8,7 @@ export type messageId = { messageId: number };
 export type channelMessagesOutput = {
   messages: messages[],
   start: number,
-  end: number 
+  end: number
 };
 
 // The channel type that is stored in the data store.

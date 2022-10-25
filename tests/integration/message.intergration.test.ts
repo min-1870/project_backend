@@ -1,4 +1,3 @@
-import { time } from 'console';
 import { authResponse, channelId, channelMessagesOutput, messageId } from '../../src/types';
 import {
   OK,
@@ -13,16 +12,16 @@ const PASSWORD = '11223344';
 const NAME_FIRST = 'Barty';
 const NAME_LAST = 'Potter';
 const TEST_CHANNEL_NAME = 'Test channel';
-const TEST_MESSAGE = 'hello world :)'
+const TEST_MESSAGE = 'hello world :)';
 
-//over 1000 characters
-let very_long_message = ':(';
-for (var i=0; i<1000; i++) very_long_message = very_long_message + ':(';
+// over 1000 characters
+let VERY_LONG_MESSAGE = ':(';
+for (let i = 0; i < 1000; i++) VERY_LONG_MESSAGE = VERY_LONG_MESSAGE + ':(';
 
 let token: string; // token of test user 1
 let token2: string; // token of test user 2
 let authUserId: number; // token of test user 1
-let authUserId2: number; // token of test user 2
+// let authUserId2: number; // token of test user 2
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -33,7 +32,7 @@ beforeEach(() => {
     nameLast: NAME_LAST
   });
   token = (parseJsonResponse(res1) as unknown as authResponse).token;
-  authUserId = (parseJsonResponse(res1) as unknown as authResponse).authUserId
+  authUserId = (parseJsonResponse(res1) as unknown as authResponse).authUserId;
 
   const res2 = sendPostRequestToEndpoint('/auth/register/v2', {
     email: '2' + EMAIL,
@@ -42,7 +41,7 @@ beforeEach(() => {
     nameLast: 'b' + NAME_LAST
   });
   token2 = (parseJsonResponse(res2) as unknown as authResponse).token;
-  authUserId2 = (parseJsonResponse(res2) as unknown as authResponse).authUserId
+  // authUserId2 = (parseJsonResponse(res2) as unknown as authResponse).authUserId;
 });
 
 describe('HTTP tests for channel/messages/v2', () => {
@@ -86,7 +85,7 @@ describe('HTTP tests for channel/messages/v2', () => {
     const res = sendPostRequestToEndpoint('/message/send/v1', {
       token: token,
       channelId: channel1Id,
-      message: very_long_message,
+      message: VERY_LONG_MESSAGE,
     });
 
     expect(res.statusCode).toBe(OK);
@@ -130,7 +129,7 @@ describe('HTTP tests for channel/messages/v2', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      messageId:  expect.any(Number)
+      messageId: expect.any(Number)
     });
   });
 
@@ -141,14 +140,14 @@ describe('HTTP tests for channel/messages/v2', () => {
       message: TEST_MESSAGE,
     });
 
-    let messageId = (parseJsonResponse(res) as unknown as messageId).messageId
+    const messageId = (parseJsonResponse(res) as unknown as messageId).messageId;
 
     const res2 = sendGetRequestToEndpoint('/channel/messages/v2', {
       token: token,
       channelId: channel1Id,
       start: 0,
     });
-    
+
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
       messages: [{ messageId: messageId, uId: authUserId, message: TEST_MESSAGE, timeSent: expect.any(Number) }],
@@ -169,7 +168,7 @@ describe('HTTP tests for channel/messages/v2', () => {
       channelId: channel1Id,
       start: 0,
     });
-    
+
     expect(res.statusCode).toBe(OK);
     expect((parseJsonResponse(res2) as unknown as channelMessagesOutput).messages[0].timeSent).toBeLessThanOrEqual(Date.now() + 2);
   });
