@@ -8,12 +8,12 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, messageRemoveRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
 import { dmCreation, dmlist } from './dms';
-import { messageSend } from './message';
+import { messageRemove, messageSend } from './message';
 
 // Set up web app
 const app = express();
@@ -169,6 +169,17 @@ app.post('/message/send/v1', (req: Request, res: Response) => {
     return res.json({ error: 'token is invalid' });
   } else {
     return res.json(messageSend(Number(authUserId), Number(channelId), message));
+  }
+});
+
+app.delete('/message/remove/v1', (req: Request, res: Response) => {
+  const { token, messageId } = req.query as unknown as messageRemoveRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'token is invalid' });
+  } else {
+    return res.json(messageRemove(Number(authUserId), Number(messageId)));
   }
 });
 

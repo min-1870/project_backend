@@ -1,6 +1,6 @@
 import { getData } from './dataStore';
-import { error, messages } from './types';
-import { getDataStoreChannel, isAuthUserIdValid, isChannelIdValid, isUserMemberInChannel } from './utils';
+import { dataStore, error, messages } from './types';
+import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isMessageIdValid, isUserMemberInChannel, isUserOwnerMemberInChannel } from './utils';
 
 let messageId = 0;
 
@@ -29,4 +29,23 @@ export function messageSend (authUserId: number, channelId: number, message: str
   messageId += 1;
 
   return { messageId: messageId - 1 };
+}
+
+export function messageRemove (authUserId: number, messageId: number): (Record<string, never> | error) {
+// assume toke is valid
+  const data:dataStore = getData();
+  const channelId = findChannelIdByMessageId(messageId, data);
+
+  if (!isMessageIdValid(messageId, data)) {
+    return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
+  } else if (!isUserMemberInChannel(authUserId, channelId, data)) {
+    return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
+  } else if (authUserId !== getDataStoreMessage(messageId, data).uId && !isUserOwnerMemberInChannel(authUserId, channelId, data)) {
+    return { error: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM' };
+  }
+
+  const dataStoreChannel = getDataStoreChannel(channelId, data);
+  dataStoreChannel.messages = dataStoreChannel.messages.filter(message => message.messageId !== messageId);
+
+  return {};
 }
