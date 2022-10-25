@@ -1,6 +1,8 @@
 import { getData, setData } from './dataStore';
 import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm } from './types';
 
+//-----FUCNTIONS ABOUT USER ONLY
+
 export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
   return getDataStoreUser(authUserId, data) != null;
 }
@@ -11,18 +13,6 @@ export function getDataStoreUser(userId: number, data: dataStore): dataStoreUser
 
 export function getDataStoreUserByEmail(email: string, data: dataStore): dataStoreUser {
   return data.users.find(user => user.email === email);
-}
-
-export function getDataStoreChannel(channelId: number, data: dataStore): dataStoreChannel {
-  return data.channels.find(channel => channel.channelId === channelId);
-}
-
-export function getDataStoreDm(dmId: number, data: dataStore): dataStoreDm {
-  return data.dms.find(channel => channel.dmId === dmId);
-}
-
-export function isUserMemberInChannel(channel: dataStoreChannel, userId: number): boolean {
-  return channel.allMembers.some(member => member.uId === userId);
 }
 
 export function isEmailUsed(email: string, users: dataStoreUser[]): boolean {
@@ -41,43 +31,6 @@ export function dataStoreUserToUser(dataStoreUser: dataStoreUser): user {
     nameLast: dataStoreUser.nameLast,
     handleStr: dataStoreUser.handleStr
   };
-}
-
-export function toOutputChannels(channels: dataStoreChannel[]): channels {
-  return {
-    channels: channels.map(channel => {
-      return {
-        channelId: channel.channelId,
-        name: channel.name
-      };
-    })
-  };
-}
-
-export function toOutputDms(dms: dataStoreDm[]): dms {
-  return {
-    dms: dms.map(dm => {
-      return {
-        dmId: dm.dmId,
-        name: dm.name
-      };
-    })
-  };
-}
-
-export function toOutputChannelDetail(channel: dataStoreChannel): channel {
-  return {
-    name: channel.name,
-    isPublic: channel.isPublic,
-    ownerMembers: channel.ownerMembers,
-    allMembers: channel.allMembers
-  };
-}
-
-// Add user to the channel. Assumes user and channel ID is valid.
-export function addUserToChannel(user: user, channelId: number, data: dataStore) {
-  data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
-  setData(data);
 }
 
 // Add session token to a user. Assumes user is a valid user.
@@ -113,6 +66,71 @@ export function removetoken(token: string): (Record<string, never> | error) {
   }
   return { error: 'Token is Invalid' };
 }
+
+//-----FUNCTIONS ABOUT CHANNELS ONYL
+
+export function isChannelIdValid(channelId: number, data: dataStore): boolean {
+  return getDataStoreChannel(channelId, data) != null;
+}
+
+export function getDataStoreChannel(channelId: number, data: dataStore): dataStoreChannel {
+  return data.channels.find(channel => channel.channelId === channelId);
+}
+
+//-----FUNCTIONS ABOUT BOTH USER AND CHANNEL
+
+export function isUserMemberInChannel(authUserId: number, channelId: number, data: dataStore): boolean {
+  return getDataStoreChannel(channelId, data).allMembers.some(member => member.uId === authUserId);
+}
+
+export function isUserOwnerMemberInChannel(authUserId: number, channelId: number, data: dataStore): boolean{
+  return getDataStoreChannel(channelId, data).ownerMembers.some(member => member.uId === authUserId);
+}
+
+// Add user to the channel. Assumes user and channel ID is valid.
+export function addUserToChannel(user: user, channelId: number, data: dataStore) {
+  data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
+  setData(data);
+}
+
+export function toOutputChannels(channels: dataStoreChannel[]): channels {
+  return {
+    channels: channels.map(channel => {
+      return {
+        channelId: channel.channelId,
+        name: channel.name
+      };
+    })
+  };
+}
+
+export function toOutputChannelDetail(channel: dataStoreChannel): channel {
+  return {
+    name: channel.name,
+    isPublic: channel.isPublic,
+    ownerMembers: channel.ownerMembers,
+    allMembers: channel.allMembers
+  };
+}
+
+//-----FUNCTIONS ABOUT DM ONLY
+
+export function getDataStoreDm(dmId: number, data: dataStore): dataStoreDm {
+  return data.dms.find(channel => channel.dmId === dmId);
+}
+
+export function toOutputDms(dms: dataStoreDm[]): dms {
+  return {
+    dms: dms.map(dm => {
+      return {
+        dmId: dm.dmId,
+        name: dm.name
+      };
+    })
+  };
+}
+
+//-----OTHERS
 
 export function duplicateValueCheck(array) {
   if (array.length !== new Set(array).size) {

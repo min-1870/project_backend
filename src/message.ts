@@ -1,6 +1,6 @@
 import { getData } from './dataStore';
 import { error, messages } from './types';
-import { getDataStoreChannel, isAuthUserIdValid, isUserMemberInChannel } from './utils';
+import { getDataStoreChannel, isAuthUserIdValid, isChannelIdValid, isUserMemberInChannel } from './utils';
 
 let messageId = 0;
 
@@ -9,11 +9,11 @@ export function messageSend (authUserId: number, channelId: number, message: str
   const channel = getDataStoreChannel(channelId, data);
   if (!isAuthUserIdValid(authUserId, data)) {
     return { error: 'token is invalid' };
-  } else if (channel == null) {
+  } else if (!isChannelIdValid(channelId, data)) {
     return { error: 'channelId does not refer to a valid channel' };
   } else if (message.length < 1 || message.length > 1000) {
     return { error: 'length of message is less than 1 or over 1000 characters' };
-  } else if (!isUserMemberInChannel(channel, authUserId)) {
+  } else if (!isUserMemberInChannel(authUserId, channelId, data)) {
     return { error: 'channelId is valid and the authorised user is not a member of the channel' };
   }
 
