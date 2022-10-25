@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import { dataStore, dataStoreUser } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid } from './utils';
+import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, toOutputDms } from './utils';
 
 let uniqueDmId = 0;
 
@@ -73,4 +73,18 @@ function dmNameGenerator(token:string, uIds: [number]) {
   const ret = arr.join(', ');
 
   return ret;
+}
+
+export function dmlist(token:string) {
+  const data: dataStore = getData();
+  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
+    return { error: 'Token is Invalid' };
+  }
+  const authUserId = getAuthUserIdFromToken(token);
+  // let ret: dmInfo[];
+  const dms = data.dms
+    .filter(dm => dm.allMembers
+      .find(member => member.uId === authUserId) != null) || [];
+
+  return toOutputDms(dms);
 }

@@ -38,7 +38,8 @@ export type dataStoreDm = {
 // The channelId output type.
 export type channelId = { channelId: number };
 
-export type dmInfo = { dmId: number, name: string};
+export type dmId = { dmId: number};
+export type dms = { dms: {dmId: number, name: string}[] };
 
 export type channel = {
   name: string,

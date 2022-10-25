@@ -12,7 +12,7 @@ import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channels
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
-import { dmCreation } from './dms';
+import { dmCreation, dmlist } from './dms';
 
 // Set up web app
 const app = express();
@@ -162,10 +162,14 @@ app.put('/user/profile/setname/v1', (req: Request, res: Response) => {
 
 app.post('/dm/create/v1', (req: Request, res: Response) => {
   const { token, uIds } = req.body as dmCreateRequest;
-
-  // after get authUserId, we call channelsCreateV1
   const result = dmCreation(token, uIds);
+  res.json(result);
+});
 
+app.get('/dm/list/v1', (req: Request, res: Response) => {
+  const { token } = req.query as channelsListRequest;
+  // const authUserId = getAuthUserIdFromToken(token);
+  const result = dmlist(token);
   res.json(result);
 });
 

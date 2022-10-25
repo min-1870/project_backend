@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error } from './types';
+import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm } from './types';
 
 export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
   return getDataStoreUser(authUserId, data) != null;
@@ -15,6 +15,10 @@ export function getDataStoreUserByEmail(email: string, data: dataStore): dataSto
 
 export function getDataStoreChannel(channelId: number, data: dataStore): dataStoreChannel {
   return data.channels.find(channel => channel.channelId === channelId);
+}
+
+export function getDataStoreDm(dmId: number, data: dataStore): dataStoreDm {
+  return data.dms.find(channel => channel.dmId === dmId);
 }
 
 export function isUserMemberInChannel(channel: dataStoreChannel, userId: number): boolean {
@@ -45,6 +49,17 @@ export function toOutputChannels(channels: dataStoreChannel[]): channels {
       return {
         channelId: channel.channelId,
         name: channel.name
+      };
+    })
+  };
+}
+
+export function toOutputDms(dms: dataStoreDm[]): dms {
+  return {
+    dms: dms.map(dm => {
+      return {
+        dmId: dm.dmId,
+        name: dm.name
       };
     })
   };

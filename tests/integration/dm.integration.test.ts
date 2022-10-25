@@ -1,4 +1,4 @@
-import { authResponse, dmInfo } from '../../src/types';
+import { authResponse, dmId } from '../../src/types';
 import {
   parseJsonResponse,
   OK,
@@ -103,16 +103,14 @@ describe('HTTP tests for /dm/create/v1', () => {
 
 describe('HTTP tests for /dm/list/v1', () => {
   let dmId: number;
-  let name: string;
   beforeEach(() => {
     const res = sendPostRequestToEndpoint('/dm/create/v1', {
       token: token,
       uIds: [uId]
     });
 
-    const jsonResponse = parseJsonResponse(res) as unknown as dmInfo;
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
-    name = jsonResponse.name;
   });
 
   test('dm list successful', () => {
@@ -121,11 +119,12 @@ describe('HTTP tests for /dm/list/v1', () => {
     });
 
     expect(res.statusCode).toBe(OK);
+    // console.log(parseJsonResponse(res))
     expect(parseJsonResponse(res)).toStrictEqual({
       dms: [
         {
           dmId,
-          name
+          name: expect.any(String)
         }
       ]
     });
