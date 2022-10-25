@@ -1,5 +1,6 @@
 import { getData, setData } from './dataStore';
 import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error } from './types';
+import validator from 'validator';
 
 let uniqueDmId = 0;
 
@@ -207,4 +208,61 @@ function duplicateValueCheck(array) {
   }
 
   return false;
+}
+
+export function userProfileEmailChange(token: string, email: string): (Record<string, never> | error) {
+  const data: dataStore = getData();
+  if (!(validator.isEmail(email))) { // checking if email is valid
+    return { error: 'Invalid Email' };
+  }
+
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    if (user.email === email) {
+      return { error: 'email is already in use' };
+    }
+  }
+
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    for (let j = 0; j < user.sessionTokens.length; j++) {
+      if (user.sessionTokens[j] === token) {
+        user.email = email;
+        setData(data);
+        return {};
+      }
+    }
+  }
+  return { error: 'Token is Invalid' };
+}
+
+export function userProfileNameChange(token: string, nameFirst: string, nameLast: string): (Record<string, never> | error) {
+  const data: dataStore = getData();
+  if (nameFirst.length < 1 || nameFirst.length > 50) {
+    return { error: 'First name is not the correct length' };
+  }
+  if (nameLast.length < 1 || nameLast.length > 50) {
+    return { error: 'handleStr is not correct size' };
+  }
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    for (let j = 0; j < user.sessionTokens.length; j++) {
+      if (user.sessionTokens[j] === token) {
+        user.nameFirst = nameFirst;
+        setData(data);
+        return {};
+      }
+    }
+  }
+  for (let l = 0; l < data.users.length; l++) {
+    const user: dataStoreUser = data.users[l];
+    for (let k = 0; k < user.sessionTokens.length; k++) {
+      if (user.sessionTokens[k] === token) {
+        user.nameLast = nameLast;
+        setData(data);
+        return {};
+      }
+    }
+  }
+  return { error: 'Token is Invalid' };
 }

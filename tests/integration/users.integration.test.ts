@@ -155,3 +155,112 @@ describe('HTTP tests for /user/profile/sethandle/v1', () => {
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });
+
+describe('Tests for /user/profile/setemail/v1', () => {
+  test('Successful update of email', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
+      token: token,
+      email: 'gomugomu1@hotmail.com'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('Email is invalid', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
+      token: token,
+      email: 'notanemail'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Email is already in use', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
+      token: token,
+      email: 'gomugomu@hotmail.com'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Token is invalid', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
+      token: (token + 443),
+      email: 'gomugomu@hotmail.com'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+});
+
+describe('Tests for /user/profile/setname/v1', () => {
+  test('Successful update of first and last name', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
+      token: token,
+      nameFirst: 'Steve',
+      nameLast: 'Man'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+  test('First name too long', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
+      token: token,
+      nameFirst: 'Steveveveveveveveveveveveveveveveveveveveveveveveveveveve',
+      nameLast: 'Man'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Last name too long', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
+      token: token,
+      nameFirst: 'Steve',
+      nameLast: 'Manananananananananananananananananananananananananananananananananananananananan'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('First name too short', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
+      token: token,
+      nameFirst: '',
+      nameLast: 'Man'
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Last name too short', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
+      token: token,
+      nameFirst: 'Steve',
+      nameLast: ''
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+});
