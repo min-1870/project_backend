@@ -266,8 +266,8 @@ describe('HTTP tests for /dm/leave/v1', () => {
     dmId = jsonResponse.dmId;
   });
 
-  test('dm delete successful', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
+  test('dm leave successful', () => {
+    const res = sendDeleteRequestToEndpoint('/dm/leave/v1', {
       token: token,
       dmId: dmId
     });
@@ -301,8 +301,8 @@ describe('HTTP tests for /dm/leave/v1', () => {
     });
   });
 
-  test('dm/remove failure, user not part of dm', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
+  test('dm/leave failure, user not part of dm', () => {
+    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
       token: tokenThree,
       dmId: dmId
     });
