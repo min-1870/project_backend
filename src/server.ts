@@ -4,14 +4,15 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
-import { dmCreation, getAuthUserIdFromToken, removetoken, userProfileEmailChange, userProfileHandleChange, userProfileNameChange } from './utils';
+import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
-import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, messageSendRequest, channelJoinRequest, channelInviteRequest, userProfileSetname, userProfileSetemail } from './types';
+import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
+import { dmCreation, dmlist } from './dms';
 import { messageSend } from './message';
 
 // Set up web app
@@ -173,10 +174,14 @@ app.post('/message/send/v1', (req: Request, res: Response) => {
 
 app.post('/dm/create/v1', (req: Request, res: Response) => {
   const { token, uIds } = req.body as dmCreateRequest;
-
-  // after get authUserId, we call channelsCreateV1
   const result = dmCreation(token, uIds);
+  res.json(result);
+});
 
+app.get('/dm/list/v1', (req: Request, res: Response) => {
+  const { token } = req.query as channelsListRequest;
+  // const authUserId = getAuthUserIdFromToken(token);
+  const result = dmlist(token);
   res.json(result);
 });
 

@@ -1,9 +1,10 @@
-import { authResponse } from '../../src/types';
+import { authResponse, dmId } from '../../src/types';
 import {
   parseJsonResponse,
   OK,
   sendDeleteRequestToEndpoint,
   sendPostRequestToEndpoint,
+  sendGetRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -91,6 +92,73 @@ describe('HTTP tests for /dm/create/v1', () => {
     const res = sendPostRequestToEndpoint('/dm/create/v1', {
       token: (token + 999),
       uIds: [uId]
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+});
+
+describe('HTTP tests for /dm/list/v1', () => {
+  let dmId: number;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: [uId]
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+    dmId = jsonResponse.dmId;
+  });
+
+  test('dm list successful', () => {
+    const res = sendGetRequestToEndpoint('/dm/list/v1', {
+      token
+    });
+
+    expect(res.statusCode).toBe(OK);
+    // console.log(parseJsonResponse(res))
+    expect(parseJsonResponse(res)).toStrictEqual({
+      dms: [
+        {
+          dmId,
+          name: expect.any(String)
+        }
+      ]
+    });
+  });
+
+  test('dm list successful with multiple lists', () => {
+    sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: []
+    });
+
+    const res = sendGetRequestToEndpoint('/dm/list/v1', {
+      token
+    });
+
+    expect(res.statusCode).toBe(OK);
+    // console.log(parseJsonResponse(res))
+    expect(parseJsonResponse(res)).toStrictEqual({
+      dms: [
+        {
+          dmId,
+          name: expect.any(String)
+        },
+        {
+          dmId: expect.any(Number),
+          name: expect.any(String)
+        }
+      ]
+    });
+  });
+
+  test('dm list with invalid token fail', () => {
+    const res = sendGetRequestToEndpoint('/dm/list/v1', {
+      token: (token + 643535)
     });
 
     expect(res.statusCode).toBe(OK);
