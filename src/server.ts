@@ -4,11 +4,11 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
-import { dmCreation, getAuthUserIdFromToken, removetoken, userProfileHandleChange } from './utils';
+import { dmCreation, getAuthUserIdFromToken, removetoken, userProfileEmailChange, userProfileHandleChange, userProfileNameChange } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, messageSendRequest, channelJoinRequest, channelInviteRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, messageSendRequest, channelJoinRequest, channelInviteRequest, userProfileSetname, userProfileSetemail } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
@@ -142,6 +142,21 @@ app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
 
   const result = userProfileHandleChange(token, handleStr);
 
+  res.json(result);
+});
+
+app.put('/user/profile/setemail/v1', (req: Request, res: Response) => {
+  const { token, email } = req.body as userProfileSetemail;
+
+  const result = userProfileEmailChange(token, email);
+
+  res.json(result);
+});
+
+app.put('/user/profile/setname/v1', (req: Request, res: Response) => {
+  const { token, nameFirst, nameLast } = req.body as userProfileSetname;
+
+  const result = userProfileNameChange(token, nameLast, nameFirst);
   res.json(result);
 });
 
