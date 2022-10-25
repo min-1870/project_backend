@@ -3,6 +3,13 @@ export type user = { uId: number, email: string, nameFirst: string, nameLast: st
 
 // Messages output type.
 export type messages = { messageId: number, uId: number, message: string, timeSent: number };
+export type messageId = { messageId: number };
+
+export type channelMessagesOutput = {
+  messages: messages[],
+  start: number,
+  end: number 
+};
 
 // The channel type that is stored in the data store.
 export type dataStoreChannel = {
