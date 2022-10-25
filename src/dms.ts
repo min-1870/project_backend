@@ -1,6 +1,6 @@
-import { getData, setData } from "./dataStore";
-import { dataStore, dataStoreUser } from "./types";
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid } from "./utils";
+import { getData, setData } from './dataStore';
+import { dataStore, dataStoreUser } from './types';
+import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid } from './utils';
 
 let uniqueDmId = 0;
 

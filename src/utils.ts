@@ -106,4 +106,3 @@ export function duplicateValueCheck(array) {
 
   return false;
 }
-

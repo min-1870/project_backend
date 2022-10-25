@@ -1,9 +1,10 @@
-import { authResponse } from '../../src/types';
+import { authResponse, dmInfo } from '../../src/types';
 import {
   parseJsonResponse,
   OK,
   sendDeleteRequestToEndpoint,
   sendPostRequestToEndpoint,
+  sendGetRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -91,6 +92,48 @@ describe('HTTP tests for /dm/create/v1', () => {
     const res = sendPostRequestToEndpoint('/dm/create/v1', {
       token: (token + 999),
       uIds: [uId]
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+});
+
+describe('HTTP tests for /dm/list/v1', () => {
+  let dmId: number;
+  let name: string;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: [uId]
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmInfo;
+    dmId = jsonResponse.dmId;
+    name = jsonResponse.name;
+  });
+
+  test('dm list successful', () => {
+    const res = sendGetRequestToEndpoint('/dm/list/v1', {
+      token
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      dms: [
+        {
+          dmId,
+          name
+        }
+      ]
+    });
+  });
+
+  test('dm list with invalid token fail', () => {
+    const res = sendGetRequestToEndpoint('/dm/list/v1', {
+      token: (token + 643535)
     });
 
     expect(res.statusCode).toBe(OK);
