@@ -90,7 +90,7 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
     return { error: 'User already in channel' };
   }
 
-  if (!isUserMemberInChannel(uId, channelId, data)) {
+  if (!isUserMemberInChannel(authUserId, channelId, data)) {
     return { error: 'Permission denied, non-channel user cannot invite other user to the channel' };
   }
 
