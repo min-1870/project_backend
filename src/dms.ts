@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import { dataStore, dataStoreUser } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, toOutputDms } from './utils';
+import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, toOutputDms } from './utils';
 
 let uniqueDmId = 0;
 
@@ -78,6 +78,7 @@ function dmNameGenerator(token:string, uIds: [number]) {
 export function dmlist(token:string) {
   const data: dataStore = getData();
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
+    // console.log(token);
     return { error: 'Token is Invalid' };
   }
   const authUserId = getAuthUserIdFromToken(token);
@@ -87,4 +88,35 @@ export function dmlist(token:string) {
       .find(member => member.uId === authUserId) != null) || [];
 
   return toOutputDms(dms);
+}
+
+export function deleteDm(token:string, dmId:number) {
+  const data: dataStore = getData();
+  // console.log(dmId);
+
+  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
+    return { error: 'Token is Invalid' };
+  }
+  if (!isDataStoreDmValid(dmId, data)) {
+    return { error: 'dmId is Invalid' };
+  }
+  for (const item of data.dms) {
+    if (item.dmId.toString() === dmId.toString()) {
+      if (item.ownerMembers[0].uId !== getAuthUserIdFromToken(token)) {
+        return { error: 'user is not owner of dm' };
+      }
+    }
+  }
+  for (const item of data.dms) {
+    if (item.dmId.toString() === dmId.toString()) {
+      if (item.allMembers.find(user => user.uId === getAuthUserIdFromToken(token) == null)) {
+        return { error: 'user is no longer part of dm' };
+      }
+    }
+  }
+
+  const index = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
+  data.dms.splice(index, 1);
+  setData(data);
+  return {};
 }
