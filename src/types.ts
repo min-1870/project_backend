@@ -144,6 +144,11 @@ export type dmCreateRequest = {
   uIds: [number]
 }
 
+export type dmDeleteRequest = {
+  token: string,
+  dmId: number
+}
+
 export type userProfileSetemail = {
   token: string
   email: string

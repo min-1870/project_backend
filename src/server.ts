@@ -8,11 +8,11 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
-import { dmCreation, dmlist } from './dms';
+import { deleteDm, dmCreation, dmlist } from './dms';
 import { messageSend } from './message';
 
 // Set up web app
@@ -182,6 +182,12 @@ app.get('/dm/list/v1', (req: Request, res: Response) => {
   const { token } = req.query as channelsListRequest;
   // const authUserId = getAuthUserIdFromToken(token);
   const result = dmlist(token);
+  res.json(result);
+});
+
+app.delete('/dm/remove/v1', (req: Request, res: Response) => {
+  const { token, dmId } = req.query as unknown as dmDeleteRequest;
+  const result = deleteDm(token, dmId);
   res.json(result);
 });
 

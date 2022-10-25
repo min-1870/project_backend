@@ -6,6 +6,7 @@ export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean 
 }
 
 export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
+  // console.log(data);
   return getDataStoreDm(dmId, data) != null;
 }
 
@@ -18,11 +19,12 @@ export function getDataStoreUserByEmail(email: string, data: dataStore): dataSto
 }
 
 export function getDataStoreChannel(channelId: number, data: dataStore): dataStoreChannel {
+  // console.log(data.channels.find(channel => channel.channelId === channelId));
   return data.channels.find(channel => channel.channelId === channelId);
 }
 
 export function getDataStoreDm(dmId: number, data: dataStore): dataStoreDm {
-  return data.dms.find(channel => channel.dmId === dmId);
+  return data.dms.find(channel => channel.dmId.toString() === dmId.toString());
 }
 
 export function isUserMemberInChannel(channel: dataStoreChannel, userId: number): boolean {
