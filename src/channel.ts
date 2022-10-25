@@ -48,11 +48,11 @@ export function channelJoinV1(authUserId: number, channelId: number): (Record<st
   if (channel == null) {
     return { error: 'Invalid channel ID' };
   } else if (dataStoreUser == null) {
-    return { error: 'Invalid user ID' };
+    return { error: 'Invalid token' };
   } else if (channel.allMembers.find(user => user.uId === authUserId) != null) {
-    return { error: 'User are in the channel' };
+    return { error: 'User already in channel' };
   } else if (!channel.isPublic && !dataStoreUser.isGlobalOwner) {
-    return { error: 'This is a private server' };
+    return { error: 'Permission denied, non-global owner is not allowed to access private channel' };
   }
 
   addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
@@ -75,23 +75,23 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
 
   const channel = getDataStoreChannel(channelId, data);
   if (channel == null) {
-    return { error: 'Channel ID does not refer to a valid channel' };
+    return { error: 'Invalid channel ID' };
   }
 
   if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'authUserId does not exist' };
+    return { error: 'Invalid token' };
   }
   const dataStoreUser = getDataStoreUser(uId, data);
   if (dataStoreUser == null) {
-    return { error: 'User ID does not exist' };
+    return { error: 'Invalid user ID' };
   }
 
   if (isUserMemberInChannel(channel, uId)) {
-    return { error: 'user already member of channel' };
+    return { error: 'User already in channel' };
   }
 
   if (!isUserMemberInChannel(channel, authUserId)) {
-    return { error: 'authUserId is not member of channel' };
+    return { error: 'Permission denied, non-channel user cannot invite other user to the channel' };
   }
 
   addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
@@ -115,7 +115,7 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
   * @param {number} start - the index of the starting point
   * @returns {{messages: array, start: number, end: number}} - an object contains the messages and information of pages
 */
-export function channelMessagesV1(authUserId: number, channelId: number, start: number): ({messages: messages[], start: number, end: number } | error) {
+export function channelMessagesV1(authUserId: number, channelId: number, start: number): ({ messages: messages[], start: number, end: number } | error) {
   const data = getData();
   const channel = getDataStoreChannel(channelId, data);
   if (channel == null) {
