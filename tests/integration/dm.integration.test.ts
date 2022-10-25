@@ -267,7 +267,7 @@ describe('HTTP tests for /dm/leave/v1', () => {
   });
 
   test('dm leave successful', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/leave/v1', {
+    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
       token: token,
       dmId: dmId
     });
