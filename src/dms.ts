@@ -94,7 +94,7 @@ export function dmlist(token:string) {
 export function deleteDm(token:string, dmId:number) {
   const data: dataStore = getData();
   // console.log(dmId);
-
+  const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     return { error: 'Token is Invalid' };
   }
@@ -110,8 +110,8 @@ export function deleteDm(token:string, dmId:number) {
   }
   for (const item of data.dms) {
     if (item.dmId.toString() === dmId.toString()) {
-      if (item.allMembers.find(user => user.uId === getAuthUserIdFromToken(token) == null)) {
-        return { error: 'user is no longer part of dm' };
+      if (item.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
+        return { error: 'user is not part of dm' };
       }
     }
   }

@@ -240,18 +240,24 @@ describe('HTTP tests for /dm/remove/v1', () => {
     });
   });
 
-  // // fix this when dm/leave is added
-  // test('dm/remove failure, user not member of dm', () => {
-  //   const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-  //     token: tokenTwo,
-  //     dmId: dmId
-  //   });
+  
+  test('dm/remove failure, user not member of dm', () => {
+    sendPostRequestToEndpoint('/dm/leave/v1', {
+      token: token,
+      dmId: dmId
+    });
 
-  //   expect(res.statusCode).toBe(OK);
-  //   expect(parseJsonResponse(res)).toStrictEqual({
-  //     error: 'user is no longer part of dm'
-  //   });
-  // });
+    
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
+      token: token,
+      dmId: dmId
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'user is not part of dm'
+    });
+  });
 });
 
 describe('HTTP tests for /dm/leave/v1', () => {
