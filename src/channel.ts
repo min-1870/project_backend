@@ -86,11 +86,11 @@ export function channelInviteV1(authUserId: number, channelId: number, uId: numb
     return { error: 'Invalid user ID' };
   }
 
-  if (isUserMemberInChannel(channel, uId)) {
+  if (isUserMemberInChannel(uId, channelId, data)) {
     return { error: 'User already in channel' };
   }
 
-  if (!isUserMemberInChannel(channel, authUserId)) {
+  if (!isUserMemberInChannel(authUserId, channelId, data)) {
     return { error: 'Permission denied, non-channel user cannot invite other user to the channel' };
   }
 
@@ -124,7 +124,7 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
     return { error: 'Invalid user ID' };
   } else if (start < 0 || start > channel.messages.length) {
     return { error: 'Invalid start' };
-  } else if (!isUserMemberInChannel(channel, authUserId)) {
+  } else if (!isUserMemberInChannel(authUserId, channelId, data)) {
     return { error: 'Not a member of the channel' };
   }
 
