@@ -4,14 +4,15 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
-import { dmCreation, getAuthUserIdFromToken, removetoken, userProfileEmailChange, userProfileHandleChange, userProfileNameChange } from './utils';
+import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
-import { userProfileV1 } from './users';
+import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
 import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, channelInviteRequest, userProfileSetname, userProfileSetemail } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
+import { dmCreation } from './dms';
 
 // Set up web app
 const app = express();
