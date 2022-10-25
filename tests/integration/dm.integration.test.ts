@@ -85,7 +85,7 @@ describe('HTTP tests for /dm/create/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: 'Invalid uId in uIds'
     });
   });
 
@@ -97,7 +97,7 @@ describe('HTTP tests for /dm/create/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: 'Duplicate uId values entered'
     });
   });
 
@@ -109,7 +109,7 @@ describe('HTTP tests for /dm/create/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: 'Token is Invalid'
     });
   });
 });
@@ -176,7 +176,7 @@ describe('HTTP tests for /dm/list/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: 'Token is Invalid'
     });
   });
 });
@@ -240,14 +240,12 @@ describe('HTTP tests for /dm/remove/v1', () => {
     });
   });
 
-  
   test('dm/remove failure, user not member of dm', () => {
     sendPostRequestToEndpoint('/dm/leave/v1', {
       token: token,
       dmId: dmId
     });
 
-    
     const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
       token: token,
       dmId: dmId

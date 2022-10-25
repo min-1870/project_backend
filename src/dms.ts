@@ -1,4 +1,3 @@
-import { arrayBuffer } from 'stream/consumers';
 import { getData, setData } from './dataStore';
 import { dataStore, dataStoreUser } from './types';
 import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, toOutputDms } from './utils';
@@ -141,7 +140,7 @@ export function dmLeave(token:string, dmId:number) {
   }
   // console.log(data.dms);
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
-  const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString())
+  const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
   data.dms[indexOne].allMembers.splice(indexTwo, 1);
   setData(data);
   // console.log(data.dms);
