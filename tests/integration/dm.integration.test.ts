@@ -14,6 +14,7 @@ const NAME_LAST = 'Potter';
 
 let token: string;
 let tokenTwo: string;
+let tokenThree: string;
 let uId: number;
 
 beforeEach(() => {
@@ -47,6 +48,7 @@ beforeEach(() => {
   });
 
   jsonResponse = parseJsonResponse(res) as unknown as authResponse;
+  tokenThree = jsonResponse.token;
 });
 
 describe('HTTP tests for /dm/create/v1', () => {
@@ -250,4 +252,64 @@ describe('HTTP tests for /dm/remove/v1', () => {
   //     error: 'user is no longer part of dm'
   //   });
   // });
+});
+
+describe('HTTP tests for /dm/leave/v1', () => {
+  let dmId: number;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: [uId]
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+    dmId = jsonResponse.dmId;
+  });
+
+  test('dm delete successful', () => {
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
+      token: token,
+      dmId: dmId
+    });
+
+    expect(res.statusCode).toBe(OK);
+    // console.log(parseJsonResponse(res))
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('dm/leave with invalid token fail', () => {
+    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
+      token: (token + 643535),
+      dmId: dmId
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Token is Invalid'
+    });
+  });
+
+  test('dm/leave with invalid dmId', () => {
+    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
+      token: token,
+      dmId: (dmId + 104340)
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'dmId is Invalid'
+    });
+  });
+
+  test('dm/remove failure, user not part of dm', () => {
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
+      token: tokenThree,
+      dmId: dmId
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'user is not part of dm'
+    });
+  });
 });
