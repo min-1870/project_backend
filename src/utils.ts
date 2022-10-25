@@ -133,6 +133,10 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
 export function dmCreation(token:string, uIds: [number]) {
   const data: dataStore = getData();
 
+  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
+    return { error: 'Token is Invalid' };
+  }
+
   for (const item of uIds) {
     if (data.users.find(user => user.uId === item) == null) {
       return { error: 'Invalid uId in uIds' };
@@ -143,6 +147,12 @@ export function dmCreation(token:string, uIds: [number]) {
   }
 
   const DmName = dmNameGenerator(token, uIds);
+  const ownerMembers = dataStoreUserToUser(getDataStoreUser(getAuthUserIdFromToken(token), data));
+  const allMembers = [ownerMembers];
+
+  for (const item of uIds) {
+    allMembers.push(dataStoreUserToUser(getDataStoreUser(item, data)));
+  }
 
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
@@ -150,7 +160,10 @@ export function dmCreation(token:string, uIds: [number]) {
       if (user.sessionTokens[j] === token) {
         data.dms.push({
           dmId: uniqueDmId,
-          name: DmName
+          name: DmName,
+          ownerMembers: [ownerMembers],
+          allMembers: allMembers,
+          messages: []
         });
         const ret = uniqueDmId;
         uniqueDmId++;
@@ -159,7 +172,6 @@ export function dmCreation(token:string, uIds: [number]) {
       }
     }
   }
-  return { error: 'Token is Invalid' };
 }
 
 function dmNameGenerator(token:string, uIds: [number]) {

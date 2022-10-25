@@ -29,7 +29,10 @@ export type dataStoreUser = {
 // The dm type that is stored in the data store
 export type dataStoreDm = {
   dmId: number,
-  name: string
+  name: string,
+  ownerMembers: user[],
+  allMembers: user[],
+  messages: messages[]
 }
 
 // The channelId output type.
