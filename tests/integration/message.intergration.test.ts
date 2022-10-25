@@ -59,7 +59,7 @@ describe('HTTP tests for channel/messages/v2', () => {
   test('channelId does not refer to a valid channel', () => {
     const res = sendPostRequestToEndpoint('/message/send/v1', {
       token: token,
-      channelId: channel1Id,
+      channelId: 9999999,
       message: TEST_MESSAGE,
     });
 
@@ -151,7 +151,7 @@ describe('HTTP tests for channel/messages/v2', () => {
     
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
-      messages: [{ messageId: messageId, uId: authUserId, message: TEST_MESSAGE, timeSent: expect.any(time) }],
+      messages: [{ messageId: messageId, uId: authUserId, message: TEST_MESSAGE, timeSent: expect.any(Number) }],
       start: 0,
       end: -1
     });

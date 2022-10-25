@@ -8,10 +8,11 @@ import { dmCreation, getAuthUserIdFromToken, removetoken, userProfileHandleChang
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, messageSendRequest } from './types';
 import { channelMessagesV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
+import { messageSend } from './message';
 
 // Set up web app
 const app = express();
@@ -118,6 +119,17 @@ app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
   const result = userProfileHandleChange(token, handleStr);
 
   res.json(result);
+});
+
+app.post('/message/send/v1', (req: Request, res: Response) => {
+  const { token, channelId, message } = req.body as messageSendRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'token is invalid' });
+  } else {
+    return res.json(messageSend(Number(authUserId), Number(channelId), message));
+  }
 });
 
 app.post('/dm/create/v1', (req: Request, res: Response) => {

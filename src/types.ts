@@ -116,6 +116,12 @@ export type userProfileSethandleRequest = {
   handleStr: string
 }
 
+export type messageSendRequest = {
+  token: string,
+  channelId: number,
+  message: string
+}
+
 export type dmCreateRequest = {
   token: string,
   uIds: [number]
