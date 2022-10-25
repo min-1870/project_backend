@@ -127,3 +127,14 @@ export type dmCreateRequest = {
   token: string,
   uIds: [number]
 }
+
+export type userProfileSetemail = {
+  token: string
+  email: string
+}
+
+export type userProfileSetname = {
+  token: string
+  nameFirst: string
+  nameLast: string
+}
