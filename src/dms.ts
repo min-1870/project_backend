@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import { dataStore, dataStoreUser } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, toOutputDms } from './utils';
+import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, toOutputDms } from './utils';
 
 let uniqueDmId = 0;
 
@@ -88,3 +88,4 @@ export function dmlist(token:string) {
 
   return toOutputDms(dms);
 }
+
