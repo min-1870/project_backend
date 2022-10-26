@@ -1,1 +1,1 @@
-{"users":[],"channels":[],"dms":[]}
+{"users":[{"uId":98,"email":"Bob123@gmail.com","password":"11223344","nameFirst":"Barty","nameLast":"Potter","handleStr":"bartypotter","isGlobalOwner":true,"sessionTokens":["220"]},{"uId":99,"email":"gomugomu@hotmail.com","password":"11223344","nameFirst":"monkey","nameLast":"luffy","handleStr":"monkeyluffy","isGlobalOwner":false,"sessionTokens":["221"]}],"channels":[],"dms":[]}

@@ -282,7 +282,7 @@ describe('Test set for the function channelDetailsV1', () => {
 
   test('user not a channel member', () => {
     const findingChannelDetails = channelDetailsV1(testUser.uId + 1, testChannel.channelId);
-    expect(findingChannelDetails).toStrictEqual({ error: 'User is not a member of channel' });
+    expect(findingChannelDetails).toStrictEqual({ error: 'User ID is not a member of channel' });
   });
 
   test('authUserId is invalid', () => {
