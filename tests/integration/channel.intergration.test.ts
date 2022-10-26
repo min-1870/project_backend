@@ -285,3 +285,62 @@ describe('HTTP tests for channel/invite/v2', () => {
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });
+
+describe('HTTP tests for channel/details/v2', () => {
+  let channel1Id: number;
+  beforeEach(() => {
+    const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    });
+    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+  });
+  test('UserId is not a member of channel', () => {
+    const res = sendGetRequestToEndpoint('/channel/details/v2', {
+      token: token2,
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'User ID is not a member of channel'
+    });
+  });
+  test('ChannelId does not refer to a valid channel', () => {
+    const res = sendGetRequestToEndpoint('/channel/details/v2', {
+      token: token,
+      channelId: 999999999999999
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Channel ID does not refer to a valid channel'
+    });
+  });
+  test('Invalid Token', () => {
+    const res = sendGetRequestToEndpoint('/channel/details/v2', {
+      token: '99999999',
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Token is invalid'
+    });
+  });
+  test('correct input correct return for channel', () => {
+    const res = sendGetRequestToEndpoint('/channel/details/v2', {
+      token: token,
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      name: TEST_CHANNEL_NAME,
+      isPublic: true,
+      ownerMembers: uId1,
+      allMembers: uId1
+    });
+  });
+});
