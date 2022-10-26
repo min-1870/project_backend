@@ -8,12 +8,12 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, usersAllRequest } from './types';
-import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, usersAllRequest } from './types';
+import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
 import { deleteDm, dmCreation, dmLeave, dmlist } from './dms';
-import { messageRemove, messageSend } from './message';
+import { messageEdit, messageRemove, messageSend } from './message';
 
 // Set up web app
 const app = express();
@@ -129,6 +129,17 @@ app.post('/channel/invite/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
+app.get('/channel/details/v2', (req: Request, res: Response) => {
+  const { token, channelId } = req.query as unknown as channelDetailsRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+  if (authUserId == null) {
+    return res.json({ error: 'Token is invalid' });
+  } else {
+    const result = channelDetailsV1(authUserId, channelId);
+    res.json(result);
+  }
+});
+
 app.get('/users/all/v1', (req: Request, res: Response) => {
   const { token } = req.query as unknown as usersAllRequest;
 
@@ -177,6 +188,17 @@ app.post('/message/send/v1', (req: Request, res: Response) => {
     return res.json({ error: 'token is invalid' });
   } else {
     return res.json(messageSend(Number(authUserId), Number(channelId), message));
+  }
+});
+
+app.put('/message/edit/v1', (req: Request, res: Response) => {
+  const { token, messageId, message } = req.body as unknown as messageEditRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'token is invalid' });
+  } else {
+    return res.json(messageEdit(Number(authUserId), Number(messageId), message));
   }
 });
 
