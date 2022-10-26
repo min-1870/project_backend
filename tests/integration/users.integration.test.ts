@@ -1,5 +1,5 @@
 import { authResponse } from '../../src/types';
-import { getData } from './dataStore';
+import { getData } from '../../src/dataStore';
 import {
   parseJsonResponse,
   OK,

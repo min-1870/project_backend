@@ -8,7 +8,7 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, usersAllRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
@@ -126,6 +126,14 @@ app.post('/channel/invite/v2', (req: Request, res: Response) => {
   // after get authUserId, we call channelInviteV1
   const result = channelInviteV1(authUserId, channelId, uId);
 
+  res.json(result);
+});
+
+app.get('/users/all/v1', (req: Request, res: Response) => {
+  const { token } = req.query as unknown as usersAllRequest;
+
+  const authUserId = getAuthUserIdFromToken(token);
+  const result = listAllUsersV1(authUserId);
   res.json(result);
 });
 
