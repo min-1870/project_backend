@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import { dataStore, dataStoreUser, error, messages } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreChannel, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms } from './utils';
+import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms } from './utils';
 
 let uniqueDmId = 0;
 
