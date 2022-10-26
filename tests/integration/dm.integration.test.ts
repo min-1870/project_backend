@@ -1,5 +1,4 @@
 import { authResponse, channelMessagesOutput, dmId, messageId } from '../../src/types';
-import { getAuthUserIdFromToken } from '../../src/utils';
 import {
   parseJsonResponse,
   OK,
@@ -402,18 +401,17 @@ describe('HTTP tests for /dm/messages/v1', () => {
 });
 
 describe('HTTP tests for message/senddm/v1', () => {
-
   let dmId: number;
-    beforeEach(() => {
-      const res = sendPostRequestToEndpoint('/dm/create/v1', {
-        token: token,
-        uIds: [uId]
-      });
-  
-      const jsonResponse = parseJsonResponse(res) as unknown as dmId;
-      dmId = jsonResponse.dmId;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: [uId]
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+    dmId = jsonResponse.dmId;
   });
-    
+
   test('message/senddm with invalid dmId', () => {
     const res = sendPostRequestToEndpoint('/message/senddm/v1', {
       token: token,
@@ -506,7 +504,7 @@ describe('HTTP tests for message/senddm/v1', () => {
       dmId: dmId,
       start: 0,
     });
-    
+
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
       messages: [{ messageId: messageId, uId: uIdTwo, message: TEST_MESSAGE, timeSent: expect.any(Number) }],
