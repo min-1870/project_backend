@@ -344,14 +344,14 @@ describe('HTTP tests for channel/details/v2', () => {
         handleStr: 'bartypotter',
         nameFirst: 'Barty',
         nameLast: 'Potter',
-        uId: 38
+        uId: uId1
       }],
       allMembers: [{
         email: 'Bob123@gmail.com',
         handleStr: 'bartypotter',
         nameFirst: 'Barty',
         nameLast: 'Potter',
-        uId: 38
+        uId: uId1
       }]
     });
   });
