@@ -14,7 +14,11 @@ import {
   toOutputChannelDetail,
   dataStoreUserToUser,
   getDataStoreChannelSpecial,
-  getDataStoreUserSpecial
+  getDataStoreUserSpecial,
+  isChannelIdValid,
+  isUserOwnerInChannel,
+  isGlobalOwner,
+  addUserToChannelAsOwner
 } from './utils';
 
 /**
