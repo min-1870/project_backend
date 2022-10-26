@@ -128,6 +128,12 @@ export type messageSendRequest = {
   message: string
 }
 
+export type messageEditRequest = {
+  token: string,
+  messageId: number,
+  message: string
+}
+
 export type messageRemoveRequest = {
   token: string,
   messageId: number
