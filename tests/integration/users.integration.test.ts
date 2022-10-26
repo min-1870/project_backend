@@ -1,4 +1,5 @@
 import { authResponse } from '../../src/types';
+import { getData } from './dataStore';
 import {
   parseJsonResponse,
   OK,
@@ -280,6 +281,8 @@ describe('Tests for /users/all/v1', () => {
     const res = sendGetRequestToEndpoint('/users/all/v1', {
       token: token,
     });
+
+    const users = getData().users;
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({ users });
