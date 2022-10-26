@@ -5,7 +5,17 @@ import {
   dataStore,
   channel
 } from './types';
-import { addUserToChannel, getDataStoreChannel, getDataStoreUser, isAuthUserIdValid, isUserMemberInChannel, toOutputChannelDetail, dataStoreUserToUser, getDataStoreChannelSpecial, getDataStoreUserSpecial } from './utils';
+import {
+  addUserToChannel,
+  getDataStoreChannel,
+  getDataStoreUser,
+  isAuthUserIdValid,
+  isUserMemberInChannel,
+  toOutputChannelDetail,
+  dataStoreUserToUser,
+  getDataStoreChannelSpecial,
+  getDataStoreUserSpecial
+} from './utils';
 
 /**
   * Given a channelId of a channel Given a channel with ID channelId
