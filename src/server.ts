@@ -12,7 +12,7 @@ import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channels
 import { channelMessagesV1, channelJoinV1, channelInviteV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
-import { deleteDm, dmCreation, dmlist } from './dms';
+import { deleteDm, dmCreation, dmLeave, dmlist } from './dms';
 import { messageRemove, messageSend } from './message';
 
 // Set up web app
@@ -199,6 +199,12 @@ app.get('/dm/list/v1', (req: Request, res: Response) => {
 app.delete('/dm/remove/v1', (req: Request, res: Response) => {
   const { token, dmId } = req.query as unknown as dmDeleteRequest;
   const result = deleteDm(token, dmId);
+  res.json(result);
+});
+
+app.post('/dm/leave/v1', (req: Request, res: Response) => {
+  const { token, dmId } = req.body as dmDeleteRequest;
+  const result = dmLeave(token, dmId);
   res.json(result);
 });
 

@@ -93,7 +93,7 @@ export function dmlist(token:string) {
 export function deleteDm(token:string, dmId:number) {
   const data: dataStore = getData();
   // console.log(dmId);
-
+  const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     return { error: 'Token is Invalid' };
   }
@@ -109,8 +109,8 @@ export function deleteDm(token:string, dmId:number) {
   }
   for (const item of data.dms) {
     if (item.dmId.toString() === dmId.toString()) {
-      if (item.allMembers.find(user => user.uId === getAuthUserIdFromToken(token) == null)) {
-        return { error: 'user is no longer part of dm' };
+      if (item.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
+        return { error: 'user is not part of dm' };
       }
     }
   }
@@ -118,5 +118,31 @@ export function deleteDm(token:string, dmId:number) {
   const index = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
   data.dms.splice(index, 1);
   setData(data);
+  return {};
+}
+
+export function dmLeave(token:string, dmId:number) {
+  const data: dataStore = getData();
+  // console.log(dmId);
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
+    return { error: 'Token is Invalid' };
+  }
+  if (!isDataStoreDmValid(dmId, data)) {
+    return { error: 'dmId is Invalid' };
+  }
+  for (const item of data.dms) {
+    if (item.dmId.toString() === dmId.toString()) {
+      if (item.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
+        return { error: 'user is not part of dm' };
+      }
+    }
+  }
+  // console.log(data.dms);
+  const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
+  const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
+  data.dms[indexOne].allMembers.splice(indexTwo, 1);
+  setData(data);
+  // console.log(data.dms);
   return {};
 }
