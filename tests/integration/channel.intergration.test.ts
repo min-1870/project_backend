@@ -339,8 +339,20 @@ describe('HTTP tests for channel/details/v2', () => {
     expect(parseJsonResponse(res)).toStrictEqual({
       name: TEST_CHANNEL_NAME,
       isPublic: true,
-      ownerMembers: uId1,
-      allMembers: uId1
+      ownerMembers: [{
+        email: "Bob123@gmail.com",
+        handleStr: "bartypotter",
+        nameFirst: "Barty",
+        nameLast: "Potter",
+        uId: 38
+      }],
+      allMembers: [{
+        email: "Bob123@gmail.com",
+        handleStr: "bartypotter",
+        nameFirst: "Barty",
+        nameLast: "Potter",
+        uId: 38
+      }]
     });
   });
 });
