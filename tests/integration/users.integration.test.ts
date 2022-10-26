@@ -264,3 +264,24 @@ describe('Tests for /user/profile/setname/v1', () => {
     });
   });
 });
+
+describe('Tests for /users/all/v1', () => {
+  test('token is invalid', () => {
+    const res = sendGetRequestToEndpoint('/users/all/v1', {
+      token: '99999999',
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid token'
+    });
+  });
+  test('A list of all users and their associated details is successfully returned.', () => {
+    const res = sendGetRequestToEndpoint('/users/all/v1', {
+      token: token,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({ users });
+  });
+});
