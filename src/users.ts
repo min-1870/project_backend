@@ -119,7 +119,7 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
 export function listAllUsersV1(token: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   const users: dataStoreUser[] = data.users;
-  if (users !== null) {
+  if (data.users.length !== 0) {
     return { users };
   }
   return { error: 'Token is Invalid' };
