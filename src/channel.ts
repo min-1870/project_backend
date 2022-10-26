@@ -5,7 +5,7 @@ import {
   dataStore,
   channel
 } from './types';
-import { addUserToChannel, getDataStoreChannel, getDataStoreUser, isAuthUserIdValid, isUserMemberInChannel, toOutputChannelDetail, dataStoreUserToUser, isChannelIdValid, isUserOwnerInChannel, addUserToChannelAsOwner, isGlobalOwner } from './utils';
+import { addUserToChannel, getDataStoreChannel, getDataStoreUser, isAuthUserIdValid, isUserMemberInChannel, toOutputChannelDetail, dataStoreUserToUser, getDataStoreChannelSpecial, getDataStoreUserSpecial } from './utils';
 
 /**
   * Given a channelId of a channel Given a channel with ID channelId
@@ -19,13 +19,13 @@ import { addUserToChannel, getDataStoreChannel, getDataStoreUser, isAuthUserIdVa
 */
 export function channelDetailsV1(authUserId: number, channelId: number): (channel | error) {
   const data = getData();
-  const channel = getDataStoreChannel(channelId, data);
+  const channel = getDataStoreChannelSpecial(channelId, data);
   if (channel == null) {
     return { error: 'Channel ID does not refer to a valid channel' };
-  } else if (getDataStoreUser(authUserId, data) == null) {
+  } else if (getDataStoreUserSpecial(authUserId, data) == null) {
     return { error: 'User ID does not exist' };
   } else if (channel.allMembers.find(user => user.uId === authUserId) == null) {
-    return { error: 'User is not a member of channel' };
+    return { error: 'User ID is not a member of channel' };
   }
 
   return toOutputChannelDetail(channel);
