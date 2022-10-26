@@ -121,7 +121,7 @@ export function isUserOwnerMemberInChannel(authUserId: number, channelId: number
 export function addUserToChannel(user: user, channelId: number, data: dataStore) {
   // Check if the user is already a member or not. This is needed since
   // when adding global owner, they would bypass the being a member first rule.
-  if (isUserMemberInChannel(getDataStoreChannel(channelId, data), user.uId, data)) {
+  if (isUserMemberInChannel(user.uId, channelId, data)) {
     return;
   }
   data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
@@ -179,7 +179,6 @@ export function toOutputDms(dms: dataStoreDm[]): dms {
 }
 
 export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
-  // console.log(data);
   return getDataStoreDm(dmId, data) != null;
 }
 // -----OTHERS

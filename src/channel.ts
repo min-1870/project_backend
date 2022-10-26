@@ -168,7 +168,7 @@ export function channelAddOwnersV1(
     return { error: 'authUserId is not a valid user.' };
   }
 
-  if (!isUserMemberInChannel(dataStoreChannel, ownerToAddId)) {
+  if (!isUserMemberInChannel(ownerToAddId, dataStoreChannel.channelId, data)) {
     return { error: 'uId refers to a user who is not a member of the channel.' };
   }
 
