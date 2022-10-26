@@ -17,6 +17,7 @@ let token: string;
 let tokenTwo: string;
 let tokenThree: string;
 let uId: number;
+let uIdTwo: number;
 
 const TEST_MESSAGE = 'hello world :)';
 // over 1000 characters
@@ -34,6 +35,7 @@ beforeEach(() => {
 
   let jsonResponse = parseJsonResponse(res) as unknown as authResponse;
   token = jsonResponse.token;
+  uIdTwo = jsonResponse.authUserId;
 
   res = sendPostRequestToEndpoint('/auth/register/v2', {
     email: 'gomugomu@hotmail.com',
@@ -400,20 +402,20 @@ describe('HTTP tests for /dm/messages/v1', () => {
 });
 
 describe('HTTP tests for message/senddm/v1', () => {
+
   let dmId: number;
-  let uId: number;
-  beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
-      uIds: [uId]
-    });
-
-    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
-    dmId = jsonResponse.dmId;
+    beforeEach(() => {
+      const res = sendPostRequestToEndpoint('/dm/create/v1', {
+        token: token,
+        uIds: [uId]
+      });
+  
+      const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+      dmId = jsonResponse.dmId;
   });
-
+    
   test('message/senddm with invalid dmId', () => {
-    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
       token: token,
       dmId: (dmId + 104340),
       message: TEST_MESSAGE
@@ -426,7 +428,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('length of message is less than 1 characters', () => {
-    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
       token: token,
       dmId: dmId,
       message: ''
@@ -439,7 +441,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('length of message is over 1000 characters', () => {
-    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
       token: token,
       dmId: dmId,
       message: VERY_LONG_MESSAGE
@@ -452,7 +454,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('failure, user not part of dm', () => {
-    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
       token: tokenThree,
       dmId: dmId,
       message: TEST_MESSAGE
@@ -504,10 +506,10 @@ describe('HTTP tests for message/senddm/v1', () => {
       dmId: dmId,
       start: 0,
     });
-
+    
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
-      messages: [{ messageId: messageId, uId: getAuthUserIdFromToken(token), message: TEST_MESSAGE, timeSent: expect.any(Number) }],
+      messages: [{ messageId: messageId, uId: uIdTwo, message: TEST_MESSAGE, timeSent: expect.any(Number) }],
       start: 0,
       end: -1
     });

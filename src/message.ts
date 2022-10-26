@@ -1,6 +1,6 @@
 import { getData } from './dataStore';
 import { dataStore, error, messages } from './types';
-import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isMessageIdValid, isUserMemberInChannel, isUserOwnerMemberInChannel } from './utils';
+import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreDm, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid, isUserMemberInChannel, isUserMemberInDm, isUserOwnerMemberInChannel } from './utils';
 
 let messageId = 0;
 
@@ -70,4 +70,31 @@ export function messageEdit (authUserId: number, messageId: number, message: str
   editedMessage.message = message;
 
   return {};
+}
+
+export function dmMessageSend (authUserId: number, dmId: number, message: string): ({messageId: number} | error) {
+  const data = getData();
+  const dm = getDataStoreDm(dmId, data);
+  if (!isAuthUserIdValid(authUserId, data)) {
+    return { error: 'Token is Invalid' };
+  } else if (!isDataStoreDmValid(dmId, data)) {
+    return { error: 'dmId is Invalid' };
+  } else if (message.length < 1 || message.length > 1000) {
+    return { error: 'length of message is less than 1 or over 1000 characters' };
+  } else if (!isUserMemberInDm(authUserId, dmId, data)) {
+    return { error: 'user is not part of dm' };
+  }
+
+  const newMessage: messages = {
+    messageId: messageId,
+    uId: authUserId,
+    message: message,
+    timeSent: Date.now()
+  };
+
+  dm.messages.push(newMessage);
+
+  messageId += 1;
+
+  return { messageId: messageId - 1 };
 }

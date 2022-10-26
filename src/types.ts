@@ -139,6 +139,12 @@ export type messageRemoveRequest = {
   messageId: number
 }
 
+export type messageSendDmRequest = {
+  token: string,
+  dmId: number,
+  message: string
+}
+
 export type channelJoinRequest = {
   token: string,
   channelId: number,
