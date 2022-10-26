@@ -1,4 +1,5 @@
-import { authResponse, dmId } from '../../src/types';
+import { authResponse, channelMessagesOutput, dmId, messageId } from '../../src/types';
+import { getAuthUserIdFromToken } from '../../src/utils';
 import {
   parseJsonResponse,
   OK,
@@ -16,6 +17,11 @@ let token: string;
 let tokenTwo: string;
 let tokenThree: string;
 let uId: number;
+
+const TEST_MESSAGE = 'hello world :)';
+// over 1000 characters
+let VERY_LONG_MESSAGE = ':(';
+for (let i = 0; i < 1000; i++) VERY_LONG_MESSAGE = VERY_LONG_MESSAGE + ':(';
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -366,7 +372,7 @@ describe('HTTP tests for /dm/messages/v1', () => {
     });
   });
 
-  test('dm/leave failure, user not part of dm', () => {
+  test('dm/messages failure, user not part of dm', () => {
     const res = sendGetRequestToEndpoint('/dm/messages/v1', {
       token: tokenThree,
       dmId: dmId,
@@ -390,5 +396,137 @@ describe('HTTP tests for /dm/messages/v1', () => {
     expect(parseJsonResponse(res)).toStrictEqual({
       error: 'Invalid start'
     });
+  });
+});
+
+describe('HTTP tests for message/senddm/v1', () => {
+  let dmId: number;
+  let uId: number;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: [uId]
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+    dmId = jsonResponse.dmId;
+  });
+
+  test('message/senddm with invalid dmId', () => {
+    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+      token: token,
+      dmId: (dmId + 104340),
+      message: TEST_MESSAGE
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'dmId is Invalid'
+    });
+  });
+
+  test('length of message is less than 1 characters', () => {
+    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+      token: token,
+      dmId: dmId,
+      message: ''
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'length of message is less than 1 or over 1000 characters'
+    });
+  });
+
+  test('length of message is over 1000 characters', () => {
+    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+      token: token,
+      dmId: dmId,
+      message: VERY_LONG_MESSAGE
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'length of message is less than 1 or over 1000 characters'
+    });
+  });
+
+  test('failure, user not part of dm', () => {
+    const res = sendPostRequestToEndpoint('/messages/senddm/v1', {
+      token: tokenThree,
+      dmId: dmId,
+      message: TEST_MESSAGE
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'user is not part of dm'
+    });
+  });
+
+  test('token is invalid', () => {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
+      token: (token + 999999),
+      dmId: dmId,
+      message: TEST_MESSAGE,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Token is Invalid'
+    });
+  });
+
+  test('correct input correct return', () => {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
+      token: token,
+      dmId: dmId,
+      message: TEST_MESSAGE,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messageId: expect.any(Number)
+    });
+  });
+
+  test('correct input correct message', () => {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
+      token: token,
+      dmId: dmId,
+      message: TEST_MESSAGE,
+    });
+
+    const messageId = (parseJsonResponse(res) as unknown as messageId).messageId;
+
+    const res2 = sendGetRequestToEndpoint('/dm/messages/v1', {
+      token: token,
+      dmId: dmId,
+      start: 0,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res2)).toStrictEqual({
+      messages: [{ messageId: messageId, uId: getAuthUserIdFromToken(token), message: TEST_MESSAGE, timeSent: expect.any(Number) }],
+      start: 0,
+      end: -1
+    });
+  });
+
+  test('correct input correct timeSent', () => {
+    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
+      token: token,
+      dmId: dmId,
+      message: TEST_MESSAGE,
+    });
+
+    const res2 = sendGetRequestToEndpoint('/dm/messages/v1', {
+      token: token,
+      dmId: dmId,
+      start: 0,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect((parseJsonResponse(res2) as unknown as channelMessagesOutput).messages[0].timeSent).toBeLessThanOrEqual(Date.now() + 2);
   });
 });
