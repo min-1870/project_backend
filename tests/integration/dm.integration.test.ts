@@ -52,7 +52,6 @@ beforeEach(() => {
 });
 
 describe('HTTP tests for /dm/create/v1', () => {
-  // happy path
   test('Successful /dm/create/v1', () => {
     const res = sendPostRequestToEndpoint('/dm/create/v1', {
       token: token,
@@ -132,7 +131,6 @@ describe('HTTP tests for /dm/list/v1', () => {
     });
 
     expect(res.statusCode).toBe(OK);
-    // console.log(parseJsonResponse(res))
     expect(parseJsonResponse(res)).toStrictEqual({
       dms: [
         {
@@ -154,7 +152,6 @@ describe('HTTP tests for /dm/list/v1', () => {
     });
 
     expect(res.statusCode).toBe(OK);
-    // console.log(parseJsonResponse(res))
     expect(parseJsonResponse(res)).toStrictEqual({
       dms: [
         {
@@ -200,7 +197,6 @@ describe('HTTP tests for /dm/remove/v1', () => {
     });
 
     expect(res.statusCode).toBe(OK);
-    // console.log(parseJsonResponse(res))
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
@@ -277,7 +273,6 @@ describe('HTTP tests for /dm/leave/v1', () => {
     });
 
     expect(res.statusCode).toBe(OK);
-    // console.log(parseJsonResponse(res))
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
@@ -314,6 +309,86 @@ describe('HTTP tests for /dm/leave/v1', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
       error: 'user is not part of dm'
+    });
+  });
+});
+
+describe('HTTP tests for /dm/messages/v1', () => {
+  let dmId: number;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: [uId]
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+    dmId = jsonResponse.dmId;
+  });
+
+  test('dm/messages successful', () => {
+    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
+      token: token,
+      dmId: dmId,
+      start: 0
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: [],
+      start: 0,
+      end: -1
+    });
+  });
+
+  test('dm/messages with invalid token fail', () => {
+    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
+      token: (token + 643535),
+      dmId: dmId,
+      start: 0
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Token is Invalid'
+    });
+  });
+
+  test('dm/messages with invalid dmId', () => {
+    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
+      token: token,
+      dmId: (dmId + 104340),
+      start: 0
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'dmId is Invalid'
+    });
+  });
+
+  test('dm/leave failure, user not part of dm', () => {
+    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
+      token: tokenThree,
+      dmId: dmId,
+      start: 0
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'user is not part of dm'
+    });
+  });
+
+  test('start is greater than the total number of messages in the dm', () => {
+    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
+      ttoken: tokenThree,
+      dmId: dmId,
+      start: 0
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid start'
     });
   });
 });
