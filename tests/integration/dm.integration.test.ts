@@ -381,9 +381,9 @@ describe('HTTP tests for /dm/messages/v1', () => {
 
   test('start is greater than the total number of messages in the dm', () => {
     const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      ttoken: tokenThree,
+      token: token,
       dmId: dmId,
-      start: 0
+      start: 9999999999
     });
 
     expect(res.statusCode).toBe(OK);

@@ -165,6 +165,12 @@ export type dmDeleteRequest = {
   dmId: number
 }
 
+export type dmMessagesRequest = {
+  token: string,
+  dmId: number,
+  start: number
+}
+
 export type userProfileSetemail = {
   token: string
   email: string

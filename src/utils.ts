@@ -200,3 +200,7 @@ export function duplicateValueCheck(array) {
 
   return false;
 }
+
+export function isUserMemberInDm(authUserId: number, dmId: number, data: dataStore): boolean {
+  return getDataStoreDm(dmId, data).allMembers.some(member => member.uId === authUserId);
+}
