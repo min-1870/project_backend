@@ -7,24 +7,12 @@ export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean 
   return getDataStoreUser(authUserId, data) != null;
 }
 
-export function isChannelIdValid(channelId: number, data: dataStore): boolean {
-  return getDataStoreChannel(channelId, data) != null;
-}
-
 export function getDataStoreUser(userId: number, data: dataStore): dataStoreUser {
   return data.users.find(user => user.uId === userId);
 }
 
 export function getDataStoreUserByEmail(email: string, data: dataStore): dataStoreUser {
   return data.users.find(user => user.email === email);
-}
-
-export function getDataStoreChannel(channelId: number, data: dataStore): dataStoreChannel {
-  return data.channels.find(channel => channel.channelId === channelId);
-}
-
-export function isUserMemberInChannel(channel: dataStoreChannel, userId: number): boolean {
-  return channel.allMembers.some(member => member.uId === userId);
 }
 
 export function isUserOwnerInChannel(channel: dataStoreChannel, userId: number): boolean {
@@ -133,7 +121,7 @@ export function isUserOwnerMemberInChannel(authUserId: number, channelId: number
 export function addUserToChannel(user: user, channelId: number, data: dataStore) {
   // Check if the user is already a member or not. This is needed since
   // when adding global owner, they would bypass the being a member first rule.
-  if (isUserMemberInChannel(getDataStoreChannel(channelId, data), user.uId)) {
+  if (isUserMemberInChannel(getDataStoreChannel(channelId, data), user.uId, data)) {
     return;
   }
   data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
