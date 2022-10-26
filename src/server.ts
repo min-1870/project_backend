@@ -8,7 +8,7 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
@@ -139,7 +139,6 @@ app.get('/channel/details/v2', (req: Request, res: Response) => {
     res.json(result);
   }
 });
-
 
 app.get('/user/profile/v2', (req: Request, res: Response) => {
   const { token, uId } = req.query as unknown as userProfileRequest;

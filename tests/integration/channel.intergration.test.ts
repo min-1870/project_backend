@@ -340,17 +340,17 @@ describe('HTTP tests for channel/details/v2', () => {
       name: TEST_CHANNEL_NAME,
       isPublic: true,
       ownerMembers: [{
-        email: "Bob123@gmail.com",
-        handleStr: "bartypotter",
-        nameFirst: "Barty",
-        nameLast: "Potter",
+        email: 'Bob123@gmail.com',
+        handleStr: 'bartypotter',
+        nameFirst: 'Barty',
+        nameLast: 'Potter',
         uId: 38
       }],
       allMembers: [{
-        email: "Bob123@gmail.com",
-        handleStr: "bartypotter",
-        nameFirst: "Barty",
-        nameLast: "Potter",
+        email: 'Bob123@gmail.com',
+        handleStr: 'bartypotter',
+        nameFirst: 'Barty',
+        nameLast: 'Potter',
         uId: 38
       }]
     });

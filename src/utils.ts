@@ -11,9 +11,9 @@ export function getDataStoreUser(userId: number, data: dataStore): dataStoreUser
   return data.users.find(user => user.uId === userId);
 }
 
-//for some reason need this to make channelDetailsV1 work
+// for some reason need this to make channelDetailsV1 work
 export function getDataStoreUserSpecial(userId: number, data: dataStore): dataStoreUser {
-  return data.users.find(user => user.uId.toString()=== userId.toString());
+  return data.users.find(user => user.uId.toString() === userId.toString());
 }
 
 export function getDataStoreUserByEmail(email: string, data: dataStore): dataStoreUser {
