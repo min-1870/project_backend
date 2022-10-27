@@ -42,7 +42,7 @@ if (fs.existsSync('./database.json')) {
 
 /**
  * Given a registered user's email and password, returns their authUserId value.
- * 
+ *
  * @param {string} email - user's email
  * @param {string} password - user's password
  *
@@ -60,7 +60,7 @@ app.post('/auth/login/v2', (req: Request, res: Response) => {
 /**
  * Given a user's first and last name, email address, and password,
  * creates a new account for them and returns a new authUserId.
- * 
+ *
  * @param {string} email - user's email
  * @param {string} password - user's password
  * @param {string} nameFirst - user's First name
@@ -81,7 +81,7 @@ app.post('/auth/register/v2', (req: Request, res: Response) => {
  * Creates a new channel with the given name that is either a public
  * or private channel. The user who created it automatically joins
  * the channel and is the owner.
- * 
+ *
  * @param {string} token - user's token
  * @param {string} name - user's name
  * @param {string} isPublic - public or not for the channel
@@ -103,7 +103,7 @@ app.post('/channels/create/v2', (req: Request, res: Response) => {
 /**
  * Provide a list of all channels (and their associated details) that
  * the authorised user is part of.
- * 
+ *
  * @param {string} token - user's token
  *
  * @returns {number} channelId - channelId made by the function
