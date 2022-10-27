@@ -7,8 +7,8 @@ import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels'
 import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
-import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, dmMessagesRequest, messageSendDmRequest } from './types';
+import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
@@ -176,6 +176,17 @@ app.get('/channel/details/v2', (req: Request, res: Response) => {
     return res.json({ error: 'Token is invalid' });
   } else {
     const result = channelDetailsV1(authUserId, channelId);
+    res.json(result);
+  }
+});
+
+app.get('/users/all/v1', (req: Request, res: Response) => {
+  const { token } = req.query as unknown as usersAllRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+  if (authUserId == null) {
+    return res.json({ error: 'Invalid token' });
+  } else {
+    const result = listAllUsersV1(token);
     res.json(result);
   }
 });

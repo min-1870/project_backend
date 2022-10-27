@@ -15,6 +15,7 @@ const NAME_LAST = 'Potter';
 
 let token: string;
 let uId: number;
+let uIdTwo: number;
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -27,6 +28,7 @@ beforeEach(() => {
 
   let jsonResponse = parseJsonResponse(res) as unknown as authResponse;
   token = jsonResponse.token;
+  uIdTwo = jsonResponse.authUserId;
 
   res = sendPostRequestToEndpoint('/auth/register/v2', {
     email: 'gomugomu@hotmail.com',
@@ -261,6 +263,42 @@ describe('Tests for /user/profile/setname/v1', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
       error: expect.any(String)
+    });
+  });
+});
+
+describe('Tests for /users/all/v1', () => {
+  test('token is invalid', () => {
+    const res = sendGetRequestToEndpoint('/users/all/v1', {
+      token: '99999999',
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid token'
+    });
+  });
+  test('A list of all users and their associated details is successfully returned.', () => {
+    const res = sendGetRequestToEndpoint('/users/all/v1', {
+      token: token,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      users: [{
+        uId: uIdTwo,
+        email: 'Bob123@gmail.com',
+        nameFirst: 'Barty',
+        nameLast: 'Potter',
+        handleStr: 'bartypotter'
+      },
+      {
+        uId: uId,
+        email: 'gomugomu@hotmail.com',
+        nameFirst: 'monkey',
+        nameLast: 'luffy',
+        handleStr: 'monkeyluffy'
+      }]
     });
   });
 });
