@@ -388,7 +388,7 @@ describe('HTTP tests for channel/leave/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Permission denied, non-channel user cannot invite other user to the channel'
+      error: 'Permission denied, non-channel user cannot leave the channel'
     });
   });
 

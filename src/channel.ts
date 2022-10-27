@@ -1,4 +1,4 @@
-import { getData } from './dataStore';
+import { getData, setData } from './dataStore';
 import {
   error,
   messages,
@@ -206,13 +206,13 @@ export function channelLeaveV1(token: string, channelId: number) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'Token is Invalid' };
+    return { error: 'Invalid token' };
   }
   if (!isChannelIdValid(channelId, data)) {
-    return { error: 'channelId is Invalid' };
+    return { error: 'Invalid channel ID' };
   }
   if (!isUserMemberInChannel(authUserId, channelId, data)) {
-    return { error: 'user is not in channel' };
+    return { error: 'Permission denied, non-channel user cannot leave the channel' };
   }
   const indexOne = data.channels.findIndex(channel => channel.channelId.toString() === channelId.toString());
   const indexTwo = data.channels[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
