@@ -122,5 +122,5 @@ export function listAllUsersV1(token: string): (Record<string, never> | error) {
   if (data.users.length !== 0) {
     return { users };
   }
-  return { error: 'Token is Invalid' };
+  return { error: 'Invalid token' };
 }

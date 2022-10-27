@@ -142,10 +142,14 @@ app.get('/channel/details/v2', (req: Request, res: Response) => {
 
 app.get('/users/all/v1', (req: Request, res: Response) => {
   const { token } = req.query as unknown as usersAllRequest;
-
   const authUserId = getAuthUserIdFromToken(token);
-  const result = listAllUsersV1(authUserId);
-  res.json(result);
+  if (authUserId == null) {
+    return res.json({ error: 'Invalid token' });
+  } else {
+    const result = listAllUsersV1(token);
+    res.json(result);
+  }
+  
 });
 
 app.get('/user/profile/v2', (req: Request, res: Response) => {
