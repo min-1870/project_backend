@@ -1,5 +1,4 @@
 import { authResponse } from '../../src/types';
-import { getData } from '../../src/dataStore';
 import {
   parseJsonResponse,
   OK,
@@ -8,7 +7,6 @@ import {
   sendPostRequestToEndpoint,
   sendPutRequestToEndpoint,
 } from './integrationTestUtils';
-import { json } from 'stream/consumers';
 
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
@@ -284,8 +282,6 @@ describe('Tests for /users/all/v1', () => {
     const res = sendGetRequestToEndpoint('/users/all/v1', {
       token: token,
     });
-
-    const usersDetails = getData().users;
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({

@@ -118,13 +118,12 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
 
 export function listAllUsersV1(token: string): ({users: user[]}| error) {
   const data: dataStore = getData();
-  let myarray : user[] = [];
-  let i = 0;
+  const myarray : user[] = [];
+
   for (const item of data.users) {
     console.log(item);
-    let dataStoreUser = getDataStoreUser(item.uId, data);
+    const dataStoreUser = getDataStoreUser(item.uId, data);
     myarray.push(dataStoreUserToUser(dataStoreUser));
-    
   }
   return { users: myarray };
 }
