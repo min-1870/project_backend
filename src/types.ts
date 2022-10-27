@@ -192,3 +192,8 @@ export type userProfileSetname = {
 export type usersAllRequest = {
   token: string
 }
+
+export type channelLeaveRequest = {
+  token: string
+  channelId: number
+}

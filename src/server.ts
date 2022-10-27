@@ -8,8 +8,8 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest } from './types';
-import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1 } from './channel';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest, channelLeaveRequest } from './types';
+import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelLeaveV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages } from './dms';
@@ -166,6 +166,12 @@ app.post('/channel/invite/v2', (req: Request, res: Response) => {
   // after get authUserId, we call channelInviteV1
   const result = channelInviteV1(authUserId, channelId, uId);
 
+  res.json(result);
+});
+
+app.post('/channel/leave/v1', (req: Request, res: Response) => {
+  const { token, channelId } = req.body as channelLeaveRequest;
+  const result = channelLeaveV1(token, channelId);
   res.json(result);
 });
 
