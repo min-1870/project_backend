@@ -144,7 +144,11 @@ app.get('/users/all/v1', (req: Request, res: Response) => {
   const { token } = req.query as unknown as usersAllRequest;
 
   const authUserId = getAuthUserIdFromToken(token);
-  const result = listAllUsersV1(authUserId);
+  if (authUserId == null) {
+    return res.json({ error: 'token is invalid' });
+  } else {
+    const result = listAllUsersV1(authUserId);
+  }
   res.json(result);
 });
 
