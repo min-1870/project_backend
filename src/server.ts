@@ -8,12 +8,12 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, dmMessagesRequest, messageSendDmRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
-import { deleteDm, dmCreation, dmLeave, dmlist } from './dms';
-import { messageEdit, messageRemove, messageSend } from './message';
+import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages } from './dms';
+import { dmMessageSend, messageEdit, messageRemove, messageSend } from './message';
 
 // Set up web app
 const app = express();
@@ -205,6 +205,16 @@ app.delete('/message/remove/v1', (req: Request, res: Response) => {
   }
 });
 
+app.post('/message/senddm/v1', (req: Request, res: Response) => {
+  const { token, dmId, message } = req.body as unknown as messageSendDmRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+  if (authUserId == null) {
+    return res.json({ error: 'Token is Invalid' });
+  } else {
+    return res.json(dmMessageSend(Number(authUserId), Number(dmId), message));
+  }
+});
+
 app.post('/dm/create/v1', (req: Request, res: Response) => {
   const { token, uIds } = req.body as dmCreateRequest;
   const result = dmCreation(token, uIds);
@@ -216,6 +226,17 @@ app.get('/dm/list/v1', (req: Request, res: Response) => {
   // const authUserId = getAuthUserIdFromToken(token);
   const result = dmlist(token);
   res.json(result);
+});
+
+app.get('/dm/messages/v1', (req: Request, res: Response) => {
+  const { token, dmId, start } = req.query as unknown as dmMessagesRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'Token is Invalid' });
+  } else {
+    return res.json(dmMessages(authUserId, Number(dmId), Number(start)));
+  }
 });
 
 app.delete('/dm/remove/v1', (req: Request, res: Response) => {

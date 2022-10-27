@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
-import { dataStore, dataStoreUser } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, toOutputDms } from './utils';
+import { dataStore, dataStoreUser, error, messages } from './types';
+import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms } from './utils';
 
 let uniqueDmId = 0;
 
@@ -145,4 +145,36 @@ export function dmLeave(token:string, dmId:number) {
   setData(data);
   // console.log(data.dms);
   return {};
+}
+
+export function dmMessages(authUserId: number, dmId: number, start: number): ({ messages: messages[], start: number, end: number } | error) {
+  const data = getData();
+  const dm = getDataStoreDm(dmId, data);
+  if (dm == null) {
+    return { error: 'dmId is Invalid' };
+  } else if (!isAuthUserIdValid(authUserId, data)) {
+    return { error: 'Invalid user ID' };
+  } else if (start < 0 || start > dm.messages.length) {
+    return { error: 'Invalid start' };
+  } else if (!isUserMemberInDm(authUserId, dmId, data)) {
+    return { error: 'user is not part of dm' };
+  }
+
+  const messages = dm.messages;
+  let slicedMessages: messages[];
+  let end: number;
+
+  if (start + 50 >= messages.length) {
+    end = -1;
+    slicedMessages = messages.slice(start);
+  } else {
+    end = start + 50;
+    slicedMessages = messages.slice(start, end);
+  }
+
+  return {
+    messages: slicedMessages,
+    start: start,
+    end: end
+  };
 }
