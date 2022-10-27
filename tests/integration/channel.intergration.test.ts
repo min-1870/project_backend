@@ -356,3 +356,61 @@ describe('HTTP tests for channel/details/v2', () => {
     });
   });
 });
+
+describe('HTTP tests for channel/leave/v1', () => {
+  let channel1Id: number;
+  beforeEach(() => {
+    const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    });
+    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+  });
+
+  test('channelId does not refer to a valid channel', () => {
+    const res = sendPostRequestToEndpoint('/channel/leave/v1', {
+      token: token,
+      channelId: 99999999,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid channel ID'
+    });
+  });
+
+  test('channelId is valid and the authorised user is not a member of the channel', () => {
+    const res = sendPostRequestToEndpoint('/channel/leave/v1', {
+      token: token2,
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Permission denied, non-channel user cannot invite other user to the channel'
+    });
+  });
+
+  test('token is invalid', () => {
+    const res = sendPostRequestToEndpoint('/channel/leave/v1', {
+      token: '99999999',
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Invalid token'
+    });
+  });
+
+  test('correct input correct return ', () => {
+    const res = sendPostRequestToEndpoint('/channel/leave/v1', {
+      token: token,
+      channelId: channel1Id,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+});
