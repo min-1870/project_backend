@@ -15,11 +15,20 @@ const TEST_CHANNEL_NAME = 'Test channel';
 
 let token: string; // token of test user 1
 let token2: string; // token of test user 2
+let token3: string; // token of test user 3
 let uId1: number; // uId of test user 1
 let uId2: number; // uId of test user 2
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
+  const res3 = sendPostRequestToEndpoint('/auth/register/v2', {
+    email: '3' + EMAIL,
+    password: '3' + PASSWORD,
+    nameFirst: 'c' + NAME_FIRST,
+    nameLast: 'c' + NAME_LAST
+  });
+  token3 = (parseJsonResponse(res3) as unknown as authResponse).token;
+
   const res1 = sendPostRequestToEndpoint('/auth/register/v2', {
     email: EMAIL,
     password: PASSWORD,
@@ -353,6 +362,198 @@ describe('HTTP tests for channel/details/v2', () => {
         nameLast: 'Potter',
         uId: uId1
       }]
+    });
+  });
+});
+
+describe('HTTP tests for channel/addowner/v1', () => {
+  let privateChannelId: number;
+  let publicChannelId: number;
+
+  beforeEach(() => {
+    const channel1CreateRes = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    });
+    publicChannelId = (parseJsonResponse(channel1CreateRes) as unknown as channelId).channelId;
+
+    const channel2CreateRes = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: false
+    });
+    privateChannelId = (parseJsonResponse(channel2CreateRes) as unknown as channelId).channelId;
+
+    sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: token,
+      channelId: privateChannelId,
+      uId: uId2
+    });
+    sendPostRequestToEndpoint('/channel/join/v2', {
+      token: token2,
+      channelId: publicChannelId,
+    });
+  });
+
+  test('Add channel owner to public channel successful', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: publicChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('Add channel owner to private channel successful', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: privateChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('Add global owner to private channel successful', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token3,
+      channelId: privateChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('Add global owner to public channel successful', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token3,
+      channelId: publicChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+  test('Add owner to invalid channel id returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: 5676879809,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Add global owner to public with invalid channel id returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token3,
+      channelId: 5676879809,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Add owner to private channel with invalid channel id returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: 5676879809,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Add global owner to public with invalid channel id returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token3,
+      channelId: 5676879809,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Add owner to public channel with channel uId not a member returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token2,
+      channelId: publicChannelId,
+      uId: 1234444
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Add owner to private channel with channel uId not a member returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token2,
+      channelId: privateChannelId,
+      uId: 2222222
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Owner add new existing owner returns fails', () => {
+    const addNewOwner = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: publicChannelId,
+      uId: uId2
+    });
+
+    expect(addNewOwner.statusCode).toBe(OK);
+    expect(parseJsonResponse(addNewOwner)).toStrictEqual({});
+
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: publicChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Non owner add new owner returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token2,
+      channelId: privateChannelId,
+      uId: 2222222
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+  test('Add owner with invalid uId returns fails', () => {
+    const res = sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: privateChannelId,
+      uId: 2222222
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
     });
   });
 });
