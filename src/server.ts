@@ -186,6 +186,16 @@ app.get('/channel/details/v2', (req: Request, res: Response) => {
   }
 });
 
+app.post('/channel/addowner/v1', (req: Request, res: Response) => {
+  const { token, channelId, uId } = req.body as channelAddownerRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+  const result = channelAddOwnersV1(
+    parseInt(encodeURI(authUserId.toString())),
+    parseInt(encodeURI(channelId.toString())),
+    parseInt(encodeURI(uId.toString())));
+  res.json(result);
+});
+
 app.get('/users/all/v1', (req: Request, res: Response) => {
   const { token } = req.query as unknown as usersAllRequest;
   const authUserId = getAuthUserIdFromToken(token);
