@@ -14,7 +14,7 @@ import validator from 'validator';
  * * *
  * @returns {user} - Object containing uId, email, nameFirst, nameLast, handleStr
  */
-export function userProfileV1(authUserId: number, uID: number): {user: user}|error {
+export function userProfileV1(authUserId: number, uID: number): { user: user } | error {
   const data = getData();
 
   if (!isAuthUserIdValid(authUserId, data)) {
@@ -114,4 +114,16 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
     }
   }
   return { error: 'Token is Invalid' };
+}
+
+export function listAllUsersV1(token: string): ({users: user[]}| error) {
+  const data: dataStore = getData();
+  const myarray : user[] = [];
+
+  for (const item of data.users) {
+    console.log(item);
+    const dataStoreUser = getDataStoreUser(item.uId, data);
+    myarray.push(dataStoreUserToUser(dataStoreUser));
+  }
+  return { users: myarray };
 }
