@@ -1,6 +1,6 @@
 // The user output type.
 export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
-export type users = { user: user[] };
+export type users = { users: user[] };
 
 // Messages output type.
 export type messages = { messageId: number, uId: number, message: string, timeSent: number };

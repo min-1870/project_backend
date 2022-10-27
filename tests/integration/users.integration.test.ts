@@ -8,6 +8,7 @@ import {
   sendPostRequestToEndpoint,
   sendPutRequestToEndpoint,
 } from './integrationTestUtils';
+import { json } from 'stream/consumers';
 
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
@@ -16,6 +17,7 @@ const NAME_LAST = 'Potter';
 
 let token: string;
 let uId: number;
+let uIdTwo: number;
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -28,6 +30,7 @@ beforeEach(() => {
 
   let jsonResponse = parseJsonResponse(res) as unknown as authResponse;
   token = jsonResponse.token;
+  uIdTwo = jsonResponse.authUserId;
 
   res = sendPostRequestToEndpoint('/auth/register/v2', {
     email: 'gomugomu@hotmail.com',
@@ -286,20 +289,20 @@ describe('Tests for /users/all/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      user: {
-        uId: uId1,
+      users: [{
+        uId: uIdTwo,
         email: 'Bob123@gmail.com',
         nameFirst: 'Barty',
         nameLast: 'Potter',
         handleStr: 'bartypotter'
       },
-      user: {
-        uId: uId2,
+      {
+        uId: uId,
         email: 'gomugomu@hotmail.com',
         nameFirst: 'monkey',
         nameLast: 'luffy',
         handleStr: 'monkeyluffy'
-      }
+      }]
     });
   });
 });

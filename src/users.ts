@@ -1,8 +1,8 @@
-import { getDataStoreUser, isAuthUserIdValid, dataStoreUserToUser, getAuthUserIdFromToken } from './utils';
+import { getDataStoreUser, isAuthUserIdValid, dataStoreUserToUser } from './utils';
 import {
   getData, setData,
 } from './dataStore';
-import { dataStore, dataStoreUser, error, user, users } from './types';
+import { dataStore, dataStoreUser, error, user } from './types';
 import validator from 'validator';
 
 /**
@@ -116,17 +116,15 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
   return { error: 'Token is Invalid' };
 }
 
-export function listAllUsersV1(token: string): (Record<string, never> | error) {
+export function listAllUsersV1(token: string): ({users: user[]}| error) {
   const data: dataStore = getData();
-
-  const uID = getAuthUserIdFromToken(token)
-
-  const dataStoreUser = getDataStoreUser(uID, data);
-
-  const userDetail = dataStoreUserToUser(dataStoreUser);
-  const users: dataStoreUser[] = data.users;
-  if (data.users.length !== 0) {
-    return { users: userDetail };
+  let myarray : user[] = [];
+  let i = 0;
+  for (const item of data.users) {
+    console.log(item);
+    let dataStoreUser = getDataStoreUser(item.uId, data);
+    myarray.push(dataStoreUserToUser(dataStoreUser));
+    
   }
-  return { error: 'Invalid token' };
+  return { users: myarray };
 }
