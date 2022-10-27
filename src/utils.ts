@@ -20,6 +20,16 @@ export function getDataStoreUserByEmail(email: string, data: dataStore): dataSto
   return data.users.find(user => user.email === email);
 }
 
+export function isUserOwnerInChannel(channel: dataStoreChannel, userId: number): boolean {
+  return channel.ownerMembers.some(member => member.uId === userId);
+}
+
+// Check if a user is global owner. If not exist, returns false.
+export function isGlobalOwner(userId: number, data: dataStore) {
+  const user = data.users.find(user => user.uId === userId);
+  return user != null && user.isGlobalOwner;
+}
+
 export function isEmailUsed(email: string, users: dataStoreUser[]): boolean {
   return users.some(user => user.email === email);
 }
@@ -119,8 +129,20 @@ export function isUserOwnerMemberInChannel(authUserId: number, channelId: number
 
 // Add user to the channel. Assumes user and channel ID is valid.
 export function addUserToChannel(user: user, channelId: number, data: dataStore) {
+  // Check if the user is already a member or not. This is needed since
+  // when adding global owner, they would bypass the being a member first rule.
+  if (isUserMemberInChannel(user.uId, channelId, data)) {
+    return;
+  }
   data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
   setData(data);
+}
+
+// Add a user as owner to a channel. Assumes user and channel ID is valid.
+export function addUserToChannelAsOwner(user: user, channelId: number, data: dataStore) {
+  data.channels.find(channel => channel.channelId === channelId).ownerMembers.push(user);
+  setData(data);
+  addUserToChannel(user, channelId, getData());
 }
 
 // -----FUCTIONS ABOUT MESSAGE ONYL
@@ -167,7 +189,6 @@ export function toOutputDms(dms: dataStoreDm[]): dms {
 }
 
 export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
-  // console.log(data);
   return getDataStoreDm(dmId, data) != null;
 }
 // -----OTHERS

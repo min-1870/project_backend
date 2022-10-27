@@ -5,7 +5,21 @@ import {
   dataStore,
   channel
 } from './types';
-import { addUserToChannel, getDataStoreChannel, getDataStoreUser, isAuthUserIdValid, isUserMemberInChannel, toOutputChannelDetail, dataStoreUserToUser, getDataStoreChannelSpecial, getDataStoreUserSpecial } from './utils';
+import {
+  addUserToChannel,
+  getDataStoreChannel,
+  getDataStoreUser,
+  isAuthUserIdValid,
+  isUserMemberInChannel,
+  toOutputChannelDetail,
+  dataStoreUserToUser,
+  getDataStoreChannelSpecial,
+  getDataStoreUserSpecial,
+  isChannelIdValid,
+  isUserOwnerInChannel,
+  isGlobalOwner,
+  addUserToChannelAsOwner
+} from './utils';
 
 /**
   * Given a channelId of a channel Given a channel with ID channelId
@@ -70,7 +84,10 @@ export function channelJoinV1(authUserId: number, channelId: number): (Record<st
   *
   * @returns {} - empty object returned
 */
-export function channelInviteV1(authUserId: number, channelId: number, uId: number): (Record<string, never> | error) {
+export function channelInviteV1(
+  authUserId: number,
+  channelId: number,
+  uId: number): (Record<string, never> | error) {
   const data = getData();
 
   const channel = getDataStoreChannel(channelId, data);
@@ -145,4 +162,41 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
     start: start,
     end: end
   };
+}
+
+export function channelAddOwnersV1(
+  authUserId: number,
+  channelId: number,
+  ownerToAddId: number): (Record<string, never> | error) {
+  const data = getData();
+
+  if (!isChannelIdValid(channelId, data)) {
+    return { error: 'channelId does not refer to a valid channel.' };
+  }
+  const dataStoreChannel = getDataStoreChannel(channelId, data);
+
+  if (!isAuthUserIdValid(ownerToAddId, data)) {
+    return { error: 'uId does not refer to a valid user.' };
+  }
+  if (!isAuthUserIdValid(authUserId, data)) {
+    return { error: 'authUserId is not a valid user.' };
+  }
+
+  if (!isUserMemberInChannel(ownerToAddId, dataStoreChannel.channelId, data)) {
+    return { error: 'uId refers to a user who is not a member of the channel.' };
+  }
+
+  if (isUserOwnerInChannel(dataStoreChannel, ownerToAddId)) {
+    return { error: 'uId refers to a user who is already an owner of the channel' };
+  }
+  if (isChannelIdValid(channelId, data) &&
+  !isUserOwnerInChannel(dataStoreChannel, authUserId) &&
+  !isGlobalOwner(authUserId, data)) {
+    return {
+      error: 'channelId is valid and the authorised user does not have owner permissions in the channel.'
+    };
+  }
+  addUserToChannelAsOwner(
+    dataStoreUserToUser(getDataStoreUser(ownerToAddId, data)), channelId, data);
+  return {};
 }

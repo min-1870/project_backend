@@ -26,7 +26,6 @@ for (let i = 0; i < 1000; i++) VERY_LONG_MESSAGE = VERY_LONG_MESSAGE + ':(';
 let token: string; // token of test user 1
 let token2: string; // token of test user 2
 let authUserId: number; // token of test user 1
-// let authUserId2: number; // token of test user 2
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -46,7 +45,6 @@ beforeEach(() => {
     nameLast: 'b' + NAME_LAST
   });
   token2 = (parseJsonResponse(res2) as unknown as authResponse).token;
-  // authUserId2 = (parseJsonResponse(res2) as unknown as authResponse).authUserId;
 });
 
 describe('HTTP tests for message/send/v1', () => {
@@ -223,10 +221,12 @@ describe('HTTP tests for message/remove/v1', () => {
   });
 
   test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
-    sendPostRequestToEndpoint('/channel/join/v2', {
+    const joinRes = sendPostRequestToEndpoint('/channel/join/v2', {
       token: token2,
       channelId: testChannelId
     });
+
+    expect(joinRes.statusCode).toBe(OK);
 
     const res = sendDeleteRequestToEndpoint('/message/remove/v1', {
       token: token2,
