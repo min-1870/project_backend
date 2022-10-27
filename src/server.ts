@@ -149,7 +149,6 @@ app.get('/users/all/v1', (req: Request, res: Response) => {
     const result = listAllUsersV1(token);
     res.json(result);
   }
-  
 });
 
 app.get('/user/profile/v2', (req: Request, res: Response) => {
