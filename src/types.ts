@@ -140,6 +140,12 @@ export type messageRemoveRequest = {
   messageId: number
 }
 
+export type messageSendDmRequest = {
+  token: string,
+  dmId: number,
+  message: string
+}
+
 export type channelJoinRequest = {
   token: string,
   channelId: number,
@@ -164,6 +170,12 @@ export type dmCreateRequest = {
 export type dmDeleteRequest = {
   token: string,
   dmId: number
+}
+
+export type dmMessagesRequest = {
+  token: string,
+  dmId: number,
+  start: number
 }
 
 export type userProfileSetemail = {

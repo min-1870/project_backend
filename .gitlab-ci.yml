@@ -20,4 +20,5 @@ tests:
 linting:
   stage: checks
   script:
+    - npm run lint-fix
     - npm run lint

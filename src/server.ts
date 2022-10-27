@@ -8,12 +8,12 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, usersAllRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
-import { deleteDm, dmCreation, dmLeave, dmlist } from './dms';
-import { messageEdit, messageRemove, messageSend } from './message';
+import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages } from './dms';
+import { dmMessageSend, messageEdit, messageRemove, messageSend } from './message';
 
 // Set up web app
 const app = express();
@@ -40,6 +40,35 @@ if (fs.existsSync('./database.json')) {
   setData(JSON.parse(String(dbstr)));
 }
 
+/**
+ * Given a registered user's email and password, returns their authUserId value.
+ *
+ * @param {string} email - user's email
+ * @param {string} password - user's password
+ *
+ * @returns {string} token - temp token for the authUserId
+ * @returns {number} authUserId - autherUserId made by the function
+ */
+app.post('/auth/login/v2', (req: Request, res: Response) => {
+  const { email, password } = req.body as authLoginRequest;
+
+  const result = authLoginV1(encodeURI(email), encodeURI(password));
+
+  res.json(result);
+});
+
+/**
+ * Given a user's first and last name, email address, and password,
+ * creates a new account for them and returns a new authUserId.
+ *
+ * @param {string} email - user's email
+ * @param {string} password - user's password
+ * @param {string} nameFirst - user's First name
+ * @param {string} nameLast - user's last name
+ *
+ * @returns {string} token - temp token for the authUserId
+ * @returns {number} authUserId - autherUserId made by the function
+ */
 app.post('/auth/register/v2', (req: Request, res: Response) => {
   const { email, password, nameFirst, nameLast } = req.body as authRegisterRequest;
 
@@ -48,12 +77,53 @@ app.post('/auth/register/v2', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.post('/auth/login/v2', (req: Request, res: Response) => {
-  const { email, password } = req.body as authLoginRequest;
+/**
+ * Creates a new channel with the given name that is either a public
+ * or private channel. The user who created it automatically joins
+ * the channel and is the owner.
+ *
+ * @param {string} token - user's token
+ * @param {string} name - user's name
+ * @param {string} isPublic - public or not for the channel
+ *
+ * @returns {number} channelId - channelId made by the function
+ */
+app.post('/channels/create/v2', (req: Request, res: Response) => {
+  const { token, name, isPublic } = req.body as channelsCreateRequest;
 
-  const result = authLoginV1(encodeURI(email), encodeURI(password));
+  // get the authUserId using token
+  const authUserId = getAuthUserIdFromToken(token);
+
+  // after get authUserId, we call channelsCreateV1
+  const result = channelsCreateV1(authUserId, name, isPublic);
 
   res.json(result);
+});
+
+/**
+ * Provide a list of all channels (and their associated details) that
+ * the authorised user is part of.
+ *
+ * @param {string} token - user's token
+ *
+ * @returns {number} channelId - channelId made by the function
+ */
+app.get('/channels/list/v2', (req: Request, res: Response) => {
+  const { token } = req.query as channelsListRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+  const result = channelsListV1(authUserId);
+  res.json(result);
+});
+
+app.get('/channels/listAll/v2', (req: Request, res: Response) => {
+  const { token } = req.query as channelsListAllRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'invalid token' });
+  } else {
+    return res.json(channelsListAllV1(authUserId));
+  }
 });
 
 app.post('/auth/logout/v1', (req: Request, res: Response) => {
@@ -72,36 +142,6 @@ app.get('/channel/messages/v2', (req: Request, res: Response) => {
     return res.json({ error: 'invalid token' });
   } else {
     return res.json(channelMessagesV1(authUserId, Number(channelId), Number(start)));
-  }
-});
-
-app.post('/channels/create/v2', (req: Request, res: Response) => {
-  const { token, name, isPublic } = req.body as channelsCreateRequest;
-
-  // get the authUserId using token
-  const authUserId = getAuthUserIdFromToken(token);
-
-  // after get authUserId, we call channelsCreateV1
-  const result = channelsCreateV1(authUserId, name, isPublic);
-
-  res.json(result);
-});
-
-app.get('/channels/list/v2', (req: Request, res: Response) => {
-  const { token } = req.query as channelsListRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-  const result = channelsListV1(authUserId);
-  res.json(result);
-});
-
-app.get('/channels/listAll/v2', (req: Request, res: Response) => {
-  const { token } = req.query as channelsListAllRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-
-  if (authUserId == null) {
-    return res.json({ error: 'invalid token' });
-  } else {
-    return res.json(channelsListAllV1(authUserId));
   }
 });
 
@@ -216,6 +256,16 @@ app.delete('/message/remove/v1', (req: Request, res: Response) => {
   }
 });
 
+app.post('/message/senddm/v1', (req: Request, res: Response) => {
+  const { token, dmId, message } = req.body as unknown as messageSendDmRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+  if (authUserId == null) {
+    return res.json({ error: 'Token is Invalid' });
+  } else {
+    return res.json(dmMessageSend(Number(authUserId), Number(dmId), message));
+  }
+});
+
 app.post('/dm/create/v1', (req: Request, res: Response) => {
   const { token, uIds } = req.body as dmCreateRequest;
   const result = dmCreation(token, uIds);
@@ -227,6 +277,17 @@ app.get('/dm/list/v1', (req: Request, res: Response) => {
   // const authUserId = getAuthUserIdFromToken(token);
   const result = dmlist(token);
   res.json(result);
+});
+
+app.get('/dm/messages/v1', (req: Request, res: Response) => {
+  const { token, dmId, start } = req.query as unknown as dmMessagesRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  if (authUserId == null) {
+    return res.json({ error: 'Token is Invalid' });
+  } else {
+    return res.json(dmMessages(authUserId, Number(dmId), Number(start)));
+  }
 });
 
 app.delete('/dm/remove/v1', (req: Request, res: Response) => {
