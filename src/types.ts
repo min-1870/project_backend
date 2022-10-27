@@ -1,5 +1,6 @@
 // The user output type.
 export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
+export type users = { users: user[] };
 
 // Messages output type.
 export type messages = { messageId: number, uId: number, message: string, timeSent: number };
@@ -45,8 +46,8 @@ export type dataStoreDm = {
 // The channelId output type.
 export type channelId = { channelId: number };
 
-export type dmId = { dmId: number};
-export type dms = { dms: {dmId: number, name: string}[] };
+export type dmId = { dmId: number };
+export type dms = { dms: { dmId: number, name: string }[] };
 
 export type channel = {
   name: string,
@@ -139,6 +140,12 @@ export type messageRemoveRequest = {
   messageId: number
 }
 
+export type messageSendDmRequest = {
+  token: string,
+  dmId: number,
+  message: string
+}
+
 export type channelJoinRequest = {
   token: string,
   channelId: number,
@@ -150,7 +157,7 @@ export type channelInviteRequest = {
   uId: number,
 }
 
-export type channelDetailsRequest ={
+export type channelDetailsRequest = {
   token: string
   channelId: number
 }
@@ -165,6 +172,12 @@ export type dmDeleteRequest = {
   dmId: number
 }
 
+export type dmMessagesRequest = {
+  token: string,
+  dmId: number,
+  start: number
+}
+
 export type userProfileSetemail = {
   token: string
   email: string
@@ -174,4 +187,13 @@ export type userProfileSetname = {
   token: string
   nameFirst: string
   nameLast: string
+}
+
+export type usersAllRequest = {
+  token: string
+}
+
+export type channelLeaveRequest = {
+  token: string
+  channelId: number
 }

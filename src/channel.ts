@@ -1,4 +1,4 @@
-import { getData } from './dataStore';
+import { getData, setData } from './dataStore';
 import {
   error,
   messages,
@@ -18,7 +18,8 @@ import {
   isChannelIdValid,
   isUserOwnerInChannel,
   isGlobalOwner,
-  addUserToChannelAsOwner
+  addUserToChannelAsOwner,
+  getAuthUserIdFromToken
 } from './utils';
 
 /**
@@ -190,13 +191,32 @@ export function channelAddOwnersV1(
     return { error: 'uId refers to a user who is already an owner of the channel' };
   }
   if (isChannelIdValid(channelId, data) &&
-  !isUserOwnerInChannel(dataStoreChannel, authUserId) &&
-  !isGlobalOwner(authUserId, data)) {
+    !isUserOwnerInChannel(dataStoreChannel, authUserId) &&
+    !isGlobalOwner(authUserId, data)) {
     return {
       error: 'channelId is valid and the authorised user does not have owner permissions in the channel.'
     };
   }
   addUserToChannelAsOwner(
     dataStoreUserToUser(getDataStoreUser(ownerToAddId, data)), channelId, data);
+  return {};
+}
+
+export function channelLeaveV1(token: string, channelId: number) {
+  const data: dataStore = getData();
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(authUserId, data)) {
+    return { error: 'Invalid token' };
+  }
+  if (!isChannelIdValid(channelId, data)) {
+    return { error: 'Invalid channel ID' };
+  }
+  if (!isUserMemberInChannel(authUserId, channelId, data)) {
+    return { error: 'Permission denied, non-channel user cannot leave the channel' };
+  }
+  const indexOne = data.channels.findIndex(channel => channel.channelId.toString() === channelId.toString());
+  const indexTwo = data.channels[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
+  data.channels[indexOne].allMembers.splice(indexTwo, 1);
+  setData(data);
   return {};
 }
