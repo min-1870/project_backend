@@ -1,8 +1,8 @@
-import { getDataStoreUser, isAuthUserIdValid, dataStoreUserToUser } from './utils';
+import { getDataStoreUser, isAuthUserIdValid, dataStoreUserToUser, getAuthUserIdFromToken } from './utils';
 import {
   getData, setData,
 } from './dataStore';
-import { dataStore, dataStoreUser, error, user } from './types';
+import { dataStore, dataStoreUser, error, user, users } from './types';
 import validator from 'validator';
 
 /**
@@ -118,9 +118,15 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
 
 export function listAllUsersV1(token: string): (Record<string, never> | error) {
   const data: dataStore = getData();
+
+  const uID = getAuthUserIdFromToken(token)
+
+  const dataStoreUser = getDataStoreUser(uID, data);
+
+  const userDetail = dataStoreUserToUser(dataStoreUser);
   const users: dataStoreUser[] = data.users;
   if (data.users.length !== 0) {
-    return { users };
+    return { users: userDetail };
   }
   return { error: 'Invalid token' };
 }

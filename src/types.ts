@@ -1,5 +1,6 @@
 // The user output type.
 export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
+export type users = { user: user[] };
 
 // Messages output type.
 export type messages = { messageId: number, uId: number, message: string, timeSent: number };
@@ -150,7 +151,7 @@ export type channelInviteRequest = {
   uId: number,
 }
 
-export type channelDetailsRequest ={
+export type channelDetailsRequest = {
   token: string
   channelId: number
 }

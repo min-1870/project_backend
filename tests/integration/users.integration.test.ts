@@ -282,9 +282,24 @@ describe('Tests for /users/all/v1', () => {
       token: token,
     });
 
-    const users = getData().users;
+    const usersDetails = getData().users;
 
     expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({ users });
+    expect(parseJsonResponse(res)).toStrictEqual({
+      user: {
+        uId: uId1,
+        email: 'Bob123@gmail.com',
+        nameFirst: 'Barty',
+        nameLast: 'Potter',
+        handleStr: 'bartypotter'
+      },
+      user: {
+        uId: uId2,
+        email: 'gomugomu@hotmail.com',
+        nameFirst: 'monkey',
+        nameLast: 'luffy',
+        handleStr: 'monkeyluffy'
+      }
+    });
   });
 });
