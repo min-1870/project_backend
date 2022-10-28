@@ -1,10 +1,19 @@
 import { getData, setData } from './dataStore';
-import { dataStore, dataStoreUser, error, messages } from './types';
+import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
 import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
 
 let uniqueDmId = 0;
 
-export function dmCreation(token:string, uIds: [number]) {
+/**
+  * Creates the Dm from token user to users entered in uIds
+  *
+  * @param {string} token - user that initiated command
+  * @param {[number]} uIds - array of uIds dm is directed to
+  * ...
+  *
+  * @returns {number} - returns an object containing dmId
+*/
+export function dmCreation(token:string, uIds: [number]): ({dmId: number} | error) {
   const data: dataStore = getData();
 
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
@@ -48,7 +57,16 @@ export function dmCreation(token:string, uIds: [number]) {
   }
 }
 
-function dmNameGenerator(token:string, uIds: [number]) {
+/**
+  * Helper function that creates the name for dm
+  *
+  * @param {string} token - user that initiated command
+  * @param {[number]} uIds - array of uIds dm is directed to
+  * ...
+  *
+  * @returns {string} - returns a string which is the name of the function
+*/
+function dmNameGenerator(token:string, uIds: [number]): (string) {
   const data: dataStore = getData();
   const owner = getAuthUserIdFromToken(token);
 
@@ -75,7 +93,15 @@ function dmNameGenerator(token:string, uIds: [number]) {
   return ret;
 }
 
-export function dmlist(token:string) {
+/**
+  * Returns the list of DMs that the user is a member of
+  *
+  * @param {string} token - user that initiated command
+  * ...
+  *
+  * @returns {[object]} - array of objects, each containing {dmId, name}
+*/
+export function dmlist(token:string): (dms | error) {
   const data: dataStore = getData();
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     // console.log(token);
@@ -121,7 +147,17 @@ export function deleteDm(token:string, dmId:number) {
   return {};
 }
 
-export function dmLeave(token:string, dmId:number) {
+/**
+  * Removes the user from the dm
+  *
+  * @param {string} token - user that initiated command
+  * @param {number} dmId - dm to remove user from
+  *
+  * ...
+  *
+  * @returns {{}} - empty array
+*/
+export function dmLeave(token:string, dmId:number): (Record<string, never> | error) {
   const data: dataStore = getData();
   // console.log(dmId);
   const authUserId = getAuthUserIdFromToken(token);
@@ -138,15 +174,25 @@ export function dmLeave(token:string, dmId:number) {
       }
     }
   }
-  // console.log(data.dms);
+
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
   const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
   data.dms[indexOne].allMembers.splice(indexTwo, 1);
   setData(data);
-  // console.log(data.dms);
   return {};
 }
 
+/**
+  * Returns the messages
+  *
+  * @param {string} token - user that initiated
+  * @param {number} dmId - a dm ID in the dataStore
+  * @param {number} start - the index of the starting point
+  *
+  * ...
+  *
+  * @returns { {messages: messages[], start: number, end: number} } - an object contains the messages and information of pages
+*/
 export function dmMessages(authUserId: number, dmId: number, start: number): ({ messages: messages[], start: number, end: number } | error) {
   const data = getData();
   const dm = getDataStoreDm(dmId, data);
@@ -179,7 +225,16 @@ export function dmMessages(authUserId: number, dmId: number, start: number): ({ 
   };
 }
 
-export function dmDetails(token:string, dmId:number) {
+/**
+  * Given a DM with ID dmId that the authorised user is a member of,
+  * provide basic details about the dm
+  *
+  * @param {number} token- intiating user
+  * @param {number} dmId - id of dm
+  *
+  * @returns {object} - An object containing basic details of the dm, name and members
+*/
+export function dmDetails(token:string, dmId:number): (dm | error) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
