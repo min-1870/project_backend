@@ -28,7 +28,9 @@ beforeEach(() => {
     nameFirst: 'c' + NAME_FIRST,
     nameLast: 'c' + NAME_LAST
   });
-  token3 = (parseJsonResponse(res3) as unknown as authResponse).token;
+  const jsonResponse3 = (parseJsonResponse(res3) as unknown as authResponse);
+  uId3 = jsonResponse3.authUserId;
+  token3 = jsonResponse3.token;
 
   const res1 = sendPostRequestToEndpoint('/auth/register/v2', {
     email: EMAIL,
@@ -617,7 +619,7 @@ describe('HTTP tests for channel/leave/v1', () => {
   });
 });
 
-describe('HTTP tests for channel/addowner/v1', () => {
+describe('HTTP tests for channel/removeowner/v1', () => {
   let privateChannelId: number;
   let publicChannelId: number;
 
@@ -829,7 +831,7 @@ describe('HTTP tests for channel/addowner/v1', () => {
 
   test('Authorised user does not have owner permissions in the channel returns fail', () => {
     const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
-      token: 121212122,
+      token: token2,
       channelId: privateChannelId,
       uId: uId1
     });

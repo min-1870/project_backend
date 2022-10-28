@@ -455,22 +455,3 @@ describe('Test set for the function addOwner', () => {
     });
   });
 });
-
-// Remove
-describe('Test set for the function removeOwner', () => {
-  beforeEach(() => {
-    channelJoinV1(testUser2.uId, publicChannelId);
-    channelInviteV1(testUser1.uId, privateChannelId, testUser2.uId);
-  });
-
-  test('channel owner remove owner to public channel success', () => {
-    const addResult = channelAddOwnersV1(testUser1.uId, publicChannelId, testUserId2);
-
-    expect(addResult).toStrictEqual({});
-
-    const detailsResult = channelDetailsV1(testUser1.uId, publicChannelId) as channel;
-
-    expect(detailsResult.ownerMembers).toStrictEqual([testUser1, testUser2]);
-    expect(detailsResult.allMembers).toStrictEqual([testUser1, testUser2]);
-  });
-});
