@@ -35,6 +35,7 @@ export function authLoginV1(email: string, password: string): (authUserId | erro
       authUserId: user.uId
     };
     addSessionTokenForUser(user.uId, token, data);
+    setData(data);
     totallyUnpredictableToken++;
     return ret;
   }

@@ -73,6 +73,7 @@ export function channelJoinV1(authUserId: number, channelId: number): (Record<st
   }
 
   addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
+  setData(data);
   return {};
 }
 
@@ -115,6 +116,7 @@ export function channelInviteV1(
   }
 
   addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
+  setData(data);
   return {};
 }
 
@@ -209,6 +211,7 @@ export function channelAddOwnersV1(
   }
   addUserToChannelAsOwner(
     dataStoreUserToUser(getDataStoreUser(ownerToAddId, data)), channelId, data);
+  setData(data);
   return {};
 }
 
@@ -253,6 +256,7 @@ export function channelRemoveOwnersV1(
   }
 
   removeUserFromChannelAsOwner(dataStoreUserToUser(getDataStoreUser(ownerToRemoveId, data)), channelId, data);
+  setData(data);
   return {};
 }
 
