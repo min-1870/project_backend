@@ -256,7 +256,19 @@ export function channelRemoveOwnersV1(
   return {};
 }
 
-export function channelLeaveV1(token: string, channelId: number) {
+/**
+  * Given a channel with ID channelId that the authorised user is a member of,
+  * remove them as a member of the channel.
+  * Their messages should remain in the channel.
+  * If the only channel owner leaves,
+  * the channel will remain.
+  *
+  * @param {string} token - an object that represents the right to perform certain actions
+  * @param {number} channelId - a channel ID in the dataStore
+  *
+  * @returns {} - empty object returned
+*/
+export function channelLeaveV1(token: string, channelId: number): (Record<string, never> | error) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(authUserId, data)) {
