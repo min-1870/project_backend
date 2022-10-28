@@ -30,6 +30,14 @@ export function userProfileV1(authUserId: number, uID: number): { user: user } |
   return { user: dataStoreUserToUser(dataStoreUser) };
 }
 
+/**
+  * <For a valid user, change their current email to new email input>
+  *
+  * @param {string} token - unique token associated with user login
+  * @param {string} handleStr- new handleStr user would like to change to
+  * ...
+  * 
+*/
 export function userProfileHandleChange(token: string, handleStr: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   if (handleStr.length < 3 || handleStr.length > 20) {
@@ -67,8 +75,6 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
   * ...
   * 
 */
-
-
 export function userProfileEmailChange(token: string, email: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   if (!(validator.isEmail(email))) { // checking if email is valid
@@ -103,7 +109,6 @@ export function userProfileEmailChange(token: string, email: string): (Record<st
   * @param {string} nameLast - description of parameter
   * ...
 */
-
 export function userProfileNameChange(token: string, nameFirst: string, nameLast: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   if (nameFirst.length < 1 || nameFirst.length > 50) {
