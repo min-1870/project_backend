@@ -145,6 +145,16 @@ export function addUserToChannelAsOwner(user: user, channelId: number, data: dat
   addUserToChannel(user, channelId, getData());
 }
 
+// Remove a user as owner to a channel. Assumes user and channel ID is valid.
+export function removeUserFromChannelAsOwner(user: user, channelId: number, data: dataStore) {
+  const channel = data.channels.find(channel => channel.channelId === channelId);
+  const idx = channel.ownerMembers.indexOf(user);
+  if (idx > -1) {
+    channel.ownerMembers.splice(idx, 1);
+  }
+  setData(data);
+}
+
 // -----FUCTIONS ABOUT MESSAGE ONYL
 
 export function isMessageIdValid(messageId: number, data: dataStore): boolean {

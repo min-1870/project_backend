@@ -19,7 +19,9 @@ import {
   isUserOwnerInChannel,
   isGlobalOwner,
   addUserToChannelAsOwner,
-  getAuthUserIdFromToken
+  getAuthUserIdFromToken,
+  isUserOwnerMemberInChannel,
+  removeUserFromChannelAsOwner
 } from './utils';
 
 /**
@@ -164,7 +166,15 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
     end: end
   };
 }
-
+/**
+ * Add a user with user Id to channel to become nan owner of the channel
+ * If there something that is not meet the requirement, return error.
+ * Otherwise make that user an onwner of the channel
+ * @param {number} authUserId - the authUserId of the person perforing the add action
+ * @param {number} channelId - the Id of the channel that user want to be the owner
+ * @param {number} ownerToAddId - the Id of the person who want to become owner of the channel
+ * @returns
+ */
 export function channelAddOwnersV1(
   authUserId: number,
   channelId: number,
@@ -199,6 +209,50 @@ export function channelAddOwnersV1(
   }
   addUserToChannelAsOwner(
     dataStoreUserToUser(getDataStoreUser(ownerToAddId, data)), channelId, data);
+  return {};
+}
+
+/**
+ * Remove user from channel with user Id as an owner of the channel.
+ * If there is something does not meet the requirement then return error.
+ * Otherwise remove them from the channel.
+ *
+ * @param {number} authUserId - the auth user id of the person performing the remove action.
+ * @param {number} channelId - the channel they will be remove from.
+ * @param {number}ownerToRemoveId - the user Id of the person who will be remove from channel.
+ * @returns
+ */
+export function channelRemoveOwnersV1(
+  authUserId: number,
+  channelId: number,
+  ownerToRemoveId: number): (Record<string, never> | error) {
+  const data = getData();
+  const dataStoreChannel = getDataStoreChannel(channelId, data);
+  if (!isChannelIdValid(channelId, data)) {
+    return { error: 'channelId does not refer to a valid channel.' };
+  }
+
+  if (!isAuthUserIdValid(ownerToRemoveId, data)) {
+    return { error: 'uId does not refer to a valid user.' };
+  }
+
+  if (!isUserOwnerMemberInChannel(ownerToRemoveId, channelId, data)) {
+    return { error: 'uId refers to a user who is already an owner of the channel' };
+  }
+
+  if (isChannelIdValid(channelId, data) &&
+    !isUserOwnerInChannel(dataStoreChannel, authUserId) &&
+    !isGlobalOwner(authUserId, data)) {
+    return {
+      error: 'channelId is valid and the authorised user does not have owner permissions in the channel.'
+    };
+  }
+
+  if (dataStoreChannel.ownerMembers.length === 1) {
+    return { error: 'uId refers to a user who is currently the only owner of the channel' };
+  }
+
+  removeUserFromChannelAsOwner(dataStoreUserToUser(getDataStoreUser(ownerToRemoveId, data)), channelId, data);
   return {};
 }
 
