@@ -135,9 +135,16 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
   return { error: 'Token is Invalid' };
 }
 
-export function listAllUsersV1(token: string): ({users: user[]}| error) {
+/**
+  * Returns a list of all users and their associated details.
+  *
+  * @param {string} token - an object that represents the right to perform certain actions
+  *
+  * @returns {users} - array of objects, where each object contains types of user
+*/
+export function listAllUsersV1(token: string): ({ users: user[] } | error) {
   const data: dataStore = getData();
-  const myarray : user[] = [];
+  const myarray: user[] = [];
 
   for (const item of data.users) {
     const dataStoreUser = getDataStoreUser(item.uId, data);
