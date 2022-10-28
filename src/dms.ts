@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import { dataStore, dataStoreUser, error, messages } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms } from './utils';
+import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
 
 let uniqueDmId = 0;
 
@@ -177,4 +177,27 @@ export function dmMessages(authUserId: number, dmId: number, start: number): ({ 
     start: start,
     end: end
   };
+}
+
+export function dmDetails(token:string, dmId:number) {
+  const data: dataStore = getData();
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
+    return { error: 'Token is Invalid' };
+  }
+  if (!isDataStoreDmValid(dmId, data)) {
+    return { error: 'dmId is Invalid' };
+  }
+  for (const item of data.dms) {
+    if (item.dmId.toString() === dmId.toString()) {
+      if (item.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
+        return { error: 'user is not part of dm' };
+      }
+    }
+  }
+  const dms = data.dms
+    .filter(dms => dms.allMembers
+      .find(member => member.uId === authUserId) != null) || [];
+
+  return toOutputDmDetails(dms);
 }

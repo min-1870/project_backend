@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm, messages } from './types';
+import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm, messages, dmDetailsList } from './types';
 
 // -----FUCNTIONS ABOUT USER ONLY
 
@@ -191,6 +191,14 @@ export function toOutputDms(dms: dataStoreDm[]): dms {
 export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
   return getDataStoreDm(dmId, data) != null;
 }
+
+export function toOutputDmDetails(dm: dataStoreDm[]) {
+  return {
+    name: dm[0].name,
+    members: dm[0].allMembers
+  };
+}
+
 // -----OTHERS
 
 export function duplicateValueCheck(array) {
