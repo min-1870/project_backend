@@ -8,11 +8,11 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, channelAddownerRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest, channelLeaveRequest } from './types';
+import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, channelAddownerRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest, channelLeaveRequest, dmDetailsRequest } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelAddOwnersV1, channelLeaveV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
-import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages } from './dms';
+import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messageRemove, messageSend } from './message';
 
 // Set up web app
@@ -315,6 +315,12 @@ app.delete('/dm/remove/v1', (req: Request, res: Response) => {
 app.post('/dm/leave/v1', (req: Request, res: Response) => {
   const { token, dmId } = req.body as dmDeleteRequest;
   const result = dmLeave(token, dmId);
+  res.json(result);
+});
+
+app.get('/dm/details/v1', (req: Request, res: Response) => {
+  const { token, dmId } = req.query as unknown as dmDetailsRequest;
+  const result = dmDetails(token, dmId);
   res.json(result);
 });
 

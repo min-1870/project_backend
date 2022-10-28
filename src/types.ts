@@ -184,6 +184,11 @@ export type dmMessagesRequest = {
   start: number
 }
 
+export type dmDetailsRequest = {
+  token: string,
+  dmId: number
+}
+
 export type userProfileSetemail = {
   token: string
   email: string
