@@ -60,7 +60,7 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
 }
 
 /**
-  * <For a valid user, change their emaill>
+  * <For a valid user, change their current email to new email input>
   *
   * @param {string} token - unique token associated with user login
   * @param {string} email - new email user would like to change to
@@ -96,7 +96,7 @@ export function userProfileEmailChange(token: string, email: string): (Record<st
 }
 
 /**
-  * <BFor a valid user, the function will change the first and last name if requested>
+  * <For a valid user, the function will change the first and last name if requested>
   * 
   * @param {string} token - description of paramter
   * @param {string} nameFirst - description of parameter
