@@ -104,11 +104,9 @@ function dmNameGenerator(token:string, uIds: [number]): (string) {
 export function dmlist(token:string): (dms | error) {
   const data: dataStore = getData();
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    // console.log(token);
     return { error: 'Token is Invalid' };
   }
   const authUserId = getAuthUserIdFromToken(token);
-  // let ret: dmInfo[];
   const dms = data.dms
     .filter(dm => dm.allMembers
       .find(member => member.uId === authUserId) != null) || [];
@@ -118,7 +116,6 @@ export function dmlist(token:string): (dms | error) {
 
 export function deleteDm(token:string, dmId:number) {
   const data: dataStore = getData();
-  // console.log(dmId);
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     return { error: 'Token is Invalid' };
@@ -159,7 +156,6 @@ export function deleteDm(token:string, dmId:number) {
 */
 export function dmLeave(token:string, dmId:number): (Record<string, never> | error) {
   const data: dataStore = getData();
-  // console.log(dmId);
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     return { error: 'Token is Invalid' };

@@ -175,6 +175,12 @@ export type channelAddownerRequest = {
   uId: number,
 }
 
+export type channelRemoveownerRequest = {
+  token: string,
+  channelId: number,
+  uId: number,
+}
+
 export type dmCreateRequest = {
   token: string,
   uIds: [number]

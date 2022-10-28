@@ -121,7 +121,6 @@ export function listAllUsersV1(token: string): ({users: user[]}| error) {
   const myarray : user[] = [];
 
   for (const item of data.users) {
-    // console.log(item);
     const dataStoreUser = getDataStoreUser(item.uId, data);
     myarray.push(dataStoreUserToUser(dataStoreUser));
   }
