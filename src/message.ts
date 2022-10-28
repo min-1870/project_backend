@@ -4,6 +4,15 @@ import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreDm, getDataS
 
 let messageId = 0;
 
+/** Send a message from the authorised user to the channel specified by channelId.
+ * Note: Each message should have its own unique ID, i.e. no messages should share
+ * an ID with another message, even if that other message is in a different channel.
+ *
+ * @param authUserId
+ * @param channelId
+ * @param message
+ * @returns  message Id
+ */
 export function messageSend (authUserId: number, channelId: number, message: string): ({messageId: number} | error) {
   const data = getData();
   const channel = getDataStoreChannel(channelId, data);
@@ -31,6 +40,12 @@ export function messageSend (authUserId: number, channelId: number, message: str
   return { messageId: messageId - 1 };
 }
 
+/** Given a messageId for a message, this message is removed from the channel/DM
+ *
+ * @param authUserId
+ * @param messageId
+ * @returns
+ */
 export function messageRemove (authUserId: number, messageId: number): (Record<string, never> | error) {
 // assume toke is valid
   const data:dataStore = getData();
@@ -50,6 +65,14 @@ export function messageRemove (authUserId: number, messageId: number): (Record<s
   return {};
 }
 
+/** Given a message, update its text with new text. If the new message is an empty
+ * string, the message is deleted.
+ *
+ * @param authUserId
+ * @param messageId
+ * @param message
+ * @returns
+ */
 export function messageEdit (authUserId: number, messageId: number, message: string): (Record<string, never> | error) {
   // assume toke is valid
   const data:dataStore = getData();
@@ -72,6 +95,15 @@ export function messageEdit (authUserId: number, messageId: number, message: str
   return {};
 }
 
+/** Send a message from authorised user to the DM specified by dmId. Note: Each message
+ * should have it's own unique ID, i.e. no messages should share an ID with another
+ * message, even if that other message is in a different channel or DM.
+ *
+ * @param authUserId
+ * @param dmId
+ * @param message
+ * @returns
+ */
 export function dmMessageSend (authUserId: number, dmId: number, message: string): ({messageId: number} | error) {
   const data = getData();
   const dm = getDataStoreDm(dmId, data);
