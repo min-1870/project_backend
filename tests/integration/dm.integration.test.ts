@@ -583,7 +583,7 @@ describe('HTTP tests for dm/details/v1', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
       name: 'bartypotter, monkeyluffy',
-      allMembers: [{
+      members: [{
         email: 'Bob123@gmail.com',
         handleStr: 'bartypotter',
         nameFirst: 'Barty',
