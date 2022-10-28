@@ -200,4 +200,4 @@ export function dmDetails(token:string, dmId:number) {
       .find(member => member.uId === authUserId) != null) || [];
 
   return toOutputDmDetails(dms);
-}
+} 
