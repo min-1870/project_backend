@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm, messages, dmDetailsList } from './types';
+import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm, messages } from './types';
 
 // -----FUCNTIONS ABOUT USER ONLY
 
