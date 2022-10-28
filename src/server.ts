@@ -8,8 +8,33 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
-<<<<<<< src/server.ts
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, channelAddownerRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest, channelLeaveRequest, channelRemoveownerRequest, dmDetailsRequest } from './types';
+import {
+  authRegisterRequest,
+  authLoginRequest,
+  channelMessagesRequest,
+  channelsCreateRequest,
+  channelsListRequest,
+  channelsListAllRequest,
+  authLogoutRequest,
+  userProfileRequest,
+  dmCreateRequest,
+  userProfileSethandleRequest,
+  channelJoinRequest,
+  messageSendRequest,
+  channelInviteRequest,
+  userProfileSetname,
+  userProfileSetemail,
+  dmDeleteRequest,
+  messageRemoveRequest,
+  messageEditRequest,
+  channelDetailsRequest,
+  channelAddownerRequest,
+  usersAllRequest,
+  dmMessagesRequest,
+  messageSendDmRequest,
+  channelLeaveRequest,
+  channelRemoveownerRequest
+} from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelAddOwnersV1, channelLeaveV1, channelRemoveOwnersV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
