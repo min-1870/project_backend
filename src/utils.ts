@@ -201,6 +201,14 @@ export function toOutputDms(dms: dataStoreDm[]): dms {
 export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
   return getDataStoreDm(dmId, data) != null;
 }
+
+export function toOutputDmDetails(dm: dataStoreDm[]) {
+  return {
+    name: dm[0].name,
+    members: dm[0].allMembers
+  };
+}
+
 // -----OTHERS
 
 export function duplicateValueCheck(array) {

@@ -33,7 +33,7 @@ let data: dataStore = {
     allMembers: [object],
     messages: [object]
     */
-  ]
+  ],
 
 };
 

@@ -530,3 +530,73 @@ describe('HTTP tests for message/senddm/v1', () => {
     expect((parseJsonResponse(res2) as unknown as channelMessagesOutput).messages[0].timeSent).toBeLessThanOrEqual(Date.now() + 2);
   });
 });
+describe('HTTP tests for dm/details/v1', () => {
+  let dmId: number;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint('/dm/create/v1', {
+      token: token,
+      uIds: [uId]
+    });
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+    dmId = jsonResponse.dmId;
+  });
+  test('UserId is not a member of DM', () => {
+    const res = sendGetRequestToEndpoint('/dm/details/v1', {
+      token: tokenThree,
+      dmId: dmId,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'user is not part of dm'
+    });
+  });
+  test('user is not part of dm', () => {
+    const res = sendGetRequestToEndpoint('/dm/details/v1', {
+      token: token,
+      dmId: 999999999999999
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'dmId is Invalid'
+    });
+  });
+  test('Invalid Token', () => {
+    const res = sendGetRequestToEndpoint('/dm/details/v1', {
+      token: '99999999',
+      dmId: dmId,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: 'Token is Invalid'
+    });
+  });
+  test('valid dmDetails', () => {
+    const res = sendGetRequestToEndpoint('/dm/details/v1', {
+      token: token,
+      dmId: dmId,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      name: 'bartypotter, monkeyluffy',
+      members: [{
+        email: 'Bob123@gmail.com',
+        handleStr: 'bartypotter',
+        nameFirst: 'Barty',
+        nameLast: 'Potter',
+        uId: uIdTwo
+      },
+      {
+        email: 'gomugomu@hotmail.com',
+        handleStr: 'monkeyluffy',
+        nameFirst: 'monkey',
+        nameLast: 'luffy',
+        uId: uId
+      }],
+    });
+  });
+});
