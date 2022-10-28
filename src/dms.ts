@@ -78,11 +78,9 @@ function dmNameGenerator(token:string, uIds: [number]) {
 export function dmlist(token:string) {
   const data: dataStore = getData();
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    // console.log(token);
     return { error: 'Token is Invalid' };
   }
   const authUserId = getAuthUserIdFromToken(token);
-  // let ret: dmInfo[];
   const dms = data.dms
     .filter(dm => dm.allMembers
       .find(member => member.uId === authUserId) != null) || [];
@@ -92,7 +90,6 @@ export function dmlist(token:string) {
 
 export function deleteDm(token:string, dmId:number) {
   const data: dataStore = getData();
-  // console.log(dmId);
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     return { error: 'Token is Invalid' };
@@ -123,7 +120,6 @@ export function deleteDm(token:string, dmId:number) {
 
 export function dmLeave(token:string, dmId:number) {
   const data: dataStore = getData();
-  // console.log(dmId);
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     return { error: 'Token is Invalid' };
@@ -138,12 +134,10 @@ export function dmLeave(token:string, dmId:number) {
       }
     }
   }
-  // console.log(data.dms);
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
   const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
   data.dms[indexOne].allMembers.splice(indexTwo, 1);
   setData(data);
-  // console.log(data.dms);
   return {};
 }
 

@@ -8,8 +8,35 @@ import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1 } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
-import { authRegisterRequest, authLoginRequest, channelMessagesRequest, channelsCreateRequest, channelsListRequest, channelsListAllRequest, authLogoutRequest, userProfileRequest, dmCreateRequest, userProfileSethandleRequest, channelJoinRequest, messageSendRequest, channelInviteRequest, userProfileSetname, userProfileSetemail, dmDeleteRequest, messageRemoveRequest, messageEditRequest, channelDetailsRequest, channelAddownerRequest, usersAllRequest, dmMessagesRequest, messageSendDmRequest, channelLeaveRequest, dmDetailsRequest } from './types';
-import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelAddOwnersV1, channelLeaveV1 } from './channel';
+import {
+  authRegisterRequest,
+  authLoginRequest,
+  channelMessagesRequest,
+  channelsCreateRequest,
+  channelsListRequest,
+  channelsListAllRequest,
+  authLogoutRequest,
+  userProfileRequest,
+  dmCreateRequest,
+  userProfileSethandleRequest,
+  channelJoinRequest,
+  messageSendRequest,
+  channelInviteRequest,
+  userProfileSetname,
+  userProfileSetemail,
+  dmDeleteRequest,
+  messageRemoveRequest,
+  messageEditRequest,
+  channelDetailsRequest,
+  channelAddownerRequest,
+  usersAllRequest,
+  dmMessagesRequest,
+  messageSendDmRequest,
+  channelLeaveRequest,
+  channelRemoveownerRequest,
+  dmDetailsRequest,
+} from './types';
+import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelAddOwnersV1, channelLeaveV1, channelRemoveOwnersV1 } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
@@ -190,6 +217,17 @@ app.post('/channel/addowner/v1', (req: Request, res: Response) => {
   const { token, channelId, uId } = req.body as channelAddownerRequest;
   const authUserId = getAuthUserIdFromToken(token);
   const result = channelAddOwnersV1(
+    parseInt(encodeURI(authUserId.toString())),
+    parseInt(encodeURI(channelId.toString())),
+    parseInt(encodeURI(uId.toString())));
+  res.json(result);
+});
+
+app.post('/channel/removeowner/v1', (req: Request, res: Response) => {
+  const { token, channelId, uId } = req.body as channelRemoveownerRequest;
+  const authUserId = getAuthUserIdFromToken(token);
+
+  const result = channelRemoveOwnersV1(
     parseInt(encodeURI(authUserId.toString())),
     parseInt(encodeURI(channelId.toString())),
     parseInt(encodeURI(uId.toString())));
