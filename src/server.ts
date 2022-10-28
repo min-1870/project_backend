@@ -33,7 +33,8 @@ import {
   dmMessagesRequest,
   messageSendDmRequest,
   channelLeaveRequest,
-  channelRemoveownerRequest
+  channelRemoveownerRequest,
+  dmDetailsRequest,
 } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelAddOwnersV1, channelLeaveV1, channelRemoveOwnersV1 } from './channel';
 import fs from 'fs';
