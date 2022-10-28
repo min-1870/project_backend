@@ -1,4 +1,4 @@
-import { getData } from './dataStore';
+import { getData, setData } from './dataStore';
 import { dataStore, error, messages } from './types';
 import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreDm, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid, isUserMemberInChannel, isUserMemberInDm, isUserOwnerMemberInChannel } from './utils';
 
@@ -34,7 +34,7 @@ export function messageSend (authUserId: number, channelId: number, message: str
   };
 
   channel.messages.push(newMessage);
-
+  setData(data);
   messageId += 1;
 
   return { messageId: messageId - 1 };
@@ -61,7 +61,7 @@ export function messageRemove (authUserId: number, messageId: number): (Record<s
 
   const dataStoreChannel = getDataStoreChannel(channelId, data);
   dataStoreChannel.messages = dataStoreChannel.messages.filter(message => message.messageId !== messageId);
-
+  setData(data);
   return {};
 }
 
@@ -91,7 +91,7 @@ export function messageEdit (authUserId: number, messageId: number, message: str
   const dataStoreChannel = getDataStoreChannel(channelId, data);
   const editedMessage: messages = dataStoreChannel.messages.find(message => message.messageId === messageId);
   editedMessage.message = message;
-
+  setData(data);
   return {};
 }
 
@@ -127,6 +127,6 @@ export function dmMessageSend (authUserId: number, dmId: number, message: string
   dm.messages.push(newMessage);
 
   messageId += 1;
-
+  setData(data);
   return { messageId: messageId - 1 };
 }
