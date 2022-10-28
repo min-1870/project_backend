@@ -59,6 +59,16 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
   return { error: 'Token is Invalid' };
 }
 
+/**
+  * <For a valid user, change their emaill>
+  *
+  * @param {string} token - unique token associated with user login
+  * @param {string} email - new email user would like to change to
+  * ...
+  * 
+*/
+
+
 export function userProfileEmailChange(token: string, email: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   if (!(validator.isEmail(email))) { // checking if email is valid
@@ -84,6 +94,15 @@ export function userProfileEmailChange(token: string, email: string): (Record<st
   }
   return { error: 'Token is Invalid' };
 }
+
+/**
+  * <BFor a valid user, the function will change the first and last name if requested>
+  * 
+  * @param {string} token - description of paramter
+  * @param {string} nameFirst - description of parameter
+  * @param {string} nameLast - description of parameter
+  * ...
+*/
 
 export function userProfileNameChange(token: string, nameFirst: string, nameLast: string): (Record<string, never> | error) {
   const data: dataStore = getData();
