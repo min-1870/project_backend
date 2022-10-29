@@ -469,7 +469,7 @@ Reference 8.5.
   </tr>
 </table>
 
-#### 6.1.3. Iteration 2+ Input/Output
+#### 6.1.3. Iteration 2+ Input/Output Types
 
 <table>
   <tr>
@@ -487,6 +487,96 @@ Reference 8.5.
   <tr>
     <td>named exactly <b>uIds</b></td>
     <td>Array of user IDs</td>
+  </tr>
+</table>
+
+#### 6.1.4. Iteration 3+ Input/Output Types
+
+<table>
+  <tr>
+    <th>Variable name</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td>contains substring <b>code</b></td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>has suffix <b>Id</b></td>
+    <td>integer</td>
+  </tr>
+  <tr>
+    <td>has prefix <b>num</b></td>
+    <td>integer</td>
+  </tr>
+  <tr>
+    <td>has suffix <b>Rate</b></td>
+    <td>float between 0 and 1 inclusive</td>
+  </tr>
+  <tr>
+    <td>(outputs only) named exactly <b>userStats</b></td>
+    <td> Object of shape {<br />
+    &emsp;channelsJoined: [{numChannelsJoined, timeStamp}],<br/>
+    &emsp;dmsJoined: [{numDmsJoined, timeStamp}], <br />
+    &emsp;messagesSent: [{numMessagesSent, timeStamp}], <br />
+    &emsp;involvementRate <br />
+    }
+    </td>
+  </tr>
+  <tr>
+    <td>(outputs only) named exactly <b>workspaceStats</b></td>
+    <td> Object of shape {<br />
+    &emsp;channelsExist: [{numChannelsExist, timeStamp}], <br />
+    &emsp;dmsExist: [{numDmsExist, timeStamp}], <br />
+    &emsp;messagesExist: [{numMessagesExist, timeStamp}], <br />
+    &emsp;utilizationRate <br />
+    }
+    </td>
+  </tr>
+  <tr>
+    <td>has suffix <b>End</b></td>
+    <td>integer</td>
+  </tr>
+  <tr>
+    <td>has suffix <b>Start</b></td>
+    <td>integer</td>
+  </tr>
+  <tr>
+    <td>has suffix <b>Url</b></td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>(outputs only) name ends in <b>reacts</b></td>
+    <td>Array of objects, where each object contains types { reactId, uIds, isThisUserReacted } where: 
+      <ul>
+        <li>reactId is the id of a react</li>
+        <li>uIds is an array of user id's of people who've reacted for that react</li>
+        <li>isThisUserReacted is whether or not the authorised user (user making the request) currently has one of the reacts to this message</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>(outputs only) named exactly <b>notifications</b></td>
+    <td>Array of objects, where each object contains types { channelId, dmId, notificationMessage } where 
+      <ul>
+        <li>channelId is the id of the channel that the event happened in, and is <code>-1</code> if it is being sent to a DM</li>
+        <li>dmId is the DM that the event happened in, and is <code>-1</code> if it is being sent to a channel</li>
+        <li>notificationMessage is a string of the following format for each trigger action:</li>
+        <ul>
+          <li>tagged: "{User’s handle} tagged you in {channel/DM name}: {first 20 characters of the message}"</li>
+          <li>reacted message: "{User’s handle} reacted to your message in {channel/DM name}"</li>
+          <li>added to a channel/DM: "{User’s handle} added you to {channel/DM name}"</li>
+        </ul>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>(Iteration 3) (outputs only) named exactly <b>user</b></td>
+    <td>Object containing uId, email, nameFirst, nameLast, handleStr, profileImgUrl</td>
+  </tr>
+  <tr>
+    <td>(Iteration 3) (outputs only) named exactly <b>messages</b></td>
+    <td>Array of objects, where each object contains types { messageId, uId, message, timeSent, reacts, isPinned  }</td>
   </tr>
 </table>
 
@@ -633,7 +723,7 @@ CHANGELOG:
     </td>
   </tr>
   <tr>
-    <td><code>user/profile/v3</code><br /><br />For a valid user, returns information about their user ID, email, first name, last name, and handle
+    <td><code>user/profile/v3</code><br /><br />For a valid user, returns information about their user ID, email, first name, last name, and handle.
     </td>
     <td style="font-weight: bold; color: green;">GET</td>
     <td><b>Query Parameters:</b><br /><code>( uId )</code><br /><br /><b>Return type if no error:</b><br /><code>{ user }</code></td>
@@ -645,7 +735,7 @@ CHANGELOG:
     </td>
   </tr>
   <tr>
-    <td><code>clear/v1</code><br /><br />Resets the internal data of the application to its initial state</td>
+    <td><code>clear/v1</code><br /><br />Resets the internal data of the application to its initial state.</td>
     <td style="font-weight: bold; color: red;">DELETE</td>
     <td><b>Parameters:</b><br /><code>()</code><br /><br /><b>Return type if no error:</b><br /><code>{}</code></td>
     <td>N/A</td>
@@ -742,7 +832,7 @@ CHANGELOG:
     </td>
   </tr>
   <tr>
-    <td><code>message/remove/v2</code><br /><br />Given a <code>messageId</code> for a message, removes the message from the channel/DM</td>
+    <td><code>message/remove/v2</code><br /><br />Given a <code>messageId</code> for a message, removes the message from the channel/DM.</td>
     <td style="color: red; font-weight: bold;">DELETE</td>
     <td><b>Query Parameters:</b><br /><code>( messageId )</code><br /><br /><b>Return type if no error:</b><br /><code>{}</code></td>
     <td>
@@ -859,7 +949,7 @@ CHANGELOG:
     <td>N/A</td>
   </tr>
   <tr>
-    <td><code>user/profile/setname/v2</code><br /><br />Updates the authorised user's first and last name</td>
+    <td><code>user/profile/setname/v2</code><br /><br />Updates the authorised user's first and last name.</td>
     <td style="font-weight: bold; color: brown;">PUT</td>
     <td><b>Body Parameters:</b><br /><code>{ nameFirst, nameLast }</code><br /><br /><b>Return type if no error:</b><br /><code>{}</code></td>
     <td>
@@ -870,7 +960,7 @@ CHANGELOG:
         </ul>
   </tr>
   <tr>
-    <td><code>user/profile/setemail/v2</code><br /><br />Updates the authorised user's email address</td>
+    <td><code>user/profile/setemail/v2</code><br /><br />Updates the authorised user's email address.</td>
     <td style="font-weight: bold; color: brown;">PUT</td>
     <td><b>Body Parameters:</b><br /><code>{ email }</code><br /><br /><b>Return type if no error:</b><br /><code>{}</code></td>
     <td>
@@ -881,7 +971,7 @@ CHANGELOG:
         </ul>
   </tr>
   <tr>
-    <td><code>user/profile/sethandle/v2</code><br /><br />Updates the authorised user's handle (i.e. display name)</td>
+    <td><code>user/profile/sethandle/v2</code><br /><br />Updates the authorised user's handle (i.e. display name).</td>
     <td style="font-weight: bold; color: brown;">PUT</td>
     <td><b>Body Parameters:</b><br /><code>{ handleStr }</code><br /><br /><b>Return type if no error:</b><br /><code>{}</code></td>
     <td>
@@ -1069,7 +1159,7 @@ All return values should be an object, with keys identically matching the names 
     </td>
   </tr>
   <tr>
-    <td><code>standup/send/v1</code><br /><br />For a given channel, if a standup is currently active in the channel, sends a message to get buffered in the standup queue. Note: @ tags should not be parsed as proper tags (i.e. no notification should be triggered on send, or when the standup finishes)</td>
+    <td><code>standup/send/v1</code><br /><br />For a given channel, if a standup is currently active in the channel, sends a message to get buffered in the standup queue. Note: @ tags should not be parsed as proper tags (i.e. no notification should be triggered on send, or when the standup finishes).</td>
     <td style="font-weight: bold; color: blue;">POST</td>
     <td><b>Body Parameters:</b><br /><code>{ channelId, message }</code><br /><br /><b>Return type if no error:</b><br /><code>{}</code></td>
     <td>
@@ -1198,7 +1288,7 @@ There are TWO different types of permissions: global permissions and channel/DM-
 
 Additional Rules:
 * Global permissions
-  * All Beans users are global members by default, except for the very first user who signs up, who is a global owner
+  * All Beans users are global members by default, except for the very first user who signs up, who is a global owner.
 * Channel permissions
   * A global owner has the same permissions as a channel owner in every channel they're part of. They do not become a channel owner unless explicitly added as one (by a channel owner, or themselves). Hence, if they are removed as a global owner (and are not a channel owner), they will no longer have those channel owner permissions.
 * DM permissions
