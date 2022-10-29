@@ -131,7 +131,7 @@ For this project, a feature is typically sized somewhere between a single functi
 
 There is no requirement that each feature be implemented by only one person. In fact, we encourage you to work together closely on features.
 
-Please pay careful attention to the following:
+    * You are required to edit the `gitlab-ci.yml` file, as per section 4.5 to add linting to the code on `master`. **You must do this BEFORE merging anything from iteration 2 into `master`**, so that you ensure `master` is always stable.
 
 * We want to see **evidence that you wrote your tests before writing the implementation**. As noted above, the commits containing your initial tests should appear *before* your implementation for every feature branch. If we don't see this evidence, we will assume you did not write your tests first and your mark will be reduced.
 * You should have black-box tests for all tests required (i.e. testing each function/endpoint). However, you are also welcome to write white-box unit tests in this iteration if you see that as important.
@@ -590,7 +590,7 @@ CHANGELOG:
     <td>
       <b>400 Error</b> when any of:
       <ul>
-        <li><code>channelId</code> does not refer to a valid channel</li>
+        <li>channelId does not refer to a valid channel</li>
         <li>the authorised user is already a member of the channel</li>
         </ul>
         <b>403 Error</b> when:
