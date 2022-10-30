@@ -590,7 +590,7 @@ CHANGELOG:
 * Error returns should be converted to the respective Exception (see table below and section 6.8.2)
 * Instead of passing `token` as a query or body parameter, you should pass it through a HTTP header (see section 6.9):
   * You should remove `token` from query and body parameters for all routes.  
-  * You also need to increment the version of each route that previously accepted `token` as a query or body parameter, e.g. v2 --> v3.  
+* You need to increment the version of each route that previously accepted `token` as a query or body parameter and/or now raises exceptions instead of error objects, e.g. v2 --> v3.  
 * New error case for `channel/leave/v2`, added in table below.
 * Added functionality for `message/edit/v2` in regards to standups, in table below.
 
@@ -614,7 +614,7 @@ CHANGELOG:
     </td>
   </tr>
   <tr>
-    <td><code>auth/register/v2</code><br /><br />Given a user's first and last name, email address, and password, creates a new account for them and returns a new <code>authUserId</code>.<br /><br />A unique handle will be generated for each registered user. The user handle is created as follows:
+    <td><code>auth/register/v3</code><br /><br />Given a user's first and last name, email address, and password, creates a new account for them and returns a new <code>authUserId</code>.<br /><br />A unique handle will be generated for each registered user. The user handle is created as follows:
       <ul>
         <li>First, generate a concatenation of their casted-to-lowercase alphanumeric (a-z0-9) first name and last name (i.e. make lowercase then remove non-alphanumeric characters).</li>
         <li>If the concatenation is longer than 20 characters, it is cut off at 20 characters.</li>
@@ -653,7 +653,7 @@ CHANGELOG:
     <td>N/A</td>
   </tr>
   <tr>
-    <td><code>channels/listAll/v3</code><br /><br />Provides an array of all channels, including private channels (and their associated details).</td>
+    <td><code>channels/listall/v3</code><br /><br />Provides an array of all channels, including private channels (and their associated details).</td>
     <td style="font-weight: bold; color: green;">GET</td>
     <td><b>Query Parameters:</b><br /><code>( )</code><br /><br /><b>Return type if no error:</b><br /><code>{ channels }</code></td>
     <td>N/A</td>
