@@ -161,7 +161,7 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
   }
 
   return {
-    messages: slicedMessages,
+    messages: slicedMessages.reverse(),
     start: start,
     end: end
   };
@@ -256,7 +256,7 @@ export function channelRemoveOwnersV1(
   return {};
 }
 
-export function channelLeaveV1(token: string, channelId: number) {
+export function channelLeaveV1(token: string, channelId: number): (Record<string, never> | error) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(authUserId, data)) {
