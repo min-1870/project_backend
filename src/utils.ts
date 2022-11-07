@@ -110,8 +110,8 @@ export function toOutputChannels(channels: dataStoreChannel[]): channels {
 
 export function toOutputChannelDetail(channel: dataStoreChannel): channel {
   const data = getData();
-  let ownerMember: user[];
-  let allMember: user[];
+  let ownerMember: user[] = [];
+  let allMember: user[] = [];
   for (const item of channel.ownerMembers) {
     ownerMember.push(dataStoreUserToUser(getDataStoreUser(item, data)))
   }
