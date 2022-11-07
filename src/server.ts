@@ -3,6 +3,7 @@ import { echo } from './echo';
 import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
+import errorHandler from 'middleware-http-errors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
@@ -61,6 +62,9 @@ app.get('/echo', (req: Request, res: Response, next) => {
     next(err);
   }
 });
+
+// handles errors nicely
+app.use(errorHandler());
 
 if (fs.existsSync('./database.json')) {
   const dbstr = fs.readFileSync('./database.json');
@@ -366,6 +370,7 @@ app.delete('/clear/v1', (_: Request, res: Response) => {
   clearV1();
   res.json({});
 });
+
 
 // for logging errors (print to terminal)
 app.use(morgan('dev'));

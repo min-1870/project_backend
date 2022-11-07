@@ -2,6 +2,7 @@ import request from 'sync-request';
 import config from '../src/config.json';
 
 const OK = 200;
+const INPUT_ERROR = 400;
 const port = config.port;
 const url = config.url;
 
@@ -34,7 +35,7 @@ describe('HTTP tests using Jest', () => {
             }
     );
     const bodyObj = JSON.parse(res.body as string);
-    expect(res.statusCode).toBe(OK);
-    expect(bodyObj).toEqual({ error: 'error' });
+    expect(res.statusCode).toBe(INPUT_ERROR);
+    expect(bodyObj.error).toStrictEqual({ message: 'Cannot echo "echo"' });
   });
 });
