@@ -21,7 +21,7 @@ export function getDataStoreUserByEmail(email: string, data: dataStore): dataSto
 }
 
 export function isUserOwnerInChannel(channel: dataStoreChannel, userId: number): boolean {
-  return channel.ownerMembers.some(member => member.uId === userId);
+  return channel.ownerMembers.includes(userId);
 }
 
 // Check if a user is global owner. If not exist, returns false.
@@ -109,22 +109,31 @@ export function toOutputChannels(channels: dataStoreChannel[]): channels {
 }
 
 export function toOutputChannelDetail(channel: dataStoreChannel): channel {
+  const data = getData();
+  const ownerMember: user[] = [];
+  const allMember: user[] = [];
+  for (const item of channel.ownerMembers) {
+    ownerMember.push(dataStoreUserToUser(getDataStoreUser(item, data)));
+  }
+  for (const item of channel.allMembers) {
+    allMember.push(dataStoreUserToUser(getDataStoreUser(item, data)));
+  }
   return {
     name: channel.name,
     isPublic: channel.isPublic,
-    ownerMembers: channel.ownerMembers,
-    allMembers: channel.allMembers
+    ownerMembers: ownerMember,
+    allMembers: allMember
   };
 }
 
 // -----FUNCTIONS ABOUT BOTH USER AND CHANNEL
 
 export function isUserMemberInChannel(authUserId: number, channelId: number, data: dataStore): boolean {
-  return getDataStoreChannel(channelId, data).allMembers.some(member => member.uId === authUserId);
+  return getDataStoreChannel(channelId, data).allMembers.includes(authUserId);
 }
 
 export function isUserOwnerMemberInChannel(authUserId: number, channelId: number, data: dataStore): boolean {
-  return getDataStoreChannel(channelId, data).ownerMembers.some(member => member.uId === authUserId);
+  return getDataStoreChannel(channelId, data).ownerMembers.includes(authUserId);
 }
 
 // Add user to the channel. Assumes user and channel ID is valid.
@@ -134,21 +143,21 @@ export function addUserToChannel(user: user, channelId: number, data: dataStore)
   if (isUserMemberInChannel(user.uId, channelId, data)) {
     return;
   }
-  data.channels.find(channel => channel.channelId === channelId).allMembers.push(user);
+  data.channels.find(channel => channel.channelId === channelId).allMembers.push(user.uId);
   setData(data);
 }
 
 // Add a user as owner to a channel. Assumes user and channel ID is valid.
 export function addUserToChannelAsOwner(user: user, channelId: number, data: dataStore) {
-  data.channels.find(channel => channel.channelId === channelId).ownerMembers.push(user);
+  data.channels.find(channel => channel.channelId === channelId).ownerMembers.push(user.uId);
   setData(data);
   addUserToChannel(user, channelId, getData());
 }
 
 // Remove a user as owner to a channel. Assumes user and channel ID is valid.
-export function removeUserFromChannelAsOwner(user: user, channelId: number, data: dataStore) {
+export function removeUserFromChannelAsOwner(uId: number, channelId: number, data: dataStore) {
   const channel = data.channels.find(channel => channel.channelId === channelId);
-  const idx = channel.ownerMembers.indexOf(user);
+  const idx = channel.ownerMembers.indexOf(uId);
   if (idx > -1) {
     channel.ownerMembers.splice(idx, 1);
   }
@@ -202,10 +211,15 @@ export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
   return getDataStoreDm(dmId, data) != null;
 }
 
-export function toOutputDmDetails(dm: dataStoreDm[]) {
+export function toOutputDmDetails(dm: dataStoreDm) {
+  const data = getData();
+  const allMember: user[] = [];
+  for (const item of dm.allMembers) {
+    allMember.push(dataStoreUserToUser(getDataStoreUser(item, data)));
+  }
   return {
-    name: dm[0].name,
-    members: dm[0].allMembers
+    name: dm.name,
+    members: allMember
   };
 }
 
@@ -216,5 +230,5 @@ export function duplicateValueCheck(array) {
 }
 
 export function isUserMemberInDm(authUserId: number, dmId: number, data: dataStore): boolean {
-  return getDataStoreDm(dmId, data).allMembers.some(member => member.uId === authUserId);
+  return getDataStoreDm(dmId, data).allMembers.includes(authUserId);
 }

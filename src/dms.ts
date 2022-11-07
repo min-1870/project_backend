@@ -1,7 +1,7 @@
 import { getData, setData } from './dataStore';
 import { generateDmId } from './ids';
 import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
+import { duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
 
 /**
   * Creates the Dm from token user to users entered in uIds
@@ -29,11 +29,11 @@ export function dmCreation(token:string, uIds: number[]): ({dmId: number} | erro
   }
 
   const DmName = dmNameGenerator(token, uIds);
-  const ownerMembers = dataStoreUserToUser(getDataStoreUser(getAuthUserIdFromToken(token), data));
+  const ownerMembers = getAuthUserIdFromToken(token);
   const allMembers = [ownerMembers];
 
   for (const uId of uIds) {
-    allMembers.push(dataStoreUserToUser(getDataStoreUser(uId, data)));
+    allMembers.push(uId);
   }
 
   for (let i = 0; i < data.users.length; i++) {
@@ -97,7 +97,7 @@ export function dmlist(token:string): (dms | error) {
   const authUserId = getAuthUserIdFromToken(token);
   const dms = data.dms
     .filter(dm => dm.allMembers
-      .find(member => member.uId === authUserId) != null) || [];
+      .includes(authUserId) !== false) || [];
 
   return toOutputDms(dms);
 }
@@ -113,14 +113,14 @@ export function deleteDm(token:string, dmId:number) {
   }
   for (const dm of data.dms) {
     if (dm.dmId.toString() === dmId.toString()) {
-      if (dm.ownerMembers[0].uId !== getAuthUserIdFromToken(token)) {
+      if (dm.ownerMembers[0] !== getAuthUserIdFromToken(token)) {
         return { error: 'user is not owner of dm' };
       }
     }
   }
   for (const dm of data.dms) {
     if (dm.dmId.toString() === dmId.toString()) {
-      if (dm.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
+      if (dm.allMembers.find(user => user.toString() === authUserId.toString()) == null) {
         return { error: 'user is not part of dm' };
       }
     }
@@ -157,7 +157,7 @@ export function dmLeave(token:string, dmId:number): (Record<string, never> | err
   }
 
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
-  const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
+  const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.toString() === getAuthUserIdFromToken(token).toString());
   data.dms[indexOne].allMembers.splice(indexTwo, 1);
   setData(data);
   return {};
@@ -229,9 +229,5 @@ export function dmDetails(token:string, dmId:number): (dm | error) {
     return { error: 'user is not part of dm' };
   }
 
-  const dms = data.dms
-    .filter(dms => dms.allMembers
-      .find(member => member.uId === authUserId) != null) || [];
-
-  return toOutputDmDetails(dms);
+  return toOutputDmDetails(getDataStoreDm(dmId, data));
 }

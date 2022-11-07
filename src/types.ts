@@ -17,8 +17,8 @@ export type dataStoreChannel = {
   channelId: number,
   isPublic: boolean,
   name: string,
-  ownerMembers: user[],
-  allMembers: user[],
+  ownerMembers: number[],
+  allMembers: number[],
   messages: messages[]
 }
 
@@ -38,8 +38,8 @@ export type dataStoreUser = {
 export type dataStoreDm = {
   dmId: number,
   name: string,
-  ownerMembers: user[],
-  allMembers: user[],
+  ownerMembers: number[],
+  allMembers: number[],
   messages: messages[]
 }
 

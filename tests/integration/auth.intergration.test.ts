@@ -17,6 +17,18 @@ beforeEach(() => {
 
 describe('HTTP tests for /auth/register/v2', () => {
   test('Successful authRegisterV1', () => {
+    sendPostRequestToEndpoint('/auth/register/v2', {
+      email: 'moniker1@hotmail.com',
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+    sendPostRequestToEndpoint('/auth/register/v2', {
+      email: 'moniker@hotmail.com',
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
     const res = sendPostRequestToEndpoint('/auth/register/v2', {
       email: EMAIL,
       password: PASSWORD,

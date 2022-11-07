@@ -371,7 +371,6 @@ app.delete('/clear/v1', (_: Request, res: Response) => {
   res.json({});
 });
 
-
 // for logging errors (print to terminal)
 app.use(morgan('dev'));
 

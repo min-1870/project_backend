@@ -32,8 +32,8 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
     channelId: generateChannelId(),
     isPublic,
     name,
-    ownerMembers: [member],
-    allMembers: [member],
+    ownerMembers: [member.uId],
+    allMembers: [member.uId],
     messages: [],
   };
 
@@ -59,7 +59,7 @@ export function channelsListV1(authUserId: number) : (channels | error) {
 
   const channels = data.channels
     .filter(channel => channel.allMembers
-      .find(member => member.uId === authUserId) != null) || [];
+      .includes(authUserId) !== false) || [];
 
   return toOutputChannels(channels);
 }
