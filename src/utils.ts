@@ -211,10 +211,15 @@ export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
   return getDataStoreDm(dmId, data) != null;
 }
 
-export function toOutputDmDetails(dm: dataStoreDm[]) {
+export function toOutputDmDetails(dm: dataStoreDm) {
+  const data = getData();
+  let allMember: user[] = [];
+  for (const item of dm.allMembers) {
+    allMember.push(dataStoreUserToUser(getDataStoreUser(item, data)))
+  }
   return {
-    name: dm[0].name,
-    members: dm[0].allMembers
+    name: dm.name,
+    members: allMember
   };
 }
 
@@ -225,5 +230,5 @@ export function duplicateValueCheck(array) {
 }
 
 export function isUserMemberInDm(authUserId: number, dmId: number, data: dataStore): boolean {
-  return getDataStoreDm(dmId, data).allMembers.some(member => member.uId === authUserId);
+  return getDataStoreDm(dmId, data).allMembers.includes(authUserId);
 }
