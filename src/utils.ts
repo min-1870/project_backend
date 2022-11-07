@@ -110,13 +110,13 @@ export function toOutputChannels(channels: dataStoreChannel[]): channels {
 
 export function toOutputChannelDetail(channel: dataStoreChannel): channel {
   const data = getData();
-  let ownerMember: user[] = [];
-  let allMember: user[] = [];
+  const ownerMember: user[] = [];
+  const allMember: user[] = [];
   for (const item of channel.ownerMembers) {
-    ownerMember.push(dataStoreUserToUser(getDataStoreUser(item, data)))
+    ownerMember.push(dataStoreUserToUser(getDataStoreUser(item, data)));
   }
   for (const item of channel.allMembers) {
-    allMember.push(dataStoreUserToUser(getDataStoreUser(item, data)))
+    allMember.push(dataStoreUserToUser(getDataStoreUser(item, data)));
   }
   return {
     name: channel.name,
@@ -213,9 +213,9 @@ export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
 
 export function toOutputDmDetails(dm: dataStoreDm) {
   const data = getData();
-  let allMember: user[] = [];
+  const allMember: user[] = [];
   for (const item of dm.allMembers) {
-    allMember.push(dataStoreUserToUser(getDataStoreUser(item, data)))
+    allMember.push(dataStoreUserToUser(getDataStoreUser(item, data)));
   }
   return {
     name: dm.name,

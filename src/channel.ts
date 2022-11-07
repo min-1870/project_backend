@@ -41,7 +41,7 @@ export function channelDetailsV1(authUserId: number, channelId: number): (channe
     return { error: 'Channel ID does not refer to a valid channel' };
   } else if (getDataStoreUserSpecial(authUserId, data) == null) {
     return { error: 'User ID does not exist' };
-  } else if (channel.allMembers.includes(authUserId) == false) {
+  } else if (channel.allMembers.includes(authUserId) === false) {
     return { error: 'User ID is not a member of channel' };
   }
 
@@ -66,7 +66,7 @@ export function channelJoinV1(authUserId: number, channelId: number): (Record<st
     return { error: 'Invalid channel ID' };
   } else if (dataStoreUser == null) {
     return { error: 'Invalid token' };
-  } else if (channel.allMembers.includes(authUserId) != false) {
+  } else if (channel.allMembers.includes(authUserId) !== false) {
     return { error: 'User already in channel' };
   } else if (!channel.isPublic && !dataStoreUser.isGlobalOwner) {
     return { error: 'Permission denied, non-global owner is not allowed to access private channel' };
@@ -146,7 +146,7 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
     return { error: 'Invalid user ID' };
   } else if (start < 0 || start > channel.messages.length) {
     return { error: 'Invalid start' };
-  } else if (isUserMemberInChannel(authUserId, channelId, data) == false) {
+  } else if (isUserMemberInChannel(authUserId, channelId, data) === false) {
     return { error: 'Not a member of the channel' };
   }
 

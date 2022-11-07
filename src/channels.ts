@@ -59,7 +59,7 @@ export function channelsListV1(authUserId: number) : (channels | error) {
 
   const channels = data.channels
     .filter(channel => channel.allMembers
-      .includes(authUserId) != false) || [];
+      .includes(authUserId) !== false) || [];
 
   return toOutputChannels(channels);
 }

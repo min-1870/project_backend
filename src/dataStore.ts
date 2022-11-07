@@ -20,8 +20,8 @@ let data: dataStore = {
     channelId: number,
     isPublic (boolean),
     name (string),
-    ownerMembers: [object],
-    allMembers: [object],
+    ownerMembers: [number],
+    allMembers: [number],
     messages: [object]
     */
   ],
@@ -29,8 +29,8 @@ let data: dataStore = {
     /*
     dmId: number,
     name: string,
-    ownerMembers: [object],
-    allMembers: [object],
+    ownerMembers: [number],
+    allMembers: [number],
     messages: [object]
     */
   ],

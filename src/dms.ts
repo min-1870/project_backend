@@ -1,7 +1,7 @@
 import { getData, setData } from './dataStore';
 import { generateDmId } from './ids';
 import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
-import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
+import { duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
 
 /**
   * Creates the Dm from token user to users entered in uIds
@@ -97,7 +97,7 @@ export function dmlist(token:string): (dms | error) {
   const authUserId = getAuthUserIdFromToken(token);
   const dms = data.dms
     .filter(dm => dm.allMembers
-      .includes(authUserId) != false) || [];
+      .includes(authUserId) !== false) || [];
 
   return toOutputDms(dms);
 }
@@ -229,6 +229,5 @@ export function dmDetails(token:string, dmId:number): (dm | error) {
     return { error: 'user is not part of dm' };
   }
 
-
-  return toOutputDmDetails(getDataStoreDm(dmId,data));
+  return toOutputDmDetails(getDataStoreDm(dmId, data));
 }

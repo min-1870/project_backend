@@ -147,13 +147,6 @@ describe('Test set for the function channelMessagesV1', () => {
     sessionTokens: [] as string[],
     isGlobalOwner: false
   };
-  const testUserOutput = {
-    uId: 1,
-    nameFirst: 'Adam',
-    nameLast: 'Johnston',
-    email: 'test@gmail.com',
-    handleStr: 'adamjohnston',
-  };
   const testUser2 = {
     uId: 2,
     nameFirst: 'Adamm',
