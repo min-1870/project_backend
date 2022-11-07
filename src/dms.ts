@@ -7,12 +7,12 @@ import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDa
   * Creates the Dm from token user to users entered in uIds
   *
   * @param {string} token - user that initiated command
-  * @param {[number]} uIds - array of uIds dm is directed to
+  * @param {number[]} uIds - array of uIds dm is directed to
   * ...
   *
   * @returns {number} - returns an object containing dmId
 */
-export function dmCreation(token:string, uIds: [number]): ({dmId: number} | error) {
+export function dmCreation(token:string, uIds: number[]): ({dmId: number} | error) {
   const data: dataStore = getData();
 
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
@@ -20,7 +20,7 @@ export function dmCreation(token:string, uIds: [number]): ({dmId: number} | erro
   }
 
   for (const uId of uIds) {
-    if (isAuthUserIdValid(uId, data)) {
+    if (!isAuthUserIdValid(uId, data)) {
       return { error: 'Invalid uId in uIds' };
     }
   }
@@ -59,12 +59,12 @@ export function dmCreation(token:string, uIds: [number]): ({dmId: number} | erro
   * Helper function that creates the name for dm
   *
   * @param {string} token - user that initiated command
-  * @param {[number]} uIds - array of uIds dm is directed to
+  * @param {number[]} uIds - array of uIds dm is directed to
   * ...
   *
   * @returns {string} - returns a string which is the name of the function
 */
-function dmNameGenerator(token:string, uIds: [number]): (string) {
+function dmNameGenerator(token:string, uIds: number[]): (string) {
   const data: dataStore = getData();
   const owner = getAuthUserIdFromToken(token);
 
@@ -151,12 +151,9 @@ export function dmLeave(token:string, dmId:number): (Record<string, never> | err
   if (!isDataStoreDmValid(dmId, data)) {
     return { error: 'dmId is Invalid' };
   }
-  for (const dm of data.dms) {
-    if (dm.dmId.toString() === dmId.toString()) {
-      if (dm.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
-        return { error: 'user is not part of dm' };
-      }
-    }
+
+  if (!isUserMemberInDm(authUserId, dmId, data)) {
+    return { error: 'user is not part of dm' };
   }
 
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
@@ -227,13 +224,11 @@ export function dmDetails(token:string, dmId:number): (dm | error) {
   if (!isDataStoreDmValid(dmId, data)) {
     return { error: 'dmId is Invalid' };
   }
-  for (const dm of data.dms) {
-    if (dm.dmId.toString() === dmId.toString()) {
-      if (dm.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
-        return { error: 'user is not part of dm' };
-      }
-    }
+
+  if (!isUserMemberInDm(authUserId, dmId, data)) {
+    return { error: 'user is not part of dm' };
   }
+
   const dms = data.dms
     .filter(dms => dms.allMembers
       .find(member => member.uId === authUserId) != null) || [];

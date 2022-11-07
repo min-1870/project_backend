@@ -86,7 +86,7 @@ describe('HTTP tests for /dm/create/v1', () => {
   test('Failure due to invalid uId', () => {
     const res = sendPostRequestToEndpoint('/dm/create/v1', {
       token: token,
-      uIds: [uId + 9999]
+      uIds: [uId + 99123123199]
     });
 
     expect(res.statusCode).toBe(OK);
