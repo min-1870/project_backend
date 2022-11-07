@@ -1,8 +1,7 @@
 import { getData, setData } from './dataStore';
+import { generateMessageId } from './ids';
 import { dataStore, error, messages } from './types';
 import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreDm, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid, isUserMemberInChannel, isUserMemberInDm, isUserOwnerMemberInChannel } from './utils';
-
-let messageId = 0;
 
 /** Send a message from the authorised user to the channel specified by channelId.
  * Note: Each message should have its own unique ID, i.e. no messages should share
@@ -27,7 +26,7 @@ export function messageSend (authUserId: number, channelId: number, message: str
   }
 
   const newMessage: messages = {
-    messageId: messageId,
+    messageId: generateMessageId(),
     uId: authUserId,
     message: message,
     timeSent: Date.now()
@@ -35,9 +34,8 @@ export function messageSend (authUserId: number, channelId: number, message: str
 
   channel.messages.push(newMessage);
   setData(data);
-  messageId += 1;
 
-  return { messageId: messageId - 1 };
+  return { messageId: newMessage.messageId };
 }
 
 /** Given a messageId for a message, this message is removed from the channel/DM
@@ -118,7 +116,7 @@ export function dmMessageSend (authUserId: number, dmId: number, message: string
   }
 
   const newMessage: messages = {
-    messageId: messageId,
+    messageId: generateMessageId(),
     uId: authUserId,
     message: message,
     timeSent: Date.now()
@@ -126,7 +124,6 @@ export function dmMessageSend (authUserId: number, dmId: number, message: string
 
   dm.messages.push(newMessage);
 
-  messageId += 1;
   setData(data);
-  return { messageId: messageId - 1 };
+  return { messageId: newMessage.messageId };
 }

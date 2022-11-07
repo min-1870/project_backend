@@ -5,9 +5,7 @@ import {
 import validator from 'validator';
 import { authUserId, error, dataStoreUser } from './types';
 import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleStrExist } from './utils';
-
-let uniqueuserID = 0;
-let totallyUnpredictableToken = 122;
+import { generateAuthUserId, generateToken } from './ids';
 
 /**
  * Given a registered user's email and password, returns their authUserId value
@@ -29,14 +27,13 @@ export function authLoginV1(email: string, password: string): (authUserId | erro
   if (user.password !== password) {
     return { error: 'Wrong password' };
   } else {
-    const token = totallyUnpredictableToken.toString();
+    const token = generateToken();
     const ret = {
       token,
       authUserId: user.uId
     };
     addSessionTokenForUser(user.uId, token, data);
     setData(data);
-    totallyUnpredictableToken++;
     return ret;
   }
 }
@@ -93,8 +90,8 @@ export function authRegisterV1(email: string, password: string,
 
   const isGlobalOwner = data.users.length === 0;
 
-  const uuID: number = uniqueuserID;
-  const currentsessionID: string = totallyUnpredictableToken.toString();
+  const uuID: number = generateAuthUserId();
+  const currentsessionID: string = generateToken();
   const temp: dataStoreUser = {
     uId: uuID,
     email,
@@ -105,8 +102,6 @@ export function authRegisterV1(email: string, password: string,
     isGlobalOwner,
     sessionTokens: [currentsessionID]
   };
-  totallyUnpredictableToken++;
-  uniqueuserID++;
   data.users.push(temp);
   setData(data);
 

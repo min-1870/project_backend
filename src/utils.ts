@@ -198,6 +198,10 @@ export function toOutputDms(dms: dataStoreDm[]): dms {
   };
 }
 
+export function isValidDmId(dmId: number, data: dataStore): boolean {
+  return getDataStoreDm(dmId, data) != null;
+}
+
 export function isDataStoreDmValid(dmId: number, data: dataStore): boolean {
   return getDataStoreDm(dmId, data) != null;
 }
