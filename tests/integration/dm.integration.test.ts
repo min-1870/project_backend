@@ -162,7 +162,7 @@ describe('HTTP tests for /dm/list/v1', () => {
     expect(parseJsonResponse(res)).toStrictEqual({
       dms: [
         {
-          dmId,
+          dmId: expect.any(Number),
           name: expect.any(String)
         },
         {

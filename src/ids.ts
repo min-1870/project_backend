@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getData } from './dataStore';
-import { isAuthUserIdValid, isChannelIdValid, isMessageIdValid, isValidDmId } from './utils';
+import { isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid } from './utils';
 
 /**
  * Generate a token.
@@ -65,7 +65,7 @@ export function generateDmId(): number {
   const dataStore = getData();
   const maxId = 1000000;
   let id = Math.floor(Math.random() * maxId);
-  while (isValidDmId(id, dataStore)) {
+  while (isDataStoreDmValid(id, dataStore)) {
     id = Math.floor(Math.random() * maxId);
   }
   return id;

@@ -20,7 +20,7 @@ export function dmCreation(token:string, uIds: [number]): ({dmId: number} | erro
   }
 
   for (const uId of uIds) {
-    if (data.users.find(user => user.uId === uId) == null) {
+    if (isAuthUserIdValid(uId, data)) {
       return { error: 'Invalid uId in uIds' };
     }
   }
@@ -69,12 +69,8 @@ function dmNameGenerator(token:string, uIds: [number]): (string) {
   const owner = getAuthUserIdFromToken(token);
 
   let arr = [];
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    if (user.uId === owner) {
-      arr.push(user.handleStr);
-    }
-  }
+  const ownerUser = getDataStoreUser(owner, data);
+  arr.push(ownerUser.handleStr);
 
   for (const uId of uIds) {
     const user = getDataStoreUser(uId, data);
@@ -82,9 +78,7 @@ function dmNameGenerator(token:string, uIds: [number]): (string) {
   }
   arr = arr.sort();
 
-  const ret = arr.join(', ');
-
-  return ret;
+  return arr.join(', ');
 }
 
 /**
