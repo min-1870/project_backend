@@ -1,9 +1,9 @@
 {
     "scripts": {
-        "test": "jest --testMatch '**/?(*.)+(test).ts'",
+        "test": "jest --coverage --testMatch '**/?(*.)+(test).ts'",
         "tsc": "tsc --noImplicitAny",
-        "lint": "eslint src/**/*.{ts,js}",
-        "lint-fix": "eslint --fix src/**/*.{ts,js}",
+        "lint": "eslint \"src/**/*.{ts,js}\" \"tests/**/*.{ts,js}\"",
+        "lint-fix": "eslint --fix \"src/**/*.{ts,js}\" \"tests/**/*.{ts,js}\"",
         "start": "ts-node -T src/server.ts",
         "ts-node-coverage": "nyc --reporter=text --reporter=lcov ts-node -T src/server.ts",
         "posttest": "pkill -f 'node_modules/sync-rpc/lib/worker.js' > /dev/null 2>&1"
@@ -11,13 +11,15 @@
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.18.0",
+        "lint": "^1.1.2",
         "morgan": "^1.10.0",
         "rewire": "^6.0.0",
         "ts-node": "^10.7.0",
         "typescript": "^4.6.3",
         "validator": "^13.7.0",
         "http-errors": "^2.0.0",
-        "middleware-http-errors": "^0.1.1"
+        "middleware-http-errors": "^0.1.1",
+        "uuid": "^9.0.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.12",
