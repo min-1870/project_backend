@@ -122,15 +122,6 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
     for (let j = 0; j < user.sessionTokens.length; j++) {
       if (user.sessionTokens[j] === token) {
         user.nameFirst = nameFirst;
-        setData(data);
-        return {};
-      }
-    }
-  }
-  for (let l = 0; l < data.users.length; l++) {
-    const user: dataStoreUser = data.users[l];
-    for (let k = 0; k < user.sessionTokens.length; k++) {
-      if (user.sessionTokens[k] === token) {
         user.nameLast = nameLast;
         setData(data);
         return {};
