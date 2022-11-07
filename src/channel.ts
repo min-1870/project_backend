@@ -41,7 +41,7 @@ export function channelDetailsV1(authUserId: number, channelId: number): (channe
     return { error: 'Channel ID does not refer to a valid channel' };
   } else if (getDataStoreUserSpecial(authUserId, data) == null) {
     return { error: 'User ID does not exist' };
-  } else if (channel.allMembers.find(user => user.uId === authUserId) == null) {
+  } else if (channel.allMembers.includes(authUserId) == null) {
     return { error: 'User ID is not a member of channel' };
   }
 
@@ -66,7 +66,7 @@ export function channelJoinV1(authUserId: number, channelId: number): (Record<st
     return { error: 'Invalid channel ID' };
   } else if (dataStoreUser == null) {
     return { error: 'Invalid token' };
-  } else if (channel.allMembers.find(user => user.uId === authUserId) != null) {
+  } else if (channel.allMembers.includes(authUserId) != null) {
     return { error: 'User already in channel' };
   } else if (!channel.isPublic && !dataStoreUser.isGlobalOwner) {
     return { error: 'Permission denied, non-global owner is not allowed to access private channel' };
@@ -146,7 +146,7 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
     return { error: 'Invalid user ID' };
   } else if (start < 0 || start > channel.messages.length) {
     return { error: 'Invalid start' };
-  } else if (!isUserMemberInChannel(authUserId, channelId, data)) {
+  } else if (isUserMemberInChannel(authUserId, channelId, data) === false) {
     return { error: 'Not a member of the channel' };
   }
 
@@ -255,7 +255,7 @@ export function channelRemoveOwnersV1(
     return { error: 'uId refers to a user who is currently the only owner of the channel' };
   }
 
-  removeUserFromChannelAsOwner(dataStoreUserToUser(getDataStoreUser(ownerToRemoveId, data)), channelId, data);
+  removeUserFromChannelAsOwner(ownerToRemoveId, channelId, data);
   setData(data);
   return {};
 }
@@ -285,7 +285,7 @@ export function channelLeaveV1(token: string, channelId: number): (Record<string
     return { error: 'Permission denied, non-channel user cannot leave the channel' };
   }
   const indexOne = data.channels.findIndex(channel => channel.channelId.toString() === channelId.toString());
-  const indexTwo = data.channels[indexOne].allMembers.findIndex(member => member.uId.toString() === getAuthUserIdFromToken(token).toString());
+  const indexTwo = data.channels[indexOne].allMembers.findIndex(member => member.toString() === getAuthUserIdFromToken(token).toString());
   data.channels[indexOne].allMembers.splice(indexTwo, 1);
   setData(data);
   return {};
