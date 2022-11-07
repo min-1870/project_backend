@@ -6,8 +6,7 @@ import {
   channels,
   dataStoreChannel,
 } from './types';
-
-let nextChannelId = 1;
+import { generateChannelId } from './ids';
 
 /**
  * Creates a new channel with the given name, that is either a public or private channel.
@@ -30,7 +29,7 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
   const dataStoreUser = getDataStoreUser(authUserId, data);
   const member = dataStoreUserToUser(dataStoreUser);
   const newChannel: dataStoreChannel = {
-    channelId: nextChannelId,
+    channelId: generateChannelId(),
     isPublic,
     name,
     ownerMembers: [member],
@@ -39,7 +38,6 @@ export function channelsCreateV1(authUserId: number, name: string, isPublic: boo
   };
 
   data.channels.push(newChannel);
-  nextChannelId++;
   setData(data);
   return {
     channelId: newChannel.channelId,

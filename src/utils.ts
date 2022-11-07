@@ -212,11 +212,7 @@ export function toOutputDmDetails(dm: dataStoreDm[]) {
 // -----OTHERS
 
 export function duplicateValueCheck(array) {
-  if (array.length !== new Set(array).size) {
-    return true;
-  }
-
-  return false;
+  return array.length !== new Set(array).size;
 }
 
 export function isUserMemberInDm(authUserId: number, dmId: number, data: dataStore): boolean {

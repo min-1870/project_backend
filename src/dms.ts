@@ -1,27 +1,26 @@
 import { getData, setData } from './dataStore';
+import { generateDmId } from './ids';
 import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
 import { dataStoreUserToUser, duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
-
-let uniqueDmId = 0;
 
 /**
   * Creates the Dm from token user to users entered in uIds
   *
   * @param {string} token - user that initiated command
-  * @param {[number]} uIds - array of uIds dm is directed to
+  * @param {number[]} uIds - array of uIds dm is directed to
   * ...
   *
   * @returns {number} - returns an object containing dmId
 */
-export function dmCreation(token:string, uIds: [number]): ({dmId: number} | error) {
+export function dmCreation(token:string, uIds: number[]): ({dmId: number} | error) {
   const data: dataStore = getData();
 
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
     return { error: 'Token is Invalid' };
   }
 
-  for (const item of uIds) {
-    if (data.users.find(user => user.uId === item) == null) {
+  for (const uId of uIds) {
+    if (!isAuthUserIdValid(uId, data)) {
       return { error: 'Invalid uId in uIds' };
     }
   }
@@ -33,25 +32,24 @@ export function dmCreation(token:string, uIds: [number]): ({dmId: number} | erro
   const ownerMembers = dataStoreUserToUser(getDataStoreUser(getAuthUserIdFromToken(token), data));
   const allMembers = [ownerMembers];
 
-  for (const item of uIds) {
-    allMembers.push(dataStoreUserToUser(getDataStoreUser(item, data)));
+  for (const uId of uIds) {
+    allMembers.push(dataStoreUserToUser(getDataStoreUser(uId, data)));
   }
 
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     for (let j = 0; j < user.sessionTokens.length; j++) {
       if (user.sessionTokens[j] === token) {
-        data.dms.push({
-          dmId: uniqueDmId,
+        const dm = {
+          dmId: generateDmId(),
           name: DmName,
           ownerMembers: [ownerMembers],
           allMembers: allMembers,
           messages: []
-        });
-        const ret = uniqueDmId;
-        uniqueDmId++;
+        };
+        data.dms.push(dm);
         setData(data);
-        return { dmId: ret };
+        return { dmId: dm.dmId };
       }
     }
   }
@@ -61,36 +59,26 @@ export function dmCreation(token:string, uIds: [number]): ({dmId: number} | erro
   * Helper function that creates the name for dm
   *
   * @param {string} token - user that initiated command
-  * @param {[number]} uIds - array of uIds dm is directed to
+  * @param {number[]} uIds - array of uIds dm is directed to
   * ...
   *
   * @returns {string} - returns a string which is the name of the function
 */
-function dmNameGenerator(token:string, uIds: [number]): (string) {
+function dmNameGenerator(token:string, uIds: number[]): (string) {
   const data: dataStore = getData();
   const owner = getAuthUserIdFromToken(token);
 
   let arr = [];
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    if (user.uId === owner) {
-      arr.push(user.handleStr);
-    }
-  }
+  const ownerUser = getDataStoreUser(owner, data);
+  arr.push(ownerUser.handleStr);
 
-  for (const item of uIds) {
-    for (let i = 0; i < data.users.length; i++) {
-      const user: dataStoreUser = data.users[i];
-      if (user.uId === item) {
-        arr.push(user.handleStr);
-      }
-    }
+  for (const uId of uIds) {
+    const user = getDataStoreUser(uId, data);
+    arr.push(user.handleStr);
   }
   arr = arr.sort();
 
-  const ret = arr.join(', ');
-
-  return ret;
+  return arr.join(', ');
 }
 
 /**
@@ -123,16 +111,16 @@ export function deleteDm(token:string, dmId:number) {
   if (!isDataStoreDmValid(dmId, data)) {
     return { error: 'dmId is Invalid' };
   }
-  for (const item of data.dms) {
-    if (item.dmId.toString() === dmId.toString()) {
-      if (item.ownerMembers[0].uId !== getAuthUserIdFromToken(token)) {
+  for (const dm of data.dms) {
+    if (dm.dmId.toString() === dmId.toString()) {
+      if (dm.ownerMembers[0].uId !== getAuthUserIdFromToken(token)) {
         return { error: 'user is not owner of dm' };
       }
     }
   }
-  for (const item of data.dms) {
-    if (item.dmId.toString() === dmId.toString()) {
-      if (item.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
+  for (const dm of data.dms) {
+    if (dm.dmId.toString() === dmId.toString()) {
+      if (dm.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
         return { error: 'user is not part of dm' };
       }
     }
@@ -163,12 +151,9 @@ export function dmLeave(token:string, dmId:number): (Record<string, never> | err
   if (!isDataStoreDmValid(dmId, data)) {
     return { error: 'dmId is Invalid' };
   }
-  for (const item of data.dms) {
-    if (item.dmId.toString() === dmId.toString()) {
-      if (item.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
-        return { error: 'user is not part of dm' };
-      }
-    }
+
+  if (!isUserMemberInDm(authUserId, dmId, data)) {
+    return { error: 'user is not part of dm' };
   }
 
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
@@ -239,13 +224,11 @@ export function dmDetails(token:string, dmId:number): (dm | error) {
   if (!isDataStoreDmValid(dmId, data)) {
     return { error: 'dmId is Invalid' };
   }
-  for (const item of data.dms) {
-    if (item.dmId.toString() === dmId.toString()) {
-      if (item.allMembers.find(user => user.uId.toString() === authUserId.toString()) == null) {
-        return { error: 'user is not part of dm' };
-      }
-    }
+
+  if (!isUserMemberInDm(authUserId, dmId, data)) {
+    return { error: 'user is not part of dm' };
   }
+
   const dms = data.dms
     .filter(dms => dms.allMembers
       .find(member => member.uId === authUserId) != null) || [];
