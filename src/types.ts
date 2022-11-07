@@ -43,11 +43,15 @@ export type dataStoreDm = {
   messages: messages[]
 }
 
+export type dm = {
+  name: string,
+  members: user[]
+}
+
 // The channelId output type.
 export type channelId = { channelId: number };
 
 export type dmId = { dmId: number };
-export type dms = { dms: { dmId: number, name: string }[] };
 
 export type channel = {
   name: string,
@@ -64,6 +68,9 @@ export type error = { error: string };
 
 // The channels output type.
 export type channels = { channels: { channelId: number, name: string }[] };
+
+// the dms output type.
+export type dms = { dms: { dmId: number, name:string}[] };
 
 // Data model stored in the data store.
 export type dataStore = {
@@ -163,6 +170,12 @@ export type channelDetailsRequest = {
 }
 
 export type channelAddownerRequest = {
+  token: string,
+  channelId: number,
+  uId: number,
+}
+
+export type channelRemoveownerRequest = {
   token: string,
   channelId: number,
   uId: number,

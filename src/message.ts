@@ -1,9 +1,18 @@
-import { getData } from './dataStore';
+import { getData, setData } from './dataStore';
 import { dataStore, error, messages } from './types';
 import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreDm, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid, isUserMemberInChannel, isUserMemberInDm, isUserOwnerMemberInChannel } from './utils';
 
 let messageId = 0;
 
+/** Send a message from the authorised user to the channel specified by channelId.
+ * Note: Each message should have its own unique ID, i.e. no messages should share
+ * an ID with another message, even if that other message is in a different channel.
+ *
+ * @param authUserId
+ * @param channelId
+ * @param message
+ * @returns  message Id
+ */
 export function messageSend (authUserId: number, channelId: number, message: string): ({messageId: number} | error) {
   const data = getData();
   const channel = getDataStoreChannel(channelId, data);
@@ -25,12 +34,18 @@ export function messageSend (authUserId: number, channelId: number, message: str
   };
 
   channel.messages.push(newMessage);
-
+  setData(data);
   messageId += 1;
 
   return { messageId: messageId - 1 };
 }
 
+/** Given a messageId for a message, this message is removed from the channel/DM
+ *
+ * @param authUserId
+ * @param messageId
+ * @returns
+ */
 export function messageRemove (authUserId: number, messageId: number): (Record<string, never> | error) {
 // assume toke is valid
   const data:dataStore = getData();
@@ -46,10 +61,18 @@ export function messageRemove (authUserId: number, messageId: number): (Record<s
 
   const dataStoreChannel = getDataStoreChannel(channelId, data);
   dataStoreChannel.messages = dataStoreChannel.messages.filter(message => message.messageId !== messageId);
-
+  setData(data);
   return {};
 }
 
+/** Given a message, update its text with new text. If the new message is an empty
+ * string, the message is deleted.
+ *
+ * @param authUserId
+ * @param messageId
+ * @param message
+ * @returns
+ */
 export function messageEdit (authUserId: number, messageId: number, message: string): (Record<string, never> | error) {
   // assume toke is valid
   const data:dataStore = getData();
@@ -68,10 +91,19 @@ export function messageEdit (authUserId: number, messageId: number, message: str
   const dataStoreChannel = getDataStoreChannel(channelId, data);
   const editedMessage: messages = dataStoreChannel.messages.find(message => message.messageId === messageId);
   editedMessage.message = message;
-
+  setData(data);
   return {};
 }
 
+/** Send a message from authorised user to the DM specified by dmId. Note: Each message
+ * should have it's own unique ID, i.e. no messages should share an ID with another
+ * message, even if that other message is in a different channel or DM.
+ *
+ * @param authUserId
+ * @param dmId
+ * @param message
+ * @returns
+ */
 export function dmMessageSend (authUserId: number, dmId: number, message: string): ({messageId: number} | error) {
   const data = getData();
   const dm = getDataStoreDm(dmId, data);
@@ -95,6 +127,6 @@ export function dmMessageSend (authUserId: number, dmId: number, message: string
   dm.messages.push(newMessage);
 
   messageId += 1;
-
+  setData(data);
   return { messageId: messageId - 1 };
 }

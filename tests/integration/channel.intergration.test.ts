@@ -18,6 +18,7 @@ let token2: string; // token of test user 2
 let token3: string; // token of test user 3
 let uId1: number; // uId of test user 1
 let uId2: number; // uId of test user 2
+let uId3: number; // uId of test user 3
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -27,7 +28,9 @@ beforeEach(() => {
     nameFirst: 'c' + NAME_FIRST,
     nameLast: 'c' + NAME_LAST
   });
-  token3 = (parseJsonResponse(res3) as unknown as authResponse).token;
+  const jsonResponse3 = (parseJsonResponse(res3) as unknown as authResponse);
+  uId3 = jsonResponse3.authUserId;
+  token3 = jsonResponse3.token;
 
   const res1 = sendPostRequestToEndpoint('/auth/register/v2', {
     email: EMAIL,
@@ -613,5 +616,229 @@ describe('HTTP tests for channel/leave/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+});
+
+describe('HTTP tests for channel/removeowner/v1', () => {
+  let privateChannelId: number;
+  let publicChannelId: number;
+
+  beforeEach(() => {
+    const channel1CreateRes = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    });
+    publicChannelId = (parseJsonResponse(channel1CreateRes) as unknown as channelId).channelId;
+
+    const channel2CreateRes = sendPostRequestToEndpoint('/channels/create/v2', {
+      token: token,
+      name: TEST_CHANNEL_NAME,
+      isPublic: false
+    });
+    privateChannelId = (parseJsonResponse(channel2CreateRes) as unknown as channelId).channelId;
+
+    sendPostRequestToEndpoint('/channel/invite/v2', {
+      token: token,
+      channelId: privateChannelId,
+      uId: uId2
+    });
+    sendPostRequestToEndpoint('/channel/join/v2', {
+      token: token2,
+      channelId: publicChannelId,
+    });
+    sendPostRequestToEndpoint('/channel/addowner/v1', {
+      token: token,
+      channelId: publicChannelId,
+      uId: uId2
+    });
+  });
+
+  test('Remove channel owner remove themselves successful', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: publicChannelId,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('Remove channel owner remove other user successful', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: publicChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+  test('Global owner remove another channel owner successful', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token3,
+      channelId: publicChannelId,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('Remove channel owner using channelId refer to invalid channel remove themselves returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: 22222222,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Remove channel owner using channelId refer to invalid channel remove other user returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: 22222222,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Global owner using channelId refer to invalid channel remove other user returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token3,
+      channelId: 22222222,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Remove channel owner using invalid uId remove themselves returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: publicChannelId,
+      uId: 123123123
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Global owner using invalid uId remove other user returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token3,
+      channelId: publicChannelId,
+      uId: 123123123
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Channel owner using uId refer a user who is not an owner of the channel remove other user returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: privateChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Global owner using uId refer a user who is not an owner of the channel remove other user returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token3,
+      channelId: privateChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Channel owner using uId refer a user who is not an owner of the channel remove other user returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: privateChannelId,
+      uId: uId2
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Channel owner using uId refer a user who is currently the only owner of the channel returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token,
+      channelId: privateChannelId,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Channel owner using uId refer a user who is currently the only owner of the channel returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token3,
+      channelId: privateChannelId,
+      uId: uId3
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Authorised user does not have owner permissions in the channel returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token2,
+      channelId: privateChannelId,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
+  });
+
+  test('Authorised user does not have owner permissions in the channel returns fail', () => {
+    const res = sendPostRequestToEndpoint('/channel/removeowner/v1', {
+      token: token2,
+      channelId: privateChannelId,
+      uId: uId1
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: expect.any(String)
+    });
   });
 });
