@@ -122,7 +122,7 @@ export function dmMessageSend (authUserId: number, dmId: number, message: string
     timeSent: Date.now()
   };
 
-  dm.messages.unshift(newMessage);
+  dm.messages.push(newMessage);
 
   setData(data);
   return { messageId: newMessage.messageId };

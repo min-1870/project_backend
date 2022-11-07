@@ -163,7 +163,7 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
   }
 
   return {
-    messages: slicedMessages,
+    messages: slicedMessages.reverse(),
     start: start,
     end: end
   };
