@@ -63,9 +63,6 @@ app.get('/echo', (req: Request, res: Response, next) => {
   }
 });
 
-// handles errors nicely
-app.use(errorHandler());
-
 if (fs.existsSync('./database.json')) {
   const dbstr = fs.readFileSync('./database.json');
   setData(JSON.parse(String(dbstr)));
@@ -80,12 +77,14 @@ if (fs.existsSync('./database.json')) {
  * @returns {string} token - temp token for the authUserId
  * @returns {number} authUserId - autherUserId made by the function
  */
-app.post('/auth/login/v2', (req: Request, res: Response) => {
-  const { email, password } = req.body as authLoginRequest;
-
-  const result = authLoginV1(encodeURI(email), encodeURI(password));
-
-  res.json(result);
+app.post('/auth/login/v3', (req: Request, res: Response, next) => {
+  try {
+    const { email, password } = req.body as authLoginRequest;
+    const result = authLoginV1(encodeURI(email), encodeURI(password));
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
@@ -370,6 +369,9 @@ app.delete('/clear/v1', (_: Request, res: Response) => {
   clearV1();
   res.json({});
 });
+
+// handles errors nicely
+app.use(errorHandler());
 
 // for logging errors (print to terminal)
 app.use(morgan('dev'));

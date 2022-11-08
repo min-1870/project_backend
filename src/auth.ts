@@ -6,6 +6,7 @@ import validator from 'validator';
 import { authUserId, error, dataStoreUser } from './types';
 import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleStrExist } from './utils';
 import { generateAuthUserId, generateToken } from './ids';
+import HTTPError from 'http-errors';
 
 /**
  * Given a registered user's email and password, returns their authUserId value
@@ -20,12 +21,12 @@ export function authLoginV1(email: string, password: string): (authUserId | erro
 
   // checking if email has already been used
   if (!isEmailUsed(email, data.users)) {
-    return { error: 'Email address is not registered' };
+    throw HTTPError(400, 'Email address is not registered');
   }
 
   const user = getDataStoreUserByEmail(email, data);
   if (user.password !== password) {
-    return { error: 'Wrong password' };
+    throw HTTPError(400, 'Incorrect Password');
   } else {
     const token = generateToken();
     const ret = {

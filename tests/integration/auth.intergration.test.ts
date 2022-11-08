@@ -129,7 +129,7 @@ describe('HTTP tests for /auth/login/v2', () => {
       nameLast: NAME_LAST
     });
 
-    const res = sendPostRequestToEndpoint('/auth/login/v2', {
+    const res = sendPostRequestToEndpoint('/auth/login/v3', {
       email: EMAIL,
       password: PASSWORD,
     });
@@ -176,7 +176,7 @@ describe('HTTP tests for /auth/login/v2', () => {
     }));
 
     users.forEach(user => {
-      const res = sendPostRequestToEndpoint('/auth/login/v2', {
+      const res = sendPostRequestToEndpoint('/auth/login/v3', {
         email: user.email,
         password: user.password,
       });
@@ -197,15 +197,13 @@ describe('HTTP tests for /auth/login/v2', () => {
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const res = sendPostRequestToEndpoint('/auth/login/v2', {
+    const res = sendPostRequestToEndpoint('/auth/login/v3', {
       email: 'idkifthisisright@gmail.com',
       password: PASSWORD,
     });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Email address is not registered' });
   });
 
   test('Error passing invalid password through authLoginV1', () => {
@@ -215,15 +213,14 @@ describe('HTTP tests for /auth/login/v2', () => {
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const res = sendPostRequestToEndpoint('/auth/login/v2', {
+    const res = sendPostRequestToEndpoint('/auth/login/v3', {
       email: EMAIL,
       password: 'nappy',
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Incorrect Password' });
   });
 });
 
