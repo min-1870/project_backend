@@ -41,13 +41,12 @@ beforeEach(() => {
   uId = jsonResponse.authUserId;
 });
 
-describe('HTTP tests for /user/profile/v2', () => {
+describe('HTTP tests for /user/profile/v3', () => {
   // happy path
-  test('Successful /user/profile/v2', () => {
-    const res = sendGetRequestToEndpoint('/user/profile/v2', {
-      token: token,
+  test('Successful /user/profile/v3', () => {
+    const res = sendGetRequestToEndpoint('/user/profile/v3', {
       uId: uId
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -62,27 +61,23 @@ describe('HTTP tests for /user/profile/v2', () => {
   });
 
   test('error passing invalid uId', () => {
-    const res = sendGetRequestToEndpoint('/user/profile/v2', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/user/profile/v3', {
       uId: (uId + 12133)
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'uId is not valid' });
   });
 
   test('error passing invalid token', () => {
-    const res = sendGetRequestToEndpoint('/user/profile/v2', {
-      token: (token + 434),
+    const res = sendGetRequestToEndpoint('/user/profile/v3', {
       uId: uId
-    });
+    }, (token + 69));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
   });
 });
 

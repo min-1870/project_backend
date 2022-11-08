@@ -250,13 +250,17 @@ app.get('/users/all/v1', (req: Request, res: Response) => {
   }
 });
 
-app.get('/user/profile/v2', (req: Request, res: Response) => {
-  const { token, uId } = req.query as unknown as userProfileRequest;
-
-  const authUserId = getAuthUserIdFromToken(token);
-  const uuId = parseInt(uId.toString());
-  const result = userProfileV1(authUserId, uuId);
-  res.json(result);
+app.get('/user/profile/v3', (req: Request, res: Response, next) => {
+  try {
+    const { uId } = req.query as unknown as userProfileRequest;
+    const token = req.header('token');
+    const authUserId = getAuthUserIdFromToken(token);
+    const uuId = parseInt(uId.toString());
+    const result = userProfileV1(authUserId, uuId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
