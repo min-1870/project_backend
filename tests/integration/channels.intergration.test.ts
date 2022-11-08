@@ -21,7 +21,7 @@ let token: string;
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
 
-  const res = sendPostRequestToEndpoint('/auth/register/v2', {
+  const res = sendPostRequestToEndpoint('/auth/register/v3', {
     email: EMAIL,
     password: PASSWORD,
     nameFirst: NAME_FIRST,
@@ -143,7 +143,7 @@ describe('HTTP tests for /channels/list/v2', () => {
 describe('HTTP tests for /channels/listAll/v2', () => {
   test('Test successful status code and return', () => {
     // test user 2
-    const user2Res = sendPostRequestToEndpoint('/auth/register/v2', {
+    const user2Res = sendPostRequestToEndpoint('/auth/register/v3', {
       email: '2' + EMAIL,
       password: '2' + PASSWORD,
       nameFirst: NAME_FIRST + 'b',

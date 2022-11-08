@@ -29,7 +29,7 @@ let authUserId: number; // token of test user 1
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
-  const res1 = sendPostRequestToEndpoint('/auth/register/v2', {
+  const res1 = sendPostRequestToEndpoint('/auth/register/v3', {
     email: EMAIL,
     password: PASSWORD,
     nameFirst: NAME_FIRST,
@@ -38,7 +38,7 @@ beforeEach(() => {
   token = (parseJsonResponse(res1) as unknown as authResponse).token;
   authUserId = (parseJsonResponse(res1) as unknown as authResponse).authUserId;
 
-  const res2 = sendPostRequestToEndpoint('/auth/register/v2', {
+  const res2 = sendPostRequestToEndpoint('/auth/register/v3', {
     email: '2' + EMAIL,
     password: '2' + PASSWORD,
     nameFirst: 'b' + NAME_FIRST,

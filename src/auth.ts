@@ -55,23 +55,23 @@ export function authRegisterV1(email: string, password: string,
   const data = getData();
 
   if (!(validator.isEmail(email))) { // checking if email is valid
-    return { error: 'Invalid Email' };
+    throw HTTPError(400, 'Invalid Email');
   }
 
   if (isEmailUsed(email, data.users)) {
-    return { error: 'Email address already in use' };
+    throw HTTPError(400, 'Email Address already in use');
   }
 
   if (password.length < 6) {
-    return { error: 'password has to be six characters or longer' };
+    throw HTTPError(400, 'password has to be six characters or longer');
   }
 
   if (nameFirst.length < 1 || nameFirst.length > 50) {
-    return { error: 'First name has to be between 1 and 50 characters in length' };
+    throw HTTPError(400, 'First name has to be between 1 and 50 characters in length');
   }
 
   if (nameLast.length < 1 || nameLast.length > 50) {
-    return { error: 'Last name has to be between 1 and 50 characters in length' };
+    throw HTTPError(400, 'Last name has to be between 1 and 50 characters in length');
   }
   let fullname = nameFirst.toLowerCase() + nameLast.toLowerCase();
   fullname = onlyalphanumeric(fullname);
