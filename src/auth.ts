@@ -7,6 +7,7 @@ import { authUserId, error, dataStoreUser } from './types';
 import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleStrExist } from './utils';
 import { generateAuthUserId, generateToken } from './ids';
 import HTTPError from 'http-errors';
+import { getHashOf } from './hash';
 
 /**
  * Given a registered user's email and password, returns their authUserId value
@@ -25,7 +26,7 @@ export function authLoginV1(email: string, password: string): (authUserId | erro
   }
 
   const user = getDataStoreUserByEmail(email, data);
-  if (user.password !== password) {
+  if (user.password !== getHashOf(password)) {
     throw HTTPError(400, 'Incorrect Password');
   } else {
     const token = generateToken();
@@ -90,7 +91,7 @@ export function authRegisterV1(email: string, password: string,
   }
 
   const isGlobalOwner = data.users.length === 0;
-
+  password = getHashOf(password);
   const uuID: number = generateAuthUserId();
   const currentsessionID: string = generateToken();
   const temp: dataStoreUser = {
