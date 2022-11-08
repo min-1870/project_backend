@@ -100,14 +100,13 @@ app.post('/auth/login/v3', (req: Request, res: Response, next) => {
  * @returns {number} authUserId - autherUserId made by the function
  */
 app.post('/auth/register/v3', (req: Request, res: Response, next) => {
-  try{
+  try {
     const { email, password, nameFirst, nameLast } = req.body as authRegisterRequest;
     const result = authRegisterV1(encodeURI(email), encodeURI(password), encodeURI(nameFirst), encodeURI(nameLast));
     res.json(result);
   } catch (err) {
     next(err);
   }
-  
 });
 
 /**

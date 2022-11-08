@@ -55,7 +55,7 @@ export function authRegisterV1(email: string, password: string,
   const data = getData();
 
   if (!(validator.isEmail(email))) { // checking if email is valid
-    throw HTTPError(400, 'Invalid Email');;
+    throw HTTPError(400, 'Invalid Email');
   }
 
   if (isEmailUsed(email, data.users)) {
