@@ -30,36 +30,77 @@ export function sendGetRequestToEndpoint(endpoint: string, qs: object, header?: 
   return res;
 }
 
-export function sendDeleteRequestToEndpoint(endpoint: string, qs: object): Response {
-  const res = request(
+export function sendDeleteRequestToEndpoint(endpoint: string, qs: object, header?: string): Response {
+  let res = request(
     'DELETE',
     `${url}:${port}${endpoint}`,
     {
       qs,
     }
   );
+
+  if (typeof header !== 'undefined') {
+    res = request(
+      'DELETE',
+      `${url}:${port}${endpoint}`,
+      {
+        qs,
+        headers: {
+          token: header
+        }
+      }
+    );
+  }
   return res;
 }
 
-export function sendPostRequestToEndpoint(endpoint: string, json: object): Response {
-  const res = request(
+export function sendPostRequestToEndpoint(endpoint: string, json: object, header?: string): Response {
+  let res = request(
     'POST',
     `${url}:${port}${endpoint}`,
     {
       json,
     }
   );
+
+  if (typeof header !== 'undefined') {
+    res = request(
+      'POST',
+      `${url}:${port}${endpoint}`,
+      {
+        json,
+        headers: {
+          token: header
+        }
+      }
+    );
+  }
+
   return res;
 }
 
-export function sendPutRequestToEndpoint(endpoint: string, json: object): Response {
-  const res = request(
+export function sendPutRequestToEndpoint(endpoint: string, json: object, header?: string): Response {
+  let res = request(
     'PUT',
     `${url}:${port}${endpoint}`,
     {
       json,
     }
   );
+
+  if (typeof header !== 'undefined') {
+    res = request(
+      'PUT',
+      `${url}:${port}${endpoint}`,
+      {
+        json,
+        headers: {
+          token: header
+        }
+      }
+    );
+  }
+
   return res;
 }
 
