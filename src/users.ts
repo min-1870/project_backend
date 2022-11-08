@@ -5,6 +5,7 @@ import {
 import { dataStore, dataStoreUser, error, user } from './types';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+import { TokenHash } from './hash';
 
 /**
  * For a valid user, return info about their user ID, email, firstname , last name and handle
@@ -57,7 +58,7 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (user.sessionTokens[j] === token) {
+      if (TokenHash(user.sessionTokens[j]) === token) {
         user.handleStr = handleStr;
         setData(data);
         return {};
@@ -91,7 +92,7 @@ export function userProfileEmailChange(token: string, email: string): (Record<st
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (user.sessionTokens[j] === token) {
+      if (TokenHash(user.sessionTokens[j]) === token) {
         user.email = email;
         setData(data);
         return {};
@@ -120,7 +121,7 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (user.sessionTokens[j] === token) {
+      if (TokenHash(user.sessionTokens[j]) === token) {
         user.nameFirst = nameFirst;
         user.nameLast = nameLast;
         setData(data);
