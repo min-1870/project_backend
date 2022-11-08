@@ -4,6 +4,7 @@ import {
 } from './dataStore';
 import { dataStore, dataStoreUser, error, user } from './types';
 import validator from 'validator';
+import HTTPError from 'http-errors';
 
 /**
  * For a valid user, return info about their user ID, email, firstname , last name and handle
@@ -16,13 +17,12 @@ import validator from 'validator';
  */
 export function userProfileV1(authUserId: number, uID: number): { user: user } | error {
   const data = getData();
-
   if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'authUserId is not valid' };
+    throw HTTPError(403, 'invalid token');
   }
 
   if (!isAuthUserIdValid(uID, data)) {
-    return { error: 'uId is not valid' };
+    throw HTTPError(400, 'uId is not valid');
   }
 
   const dataStoreUser = getDataStoreUser(uID, data);

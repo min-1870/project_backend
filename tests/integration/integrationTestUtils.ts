@@ -5,14 +5,28 @@ export const OK = 200;
 const port = config.port;
 const url = config.url;
 
-export function sendGetRequestToEndpoint(endpoint: string, qs: object): Response {
-  const res = request(
+export function sendGetRequestToEndpoint(endpoint: string, qs: object, header?: string): Response {
+  let res = request(
     'GET',
     `${url}:${port}${endpoint}`,
     {
       qs,
     }
   );
+
+  if (typeof header !== 'undefined') {
+    res = request(
+      'GET',
+      `${url}:${port}${endpoint}`,
+      {
+        qs,
+        headers: {
+          token: header
+        }
+      }
+    );
+  }
+
   return res;
 }
 
