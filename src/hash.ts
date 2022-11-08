@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-let totallysecretstring = 'wowthisissosecurexD'
+const totallysecretstring = 'wowthisissosecurexD';
 
 export function getHashOf(plaintext: string) {
   return crypto.createHash('sha256').update(plaintext).digest('hex');

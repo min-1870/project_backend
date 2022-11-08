@@ -30,7 +30,7 @@ export function authLoginV1(email: string, password: string): (authUserId | erro
     throw HTTPError(400, 'Incorrect Password');
   } else {
     const token = generateToken();
-    let hashedToken = TokenHash(token)
+    const hashedToken = TokenHash(token);
     const ret = {
       token: hashedToken,
       authUserId: user.uId
