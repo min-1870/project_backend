@@ -1,4 +1,5 @@
 import { getData, setData } from './dataStore';
+import { TokenHash } from './hash';
 import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm, messages } from './types';
 
 // -----FUCNTIONS ABOUT USER ONLY
@@ -59,7 +60,7 @@ export function getAuthUserIdFromToken(token: string): number {
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (user.sessionTokens[j] === token) {
+      if (TokenHash(user.sessionTokens[j]) === token) {
         return user.uId;
       }
     }
@@ -72,7 +73,7 @@ export function removetoken(token: string): (Record<string, never> | error) {
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (user.sessionTokens[j] === token) {
+      if (TokenHash(user.sessionTokens[j]) === token) {
         user.sessionTokens.splice(j, 1);
         setData(data);
         return {};
