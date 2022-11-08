@@ -19,7 +19,7 @@ let uIdTwo: number;
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
-  let res = sendPostRequestToEndpoint('/auth/register/v2', {
+  let res = sendPostRequestToEndpoint('/auth/register/v3', {
     email: EMAIL,
     password: PASSWORD,
     nameFirst: NAME_FIRST,
@@ -30,7 +30,7 @@ beforeEach(() => {
   token = jsonResponse.token;
   uIdTwo = jsonResponse.authUserId;
 
-  res = sendPostRequestToEndpoint('/auth/register/v2', {
+  res = sendPostRequestToEndpoint('/auth/register/v3', {
     email: 'gomugomu@hotmail.com',
     password: PASSWORD,
     nameFirst: 'monkey',

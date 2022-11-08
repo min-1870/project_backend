@@ -25,7 +25,7 @@ for (let i = 0; i < 1000; i++) VERY_LONG_MESSAGE = VERY_LONG_MESSAGE + ':(';
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
-  let res = sendPostRequestToEndpoint('/auth/register/v2', {
+  let res = sendPostRequestToEndpoint('/auth/register/v3', {
     email: EMAIL,
     password: PASSWORD,
     nameFirst: NAME_FIRST,
@@ -36,7 +36,7 @@ beforeEach(() => {
   token = jsonResponse.token;
   uIdTwo = jsonResponse.authUserId;
 
-  res = sendPostRequestToEndpoint('/auth/register/v2', {
+  res = sendPostRequestToEndpoint('/auth/register/v3', {
     email: 'gomugomu@hotmail.com',
     password: PASSWORD,
     nameFirst: 'monkey',
@@ -47,7 +47,7 @@ beforeEach(() => {
   uId = jsonResponse.authUserId;
   tokenTwo = jsonResponse.token;
 
-  res = sendPostRequestToEndpoint('/auth/register/v2', {
+  res = sendPostRequestToEndpoint('/auth/register/v3', {
     email: 'gomugomu1@hotmail.com',
     password: PASSWORD,
     nameFirst: 'fake',

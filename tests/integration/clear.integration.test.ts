@@ -9,7 +9,7 @@ const TEST_CHANNEL_NAME = 'Test channel';
 
 describe('HTTP tests for /clear/v1', () => {
   test('Clear data succeeds', () => {
-    const registerResponse = sendPostRequestToEndpoint('/auth/register/v2', {
+    const registerResponse = sendPostRequestToEndpoint('/auth/register/v3', {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
