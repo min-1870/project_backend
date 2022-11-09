@@ -112,7 +112,7 @@ describe('HTTP tests for /dm/create/v2', () => {
   });
 });
 
-describe('HTTP tests for /dm/list/v1', () => {
+describe('HTTP tests for /dm/list/v2', () => {
   let dmId: number;
   beforeEach(() => {
     const res = sendPostRequestToEndpoint('/dm/create/v2', {
@@ -124,9 +124,7 @@ describe('HTTP tests for /dm/list/v1', () => {
   });
 
   test('dm list successful', () => {
-    const res = sendGetRequestToEndpoint('/dm/list/v1', {
-      token
-    });
+    const res = sendGetRequestToEndpoint('/dm/list/v2', {}, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -144,9 +142,7 @@ describe('HTTP tests for /dm/list/v1', () => {
       uIds: []
     }, token);
 
-    const res = sendGetRequestToEndpoint('/dm/list/v1', {
-      token
-    });
+    const res = sendGetRequestToEndpoint('/dm/list/v2', {}, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -164,14 +160,11 @@ describe('HTTP tests for /dm/list/v1', () => {
   });
 
   test('dm list with invalid token fail', () => {
-    const res = sendGetRequestToEndpoint('/dm/list/v1', {
-      token: (token + 643535)
-    });
+    const res = sendGetRequestToEndpoint('/dm/list/v2', {}, (token + 77));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 });
 

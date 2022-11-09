@@ -341,11 +341,14 @@ app.post('/dm/create/v2', (req: Request, res: Response, next) => {
   }
 });
 
-app.get('/dm/list/v1', (req: Request, res: Response) => {
-  const { token } = req.query as channelsListRequest;
-  // const authUserId = getAuthUserIdFromToken(token);
-  const result = dmlist(token);
-  res.json(result);
+app.get('/dm/list/v2', (req: Request, res: Response, next) => {
+  try {
+    const token = req.header('token');
+    const result = dmlist(token);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.get('/dm/messages/v1', (req: Request, res: Response) => {

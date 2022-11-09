@@ -94,7 +94,7 @@ function dmNameGenerator(token:string, uIds: number[]): (string) {
 export function dmlist(token:string): (dms | error) {
   const data: dataStore = getData();
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   const authUserId = getAuthUserIdFromToken(token);
   const dms = data.dms
