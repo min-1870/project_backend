@@ -362,10 +362,15 @@ app.get('/dm/messages/v1', (req: Request, res: Response) => {
   }
 });
 
-app.delete('/dm/remove/v1', (req: Request, res: Response) => {
-  const { token, dmId } = req.query as unknown as dmDeleteRequest;
-  const result = deleteDm(token, dmId);
-  res.json(result);
+app.delete('/dm/remove/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId } = req.query as unknown as dmDeleteRequest;
+    const token = req.header('token');
+    const result = deleteDm(token, dmId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/dm/leave/v1', (req: Request, res: Response) => {

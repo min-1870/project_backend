@@ -108,22 +108,22 @@ export function deleteDm(token:string, dmId:number) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   if (!isDataStoreDmValid(dmId, data)) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   }
   for (const dm of data.dms) {
     if (dm.dmId.toString() === dmId.toString()) {
       if (dm.ownerMembers[0] !== getAuthUserIdFromToken(token)) {
-        return { error: 'user is not owner of dm' };
+        throw HTTPError(403, 'user is not owner of dm');
       }
     }
   }
   for (const dm of data.dms) {
     if (dm.dmId.toString() === dmId.toString()) {
       if (dm.allMembers.find(user => user.toString() === authUserId.toString()) == null) {
-        return { error: 'user is not part of dm' };
+        throw HTTPError(403, 'user is not part of dm');
       }
     }
   }

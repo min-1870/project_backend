@@ -168,7 +168,7 @@ describe('HTTP tests for /dm/list/v2', () => {
   });
 });
 
-describe('HTTP tests for /dm/remove/v1', () => {
+describe('HTTP tests for /dm/remove/v2', () => {
   let dmId: number;
   beforeEach(() => {
     const res = sendPostRequestToEndpoint('/dm/create/v2', {
@@ -180,49 +180,42 @@ describe('HTTP tests for /dm/remove/v1', () => {
   });
 
   test('dm delete successful', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: token,
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
   test('dm/remove with invalid token fail', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: (token + 643535),
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, (token + 4432));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('dm/remove with invalid dmId', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: token,
-      dmId: (dmId + 104340)
-    });
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
+      dmId: (dmId + 44)
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('dm/remove failure, user not owner of dm', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: tokenTwo,
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, tokenTwo);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not owner of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not owner of dm' });
   });
 
   test('dm/remove failure, user not member of dm', () => {
@@ -231,15 +224,13 @@ describe('HTTP tests for /dm/remove/v1', () => {
       dmId: dmId
     });
 
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: token,
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 });
 
