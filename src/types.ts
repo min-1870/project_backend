@@ -192,7 +192,6 @@ export type dmMessagesRequest = {
 }
 
 export type dmDetailsRequest = {
-  token: string,
   dmId: number
 }
 

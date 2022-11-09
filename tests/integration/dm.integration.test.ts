@@ -511,43 +511,36 @@ describe('HTTP tests for dm/details/v1', () => {
     dmId = jsonResponse.dmId;
   });
   test('UserId is not a member of DM', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: tokenThree,
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: dmId,
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
   test('user is not part of dm', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: 999999999999999
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
   test('Invalid Token', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: '99999999',
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: dmId,
-    });
+    }, (token + 99));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
   test('valid dmDetails', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: dmId,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({

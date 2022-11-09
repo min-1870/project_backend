@@ -379,10 +379,15 @@ app.post('/dm/leave/v1', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.get('/dm/details/v1', (req: Request, res: Response) => {
-  const { token, dmId } = req.query as unknown as dmDetailsRequest;
-  const result = dmDetails(token, dmId);
-  res.json(result);
+app.get('/dm/details/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId } = req.query as unknown as dmDetailsRequest;
+    const token = req.header('token');
+    const result = dmDetails(token, dmId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.delete('/clear/v1', (_: Request, res: Response) => {

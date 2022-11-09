@@ -221,14 +221,14 @@ export function dmDetails(token:string, dmId:number): (dm | error) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   if (!isDataStoreDmValid(dmId, data)) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   }
 
   if (!isUserMemberInDm(authUserId, dmId, data)) {
-    return { error: 'user is not part of dm' };
+    throw HTTPError(403, 'user is not part of dm');
   }
 
   return toOutputDmDetails(getDataStoreDm(dmId, data));
