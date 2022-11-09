@@ -219,10 +219,9 @@ describe('HTTP tests for /dm/remove/v2', () => {
   });
 
   test('dm/remove failure, user not member of dm', () => {
-    sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: token,
+    sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, token);
 
     const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
@@ -234,7 +233,7 @@ describe('HTTP tests for /dm/remove/v2', () => {
   });
 });
 
-describe('HTTP tests for /dm/leave/v1', () => {
+describe('HTTP tests for /dm/leave/v2', () => {
   let dmId: number;
   beforeEach(() => {
     const res = sendPostRequestToEndpoint('/dm/create/v2', {
@@ -246,49 +245,42 @@ describe('HTTP tests for /dm/leave/v1', () => {
   });
 
   test('dm leave successful', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
   test('dm/leave with invalid token fail', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: (token + 643535),
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, (token + 99));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('dm/leave with invalid dmId', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: (dmId + 104340)
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('dm/leave failure, user not part of dm', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: tokenThree,
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 });
 

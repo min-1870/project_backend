@@ -148,14 +148,14 @@ export function dmLeave(token:string, dmId:number): (Record<string, never> | err
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   if (!isDataStoreDmValid(dmId, data)) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   }
 
   if (!isUserMemberInDm(authUserId, dmId, data)) {
-    return { error: 'user is not part of dm' };
+    throw HTTPError(403, 'user is not part of dm');
   }
 
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());

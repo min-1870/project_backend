@@ -181,7 +181,6 @@ export type dmCreateRequest = {
 }
 
 export type dmDeleteRequest = {
-  token: string,
   dmId: number
 }
 
