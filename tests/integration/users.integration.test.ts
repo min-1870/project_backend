@@ -262,21 +262,18 @@ describe('Tests for /user/profile/setname/v1', () => {
   });
 });
 
-describe('Tests for /users/all/v1', () => {
+describe('Tests for /users/all/v2', () => {
   test('token is invalid', () => {
-    const res = sendGetRequestToEndpoint('/users/all/v1', {
-      token: '99999999',
-    });
+    const res = sendGetRequestToEndpoint('/users/all/v2', {
+    }, (token + 999));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid token'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid token' });
   });
   test('A list of all users and their associated details is successfully returned.', () => {
-    const res = sendGetRequestToEndpoint('/users/all/v1', {
-      token: token,
-    });
+    const res = sendGetRequestToEndpoint('/users/all/v2', {
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
