@@ -58,12 +58,11 @@ beforeEach(() => {
   tokenThree = jsonResponse.token;
 });
 
-describe('HTTP tests for /dm/create/v1', () => {
-  test('Successful /dm/create/v1', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+describe('HTTP tests for /dm/create/v2', () => {
+  test('Successful /dm/create/v2', () => {
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -71,11 +70,10 @@ describe('HTTP tests for /dm/create/v1', () => {
     });
   });
 
-  test('Successful /dm/create/v1 with only owner', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+  test('Successful /dm/create/v2 with only owner', () => {
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: []
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -84,49 +82,42 @@ describe('HTTP tests for /dm/create/v1', () => {
   });
 
   test('Failure due to invalid uId', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId + 99123123199]
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid uId in uIds'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid uId in uIds' });
   });
 
   test('Failure due to duplicate uId', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId, uId]
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Duplicate uId values entered'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Duplicate uId values entered' });
   });
 
   test('Failure due to invalid tokens', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: (token + 999),
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, (token + 69));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
   });
 });
 
 describe('HTTP tests for /dm/list/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
@@ -149,10 +140,9 @@ describe('HTTP tests for /dm/list/v1', () => {
   });
 
   test('dm list successful with multiple lists', () => {
-    sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: []
-    });
+    }, token);
 
     const res = sendGetRequestToEndpoint('/dm/list/v1', {
       token
@@ -188,10 +178,9 @@ describe('HTTP tests for /dm/list/v1', () => {
 describe('HTTP tests for /dm/remove/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
@@ -264,10 +253,9 @@ describe('HTTP tests for /dm/remove/v1', () => {
 describe('HTTP tests for /dm/leave/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
@@ -323,10 +311,9 @@ describe('HTTP tests for /dm/leave/v1', () => {
 describe('HTTP tests for /dm/messages/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
@@ -403,10 +390,9 @@ describe('HTTP tests for /dm/messages/v1', () => {
 describe('HTTP tests for message/senddm/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
@@ -533,10 +519,9 @@ describe('HTTP tests for message/senddm/v1', () => {
 describe('HTTP tests for dm/details/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;

@@ -177,7 +177,6 @@ export type channelRemoveownerRequest = {
 }
 
 export type dmCreateRequest = {
-  token: string,
   uIds: [number]
 }
 

@@ -330,10 +330,15 @@ app.post('/message/senddm/v1', (req: Request, res: Response) => {
   }
 });
 
-app.post('/dm/create/v1', (req: Request, res: Response) => {
-  const { token, uIds } = req.body as dmCreateRequest;
-  const result = dmCreation(token, uIds);
-  res.json(result);
+app.post('/dm/create/v2', (req: Request, res: Response, next) => {
+  try {
+    const { uIds } = req.body as dmCreateRequest;
+    const token = req.header('token');
+    const result = dmCreation(token, uIds);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.get('/dm/list/v1', (req: Request, res: Response) => {

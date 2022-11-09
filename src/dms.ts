@@ -3,6 +3,7 @@ import { TokenHash } from './hash';
 import { generateDmId } from './ids';
 import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
 import { duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
+import HTTPError from 'http-errors';
 
 /**
   * Creates the Dm from token user to users entered in uIds
@@ -17,16 +18,16 @@ export function dmCreation(token:string, uIds: number[]): ({dmId: number} | erro
   const data: dataStore = getData();
 
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'invalid token');
   }
 
   for (const uId of uIds) {
     if (!isAuthUserIdValid(uId, data)) {
-      return { error: 'Invalid uId in uIds' };
+      throw HTTPError(400, 'Invalid uId in uIds');
     }
   }
   if (duplicateValueCheck(uIds) === true) {
-    return { error: 'Duplicate uId values entered' };
+    throw HTTPError(400, 'Duplicate uId values entered');
   }
 
   const DmName = dmNameGenerator(token, uIds);
