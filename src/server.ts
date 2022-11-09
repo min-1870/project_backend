@@ -290,11 +290,15 @@ app.put('/user/profile/setemail/v2', (req: Request, res: Response, next) => {
   }
 });
 
-app.put('/user/profile/setname/v1', (req: Request, res: Response) => {
-  const { token, nameFirst, nameLast } = req.body as userProfileSetname;
-
-  const result = userProfileNameChange(token, nameLast, nameFirst);
-  res.json(result);
+app.put('/user/profile/setname/v2', (req: Request, res: Response, next) => {
+  try {
+    const { nameFirst, nameLast } = req.body as userProfileSetname;
+    const token = req.header('token');
+    const result = userProfileNameChange(token, nameFirst, nameLast);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/message/send/v1', (req: Request, res: Response) => {

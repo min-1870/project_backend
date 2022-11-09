@@ -183,64 +183,65 @@ describe('Tests for /user/profile/setemail/v2', () => {
   });
 });
 
-describe('Tests for /user/profile/setname/v1', () => {
+describe('Tests for /user/profile/setname/v2', () => {
   test('Successful update of first and last name', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steve',
       nameLast: 'Man'
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
   test('First name too long', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steveveveveveveveveveveveveveveveveveveveveveveveveveveve',
       nameLast: 'Man'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'First name is not correct length' });
   });
   test('Last name too long', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steve',
       nameLast: 'Manananananananananananananananananananananananananananananananananananananananan'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Last name is not correct length' });
   });
   test('First name too short', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: '',
       nameLast: 'Man'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'First name is not correct length' });
   });
   test('Last name too short', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steve',
       nameLast: ''
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Last name is not correct length' });
+  });
+  test('Token is invalid', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
+      nameFirst: 'Steve',
+      nameLast: 'Lacy'
+    }, (token + 69));
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 });
 

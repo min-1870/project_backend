@@ -113,10 +113,10 @@ export function userProfileEmailChange(token: string, email: string): (Record<st
 export function userProfileNameChange(token: string, nameFirst: string, nameLast: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   if (nameFirst.length < 1 || nameFirst.length > 50) {
-    return { error: 'First name is not the correct length' };
+    throw HTTPError(400, 'First name is not correct length');
   }
   if (nameLast.length < 1 || nameLast.length > 50) {
-    return { error: 'handleStr is not correct size' };
+    throw HTTPError(400, 'Last name is not correct length');
   }
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
@@ -129,7 +129,7 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
       }
     }
   }
-  return { error: 'Token is Invalid' };
+  throw HTTPError(403, 'Token is Invalid');
 }
 
 /**

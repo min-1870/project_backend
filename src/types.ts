@@ -200,13 +200,8 @@ export type userProfileSetemail = {
 }
 
 export type userProfileSetname = {
-  token: string
   nameFirst: string
   nameLast: string
-}
-
-export type usersAllRequest = {
-  token: string
 }
 
 export type channelLeaveRequest = {
