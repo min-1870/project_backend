@@ -268,20 +268,26 @@ app.get('/user/profile/v3', (req: Request, res: Response, next) => {
   }
 });
 
-app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
-  const { token, handleStr } = req.body as userProfileSethandleRequest;
-
-  const result = userProfileHandleChange(token, handleStr);
-
-  res.json(result);
+app.put('/user/profile/sethandle/v2', (req: Request, res: Response, next) => {
+  try {
+    const { handleStr } = req.body as userProfileSethandleRequest;
+    const token = req.header('token');
+    const result = userProfileHandleChange(token, handleStr);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.put('/user/profile/setemail/v1', (req: Request, res: Response) => {
-  const { token, email } = req.body as userProfileSetemail;
-
-  const result = userProfileEmailChange(token, email);
-
-  res.json(result);
+app.put('/user/profile/setemail/v2', (req: Request, res: Response, next) => {
+  try {
+    const { email } = req.body as userProfileSetemail;
+    const token = req.header('token');
+    const result = userProfileEmailChange(token, email);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.put('/user/profile/setname/v1', (req: Request, res: Response) => {

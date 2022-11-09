@@ -42,16 +42,16 @@ export function userProfileV1(authUserId: number, uID: number): { user: user } |
 export function userProfileHandleChange(token: string, handleStr: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   if (handleStr.length < 3 || handleStr.length > 20) {
-    return { error: 'handleStr is not correct size' };
+    throw HTTPError(400, 'handleStr is not correct size');
   }
   if (!(/^[A-Za-z0-9]*$/.test(handleStr))) {
-    return { error: 'handleStr has non-alphanumeric characters' };
+    throw HTTPError(400, 'handleStr has non-alphanumeric characters');
   }
 
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     if (user.handleStr === handleStr) {
-      return { error: 'handle is already in use' };
+      throw HTTPError(400, 'handle is already in use');
     }
   }
 
@@ -65,7 +65,7 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
       }
     }
   }
-  return { error: 'Token is Invalid' };
+  throw HTTPError(403, 'Token is Invalid');
 }
 
 /**
@@ -79,13 +79,13 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
 export function userProfileEmailChange(token: string, email: string): (Record<string, never> | error) {
   const data: dataStore = getData();
   if (!(validator.isEmail(email))) { // checking if email is valid
-    return { error: 'Invalid Email' };
+    throw HTTPError(400, 'Invalid Email');
   }
 
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     if (user.email === email) {
-      return { error: 'email is already in use' };
+      throw HTTPError(400, 'email is already in use');
     }
   }
 
@@ -99,7 +99,7 @@ export function userProfileEmailChange(token: string, email: string): (Record<st
       }
     }
   }
-  return { error: 'Token is Invalid' };
+  throw HTTPError(403, 'Token is Invalid');
 }
 
 /**
