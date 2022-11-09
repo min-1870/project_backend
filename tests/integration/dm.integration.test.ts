@@ -284,7 +284,7 @@ describe('HTTP tests for /dm/leave/v2', () => {
   });
 });
 
-describe('HTTP tests for /dm/messages/v1', () => {
+describe('HTTP tests for /dm/messages/v2', () => {
   let dmId: number;
   beforeEach(() => {
     const res = sendPostRequestToEndpoint('/dm/create/v2', {
@@ -296,11 +296,10 @@ describe('HTTP tests for /dm/messages/v1', () => {
   });
 
   test('dm/messages successful', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -311,55 +310,47 @@ describe('HTTP tests for /dm/messages/v1', () => {
   });
 
   test('dm/messages with invalid token fail', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: (token + 643535),
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0
-    });
+    }, (token + 643535));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('dm/messages with invalid dmId', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: (dmId + 104340),
       start: 0
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('dm/messages failure, user not part of dm', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: tokenThree,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 
   test('start is greater than the total number of messages in the dm', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 9999999999
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid start'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid start' });
   });
 });
 
@@ -375,76 +366,65 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('message/senddm with invalid dmId', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: (dmId + 104340),
       message: TEST_MESSAGE
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('length of message is less than 1 characters', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: ''
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'length of message is less than 1 or over 1000 characters' });
   });
 
   test('length of message is over 1000 characters', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: VERY_LONG_MESSAGE
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'length of message is less than 1 or over 1000 characters' });
   });
 
   test('failure, user not part of dm', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: tokenThree,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 
   test('token is invalid', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: (token + 999999),
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, (token + 99999));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('correct input correct return', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -453,19 +433,17 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('correct input correct message', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, token);
 
     const messageId = (parseJsonResponse(res) as unknown as messageId).messageId;
 
-    const res2 = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res2 = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
@@ -476,17 +454,15 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('correct input correct timeSent', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, token);
 
-    const res2 = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res2 = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect((parseJsonResponse(res2) as unknown as channelMessagesOutput).messages[0].timeSent).toBeLessThanOrEqual(Date.now() + 2);

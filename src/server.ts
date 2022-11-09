@@ -320,13 +320,14 @@ app.delete('/message/remove/v1', (req: Request, res: Response) => {
   }
 });
 
-app.post('/message/senddm/v1', (req: Request, res: Response) => {
-  const { token, dmId, message } = req.body as unknown as messageSendDmRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-  if (authUserId == null) {
-    return res.json({ error: 'Token is Invalid' });
-  } else {
+app.post('/message/senddm/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId, message } = req.body as unknown as messageSendDmRequest;
+    const token = req.header('token');
+    const authUserId = getAuthUserIdFromToken(token);
     return res.json(dmMessageSend(Number(authUserId), Number(dmId), message));
+  } catch (err) {
+    next(err);
   }
 });
 
@@ -351,14 +352,14 @@ app.get('/dm/list/v2', (req: Request, res: Response, next) => {
   }
 });
 
-app.get('/dm/messages/v1', (req: Request, res: Response) => {
-  const { token, dmId, start } = req.query as unknown as dmMessagesRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-
-  if (authUserId == null) {
-    return res.json({ error: 'Token is Invalid' });
-  } else {
+app.get('/dm/messages/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId, start } = req.query as unknown as dmMessagesRequest;
+    const token = req.header('token');
+    const authUserId = getAuthUserIdFromToken(token);
     return res.json(dmMessages(authUserId, Number(dmId), Number(start)));
+  } catch (err) {
+    next(err);
   }
 });
 

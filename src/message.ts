@@ -2,6 +2,7 @@ import { getData, setData } from './dataStore';
 import { generateMessageId } from './ids';
 import { dataStore, error, messages } from './types';
 import { findChannelIdByMessageId, getDataStoreChannel, getDataStoreDm, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid, isUserMemberInChannel, isUserMemberInDm, isUserOwnerMemberInChannel } from './utils';
+import HTTPError from 'http-errors';
 
 /** Send a message from the authorised user to the channel specified by channelId.
  * Note: Each message should have its own unique ID, i.e. no messages should share
@@ -106,13 +107,13 @@ export function dmMessageSend (authUserId: number, dmId: number, message: string
   const data = getData();
   const dm = getDataStoreDm(dmId, data);
   if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   } else if (!isDataStoreDmValid(dmId, data)) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   } else if (message.length < 1 || message.length > 1000) {
-    return { error: 'length of message is less than 1 or over 1000 characters' };
+    throw HTTPError(400, 'length of message is less than 1 or over 1000 characters');
   } else if (!isUserMemberInDm(authUserId, dmId, data)) {
-    return { error: 'user is not part of dm' };
+    throw HTTPError(403, 'user is not part of dm');
   }
 
   const newMessage: messages = {

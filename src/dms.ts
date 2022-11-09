@@ -180,13 +180,13 @@ export function dmMessages(authUserId: number, dmId: number, start: number): ({ 
   const data = getData();
   const dm = getDataStoreDm(dmId, data);
   if (dm == null) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   } else if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'Invalid user ID' };
+    throw HTTPError(403, 'Token is Invalid');
   } else if (start < 0 || start > dm.messages.length) {
-    return { error: 'Invalid start' };
+    throw HTTPError(400, 'Invalid start');
   } else if (!isUserMemberInDm(authUserId, dmId, data)) {
-    return { error: 'user is not part of dm' };
+    throw HTTPError(403, 'user is not part of dm');
   }
 
   const messages = dm.messages;
