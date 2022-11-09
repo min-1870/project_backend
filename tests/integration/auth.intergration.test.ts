@@ -219,7 +219,7 @@ describe('HTTP tests for /auth/login/v2', () => {
   });
 });
 
-describe('HTTP tests for /auth/logout/v1', () => {
+describe('HTTP tests for /auth/logout/v2', () => {
   test('Successful auth logout', () => {
     const ret = sendPostRequestToEndpoint('/auth/register/v3', {
       email: EMAIL,
@@ -231,9 +231,7 @@ describe('HTTP tests for /auth/logout/v1', () => {
     const jsonResponse = parseJsonResponse(ret) as unknown as authResponse;
     const token = jsonResponse.token;
 
-    const res = sendPostRequestToEndpoint('/auth/logout/v1', {
-      token: token,
-    });
+    const res = sendPostRequestToEndpoint('/auth/logout/v2', {}, token);
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
@@ -245,13 +243,10 @@ describe('HTTP tests for /auth/logout/v1', () => {
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const res = sendPostRequestToEndpoint('/auth/logout/v1', {
-      token: 'this is definitely wrong'
-    });
+    const res = sendPostRequestToEndpoint('/auth/logout/v2', {}, 'this is definitely wrong');
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
   });
 });
