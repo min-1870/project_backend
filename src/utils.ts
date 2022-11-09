@@ -1,7 +1,7 @@
 import { getData, setData } from './dataStore';
 import { TokenHash } from './hash';
 import { channel, channels, dataStore, dataStoreChannel, dataStoreUser, user, error, dms, dataStoreDm, messages } from './types';
-
+import HTTPError from 'http-errors';
 // -----FUCNTIONS ABOUT USER ONLY
 
 export function isAuthUserIdValid(authUserId: number, data: dataStore): boolean {
@@ -80,7 +80,7 @@ export function removetoken(token: string): (Record<string, never> | error) {
       }
     }
   }
-  return { error: 'Token is Invalid' };
+  throw HTTPError(403, 'invalid token');
 }
 
 // -----FUNCTIONS ABOUT CHANNELS ONYL

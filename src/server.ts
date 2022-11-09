@@ -16,7 +16,6 @@ import {
   channelsCreateRequest,
   channelsListRequest,
   channelsListAllRequest,
-  authLogoutRequest,
   userProfileRequest,
   dmCreateRequest,
   userProfileSethandleRequest,
@@ -158,12 +157,14 @@ app.get('/channels/listAll/v2', (req: Request, res: Response) => {
   }
 });
 
-app.post('/auth/logout/v1', (req: Request, res: Response) => {
-  const { token } = req.body as authLogoutRequest;
-
-  const result = removetoken(token);
-
-  res.json(result);
+app.post('/auth/logout/v2', (req: Request, res: Response, next) => {
+  try {
+    const token = req.header('token');
+    const result = removetoken(token);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.get('/channel/messages/v2', (req: Request, res: Response) => {
