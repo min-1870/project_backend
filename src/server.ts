@@ -320,56 +320,80 @@ app.delete('/message/remove/v1', (req: Request, res: Response) => {
   }
 });
 
-app.post('/message/senddm/v1', (req: Request, res: Response) => {
-  const { token, dmId, message } = req.body as unknown as messageSendDmRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-  if (authUserId == null) {
-    return res.json({ error: 'Token is Invalid' });
-  } else {
+app.post('/message/senddm/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId, message } = req.body as unknown as messageSendDmRequest;
+    const token = req.header('token');
+    const authUserId = getAuthUserIdFromToken(token);
     return res.json(dmMessageSend(Number(authUserId), Number(dmId), message));
+  } catch (err) {
+    next(err);
   }
 });
 
-app.post('/dm/create/v1', (req: Request, res: Response) => {
-  const { token, uIds } = req.body as dmCreateRequest;
-  const result = dmCreation(token, uIds);
-  res.json(result);
+app.post('/dm/create/v2', (req: Request, res: Response, next) => {
+  try {
+    const { uIds } = req.body as dmCreateRequest;
+    const token = req.header('token');
+    const result = dmCreation(token, uIds);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.get('/dm/list/v1', (req: Request, res: Response) => {
-  const { token } = req.query as channelsListRequest;
-  // const authUserId = getAuthUserIdFromToken(token);
-  const result = dmlist(token);
-  res.json(result);
+app.get('/dm/list/v2', (req: Request, res: Response, next) => {
+  try {
+    const token = req.header('token');
+    const result = dmlist(token);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.get('/dm/messages/v1', (req: Request, res: Response) => {
-  const { token, dmId, start } = req.query as unknown as dmMessagesRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-
-  if (authUserId == null) {
-    return res.json({ error: 'Token is Invalid' });
-  } else {
+app.get('/dm/messages/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId, start } = req.query as unknown as dmMessagesRequest;
+    const token = req.header('token');
+    const authUserId = getAuthUserIdFromToken(token);
     return res.json(dmMessages(authUserId, Number(dmId), Number(start)));
+  } catch (err) {
+    next(err);
   }
 });
 
-app.delete('/dm/remove/v1', (req: Request, res: Response) => {
-  const { token, dmId } = req.query as unknown as dmDeleteRequest;
-  const result = deleteDm(token, dmId);
-  res.json(result);
+app.delete('/dm/remove/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId } = req.query as unknown as dmDeleteRequest;
+    const token = req.header('token');
+    const result = deleteDm(token, dmId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.post('/dm/leave/v1', (req: Request, res: Response) => {
-  const { token, dmId } = req.body as dmDeleteRequest;
-  const result = dmLeave(token, dmId);
-  res.json(result);
+app.post('/dm/leave/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId } = req.body as dmDeleteRequest;
+    const token = req.header('token');
+    const result = dmLeave(token, dmId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.get('/dm/details/v1', (req: Request, res: Response) => {
-  const { token, dmId } = req.query as unknown as dmDetailsRequest;
-  const result = dmDetails(token, dmId);
-  res.json(result);
+app.get('/dm/details/v2', (req: Request, res: Response, next) => {
+  try {
+    const { dmId } = req.query as unknown as dmDetailsRequest;
+    const token = req.header('token');
+    const result = dmDetails(token, dmId);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.delete('/clear/v1', (_: Request, res: Response) => {

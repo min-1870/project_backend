@@ -3,6 +3,7 @@ import { TokenHash } from './hash';
 import { generateDmId } from './ids';
 import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
 import { duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
+import HTTPError from 'http-errors';
 
 /**
   * Creates the Dm from token user to users entered in uIds
@@ -17,16 +18,16 @@ export function dmCreation(token:string, uIds: number[]): ({dmId: number} | erro
   const data: dataStore = getData();
 
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'invalid token');
   }
 
   for (const uId of uIds) {
     if (!isAuthUserIdValid(uId, data)) {
-      return { error: 'Invalid uId in uIds' };
+      throw HTTPError(400, 'Invalid uId in uIds');
     }
   }
   if (duplicateValueCheck(uIds) === true) {
-    return { error: 'Duplicate uId values entered' };
+    throw HTTPError(400, 'Duplicate uId values entered');
   }
 
   const DmName = dmNameGenerator(token, uIds);
@@ -93,7 +94,7 @@ function dmNameGenerator(token:string, uIds: number[]): (string) {
 export function dmlist(token:string): (dms | error) {
   const data: dataStore = getData();
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   const authUserId = getAuthUserIdFromToken(token);
   const dms = data.dms
@@ -107,22 +108,22 @@ export function deleteDm(token:string, dmId:number) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   if (!isDataStoreDmValid(dmId, data)) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   }
   for (const dm of data.dms) {
     if (dm.dmId.toString() === dmId.toString()) {
       if (dm.ownerMembers[0] !== getAuthUserIdFromToken(token)) {
-        return { error: 'user is not owner of dm' };
+        throw HTTPError(403, 'user is not owner of dm');
       }
     }
   }
   for (const dm of data.dms) {
     if (dm.dmId.toString() === dmId.toString()) {
       if (dm.allMembers.find(user => user.toString() === authUserId.toString()) == null) {
-        return { error: 'user is not part of dm' };
+        throw HTTPError(403, 'user is not part of dm');
       }
     }
   }
@@ -147,14 +148,14 @@ export function dmLeave(token:string, dmId:number): (Record<string, never> | err
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   if (!isDataStoreDmValid(dmId, data)) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   }
 
   if (!isUserMemberInDm(authUserId, dmId, data)) {
-    return { error: 'user is not part of dm' };
+    throw HTTPError(403, 'user is not part of dm');
   }
 
   const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
@@ -179,13 +180,13 @@ export function dmMessages(authUserId: number, dmId: number, start: number): ({ 
   const data = getData();
   const dm = getDataStoreDm(dmId, data);
   if (dm == null) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   } else if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'Invalid user ID' };
+    throw HTTPError(403, 'Token is Invalid');
   } else if (start < 0 || start > dm.messages.length) {
-    return { error: 'Invalid start' };
+    throw HTTPError(400, 'Invalid start');
   } else if (!isUserMemberInDm(authUserId, dmId, data)) {
-    return { error: 'user is not part of dm' };
+    throw HTTPError(403, 'user is not part of dm');
   }
 
   const messages = dm.messages;
@@ -220,14 +221,14 @@ export function dmDetails(token:string, dmId:number): (dm | error) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    return { error: 'Token is Invalid' };
+    throw HTTPError(403, 'Token is Invalid');
   }
   if (!isDataStoreDmValid(dmId, data)) {
-    return { error: 'dmId is Invalid' };
+    throw HTTPError(400, 'dmId is Invalid');
   }
 
   if (!isUserMemberInDm(authUserId, dmId, data)) {
-    return { error: 'user is not part of dm' };
+    throw HTTPError(403, 'user is not part of dm');
   }
 
   return toOutputDmDetails(getDataStoreDm(dmId, data));

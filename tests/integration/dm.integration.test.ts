@@ -58,12 +58,11 @@ beforeEach(() => {
   tokenThree = jsonResponse.token;
 });
 
-describe('HTTP tests for /dm/create/v1', () => {
-  test('Successful /dm/create/v1', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+describe('HTTP tests for /dm/create/v2', () => {
+  test('Successful /dm/create/v2', () => {
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -71,11 +70,10 @@ describe('HTTP tests for /dm/create/v1', () => {
     });
   });
 
-  test('Successful /dm/create/v1 with only owner', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+  test('Successful /dm/create/v2 with only owner', () => {
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: []
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -84,58 +82,49 @@ describe('HTTP tests for /dm/create/v1', () => {
   });
 
   test('Failure due to invalid uId', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId + 99123123199]
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid uId in uIds'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid uId in uIds' });
   });
 
   test('Failure due to duplicate uId', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId, uId]
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Duplicate uId values entered'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Duplicate uId values entered' });
   });
 
   test('Failure due to invalid tokens', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: (token + 999),
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, (token + 69));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
   });
 });
 
-describe('HTTP tests for /dm/list/v1', () => {
+describe('HTTP tests for /dm/list/v2', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
   });
 
   test('dm list successful', () => {
-    const res = sendGetRequestToEndpoint('/dm/list/v1', {
-      token
-    });
+    const res = sendGetRequestToEndpoint('/dm/list/v2', {}, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -149,14 +138,11 @@ describe('HTTP tests for /dm/list/v1', () => {
   });
 
   test('dm list successful with multiple lists', () => {
-    sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: []
-    });
+    }, token);
 
-    const res = sendGetRequestToEndpoint('/dm/list/v1', {
-      token
-    });
+    const res = sendGetRequestToEndpoint('/dm/list/v2', {}, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -174,170 +160,146 @@ describe('HTTP tests for /dm/list/v1', () => {
   });
 
   test('dm list with invalid token fail', () => {
-    const res = sendGetRequestToEndpoint('/dm/list/v1', {
-      token: (token + 643535)
-    });
+    const res = sendGetRequestToEndpoint('/dm/list/v2', {}, (token + 77));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 });
 
-describe('HTTP tests for /dm/remove/v1', () => {
+describe('HTTP tests for /dm/remove/v2', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
   });
 
   test('dm delete successful', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: token,
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
   test('dm/remove with invalid token fail', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: (token + 643535),
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, (token + 4432));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('dm/remove with invalid dmId', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: token,
-      dmId: (dmId + 104340)
-    });
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
+      dmId: (dmId + 44)
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('dm/remove failure, user not owner of dm', () => {
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: tokenTwo,
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, tokenTwo);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not owner of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not owner of dm' });
   });
 
   test('dm/remove failure, user not member of dm', () => {
-    sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: token,
+    sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, token);
 
-    const res = sendDeleteRequestToEndpoint('/dm/remove/v1', {
-      token: token,
+    const res = sendDeleteRequestToEndpoint('/dm/remove/v2', {
       dmId: dmId
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 });
 
-describe('HTTP tests for /dm/leave/v1', () => {
+describe('HTTP tests for /dm/leave/v2', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
   });
 
   test('dm leave successful', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
   test('dm/leave with invalid token fail', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: (token + 643535),
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, (token + 99));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('dm/leave with invalid dmId', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: (dmId + 104340)
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('dm/leave failure, user not part of dm', () => {
-    const res = sendPostRequestToEndpoint('/dm/leave/v1', {
-      token: tokenThree,
+    const res = sendPostRequestToEndpoint('/dm/leave/v2', {
       dmId: dmId
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 });
 
-describe('HTTP tests for /dm/messages/v1', () => {
+describe('HTTP tests for /dm/messages/v2', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
   });
 
   test('dm/messages successful', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -348,141 +310,121 @@ describe('HTTP tests for /dm/messages/v1', () => {
   });
 
   test('dm/messages with invalid token fail', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: (token + 643535),
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0
-    });
+    }, (token + 643535));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('dm/messages with invalid dmId', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: (dmId + 104340),
       start: 0
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('dm/messages failure, user not part of dm', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: tokenThree,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 
   test('start is greater than the total number of messages in the dm', () => {
-    const res = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 9999999999
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid start'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid start' });
   });
 });
 
 describe('HTTP tests for message/senddm/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
   });
 
   test('message/senddm with invalid dmId', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: (dmId + 104340),
       message: TEST_MESSAGE
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
 
   test('length of message is less than 1 characters', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: ''
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'length of message is less than 1 or over 1000 characters' });
   });
 
   test('length of message is over 1000 characters', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: VERY_LONG_MESSAGE
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'length of message is less than 1 or over 1000 characters' });
   });
 
   test('failure, user not part of dm', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: tokenThree,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
 
   test('token is invalid', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: (token + 999999),
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, (token + 99999));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('correct input correct return', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -491,19 +433,17 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('correct input correct message', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, token);
 
     const messageId = (parseJsonResponse(res) as unknown as messageId).messageId;
 
-    const res2 = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res2 = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
@@ -514,17 +454,15 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('correct input correct timeSent', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
       message: TEST_MESSAGE,
-    });
+    }, token);
 
-    const res2 = sendGetRequestToEndpoint('/dm/messages/v1', {
-      token: token,
+    const res2 = sendGetRequestToEndpoint('/dm/messages/v2', {
       dmId: dmId,
       start: 0,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect((parseJsonResponse(res2) as unknown as channelMessagesOutput).messages[0].timeSent).toBeLessThanOrEqual(Date.now() + 2);
@@ -533,52 +471,44 @@ describe('HTTP tests for message/senddm/v1', () => {
 describe('HTTP tests for dm/details/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v1', {
-      token: token,
+    const res = sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [uId]
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as dmId;
     dmId = jsonResponse.dmId;
   });
   test('UserId is not a member of DM', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: tokenThree,
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: dmId,
-    });
+    }, tokenThree);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'user is not part of dm'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
   });
   test('user is not part of dm', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: 999999999999999
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'dmId is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
   });
   test('Invalid Token', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: '99999999',
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: dmId,
-    });
+    }, (token + 99));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Token is Invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
   test('valid dmDetails', () => {
-    const res = sendGetRequestToEndpoint('/dm/details/v1', {
-      token: token,
+    const res = sendGetRequestToEndpoint('/dm/details/v2', {
       dmId: dmId,
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
