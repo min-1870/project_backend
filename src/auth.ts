@@ -156,3 +156,31 @@ export function sendPasswordResetEmail(email :string) {
   }
   return {};
 }
+
+export function resetPassword(resetCode: string, newPassword: string) {
+  const data = getData();
+  let validEmail: string;
+
+  if (!(data.passwordReset.find(user => user.resetCode === resetCode))) {
+    throw HTTPError(400, 'Invalid reset code');
+  } else {
+    for (let i = 0; i < data.passwordReset.length; i++) {
+      if (data.passwordReset[i].resetCode === resetCode) {
+        validEmail = data.passwordReset[i].email;
+        data.passwordReset.splice(i, 1);
+      }
+    }
+  }
+  if (newPassword.length < 6) {
+    throw HTTPError(400, 'Password must be 6 character or longer');
+  }
+
+  for (let i = 0; i < data.users.length; i++) {
+    const user: dataStoreUser = data.users[i];
+    if (user.email === validEmail) {
+      user.password = getHashOf(newPassword);
+      setData(data);
+      return {};
+    }
+  }
+}

@@ -7,7 +7,7 @@ import errorHandler from 'middleware-http-errors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
-import { authLoginV1, authRegisterV1, sendPasswordResetEmail } from './auth';
+import { authLoginV1, authRegisterV1, resetPassword, sendPasswordResetEmail } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
 import {
   authRegisterRequest,
@@ -34,6 +34,7 @@ import {
   channelLeaveRequest,
   channelRemoveownerRequest,
   dmDetailsRequest,
+  passwordResetRequest,
 } from './types';
 import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelAddOwnersV1, channelLeaveV1, channelRemoveOwnersV1 } from './channel';
 import fs from 'fs';
@@ -112,6 +113,16 @@ app.post('/auth/passwordreset/request/v1', (req: Request, res: Response) => {
   const { email } = req.body;
   const result = (sendPasswordResetEmail(email));
   res.json(result);
+});
+
+app.post('/auth/passwordreset/reset/v1', (req: Request, res: Response, next) => {
+  try {
+    const { resetCode, newPassword } = req.body as passwordResetRequest;
+    const result = (resetPassword(resetCode, newPassword));
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**

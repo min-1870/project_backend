@@ -251,7 +251,7 @@ describe('HTTP tests for /auth/logout/v2', () => {
   });
 });
 
-describe('HTTP tests for /auth/passwordreset/request/v1', () => {
+describe('HTTP tests for /auth/passwordreset functions', () => {
   test('Successful password reset request', () => {
     sendPostRequestToEndpoint('/auth/register/v3', {
       email: 'unswbeanstotally@gmail.com',
@@ -263,5 +263,19 @@ describe('HTTP tests for /auth/passwordreset/request/v1', () => {
     const res = sendPostRequestToEndpoint('/auth/passwordreset/request/v1', { email: 'unswbeanstotally@gmail.com' });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+  test('invalid reset code for reset', () => {
+    sendPostRequestToEndpoint('/auth/register/v3', {
+      email: 'unswbeanstotally@gmail.com',
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+
+    const res = sendPostRequestToEndpoint('/auth/passwordreset/reset/v1', { resetCode: 'invalid code', newPassword: 'hahahahahhaha' });
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid reset code' });
   });
 });
