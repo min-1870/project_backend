@@ -158,7 +158,7 @@ export function sendPasswordResetEmail(email :string) {
 }
 
 export function resetPassword(resetCode: string, newPassword: string) {
-  let data = getData();
+  const data = getData();
   let validEmail: string;
 
   if (!(data.passwordReset.find(user => user.resetCode === resetCode))) {
@@ -183,5 +183,4 @@ export function resetPassword(resetCode: string, newPassword: string) {
       return {};
     }
   }
-  
-};
+}
