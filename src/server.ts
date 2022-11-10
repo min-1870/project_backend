@@ -7,7 +7,7 @@ import errorHandler from 'middleware-http-errors';
 import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
 import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
-import { authLoginV1, authRegisterV1 } from './auth';
+import { authLoginV1, authRegisterV1, sendPasswordResetEmail } from './auth';
 import { userProfileEmailChange, userProfileHandleChange, userProfileNameChange, userProfileV1, listAllUsersV1 } from './users';
 import {
   authRegisterRequest,
@@ -106,6 +106,12 @@ app.post('/auth/register/v3', (req: Request, res: Response, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/auth/passwordreset/request/v1', (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = (sendPasswordResetEmail(email));
+  res.json(result);
 });
 
 /**

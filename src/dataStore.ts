@@ -34,7 +34,12 @@ let data: dataStore = {
     messages: [object]
     */
   ],
-
+  passwordReset: [
+    /*
+    email: string,
+    resetcode: string
+    */
+  ]
 };
 
 // save function

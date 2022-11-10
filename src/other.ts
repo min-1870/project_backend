@@ -17,6 +17,8 @@ export function clearV1(): Record<string, never> {
     channels: [
     ],
     dms: [
+    ],
+    passwordReset: [
     ]
   };
   setData(data);

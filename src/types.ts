@@ -43,6 +43,11 @@ export type dataStoreDm = {
   messages: messages[]
 }
 
+export type dataStorePassReset = {
+  email: string,
+  resetCode: string
+}
+
 export type dm = {
   name: string,
   members: user[]
@@ -76,7 +81,8 @@ export type dms = { dms: { dmId: number, name:string}[] };
 export type dataStore = {
   users: dataStoreUser[],
   channels: dataStoreChannel[],
-  dms: dataStoreDm[]
+  dms: dataStoreDm[],
+  passwordReset: dataStorePassReset[]
 }
 
 export type authResponse = {
