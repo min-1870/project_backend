@@ -273,7 +273,9 @@ describe('HTTP tests for /auth/passwordreset functions', () => {
     });
 
     const res = sendPostRequestToEndpoint('/auth/passwordreset/reset/v1', { resetCode: 'invalid code', newPassword: 'hahahahahhaha' });
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({});
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid reset code' });
   });
 });
