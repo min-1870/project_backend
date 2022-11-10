@@ -108,6 +108,18 @@ app.post('/auth/register/v3', (req: Request, res: Response, next) => {
   }
 });
 
+
+
+app.post('/auth/passwordreset/request/v1', (req: Request, res: Response, next) => {
+  try {
+    const { email } = req.body as authRegisterRequest;
+    const result = authRegisterV1(encodeURI(email));
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
 /**
  * Creates a new channel with the given name that is either a public
  * or private channel. The user who created it automatically joins

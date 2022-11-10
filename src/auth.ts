@@ -8,6 +8,8 @@ import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleS
 import { generateAuthUserId, generateToken } from './ids';
 import HTTPError from 'http-errors';
 import { getHashOf, TokenHash } from './hash';
+const nodemailer = require("nodemailer");
+
 
 /**
  * Given a registered user's email and password, returns their authUserId value
@@ -126,3 +128,5 @@ function onlyalphanumeric(handle:string): string {
   handle = handle.replace(/[^a-z0-9]/gi, '');
   return handle;
 }
+
+

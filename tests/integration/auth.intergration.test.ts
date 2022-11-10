@@ -250,3 +250,22 @@ describe('HTTP tests for /auth/logout/v2', () => {
     expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
   });
 });
+
+describe('HTTP tests for /auth/passwordreset/request/v1', () => {
+  test('Successful password reset request', () => {
+    const ret = sendPostRequestToEndpoint('/auth/register/v3', {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+
+    const jsonResponse = parseJsonResponse(ret) as unknown as authResponse;
+    const token = jsonResponse.token;
+
+    const res = sendPostRequestToEndpoint('/auth/passwordreset/request/v1', { EMAIL }, token);
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+});
