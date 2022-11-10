@@ -8,8 +8,7 @@ import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleS
 import { generateAuthUserId, generateToken } from './ids';
 import HTTPError from 'http-errors';
 import { getHashOf, TokenHash } from './hash';
-const nodemailer = require("nodemailer");
-
+const nodemailer = require('nodemailer');
 
 /**
  * Given a registered user's email and password, returns their authUserId value
@@ -129,4 +128,31 @@ function onlyalphanumeric(handle:string): string {
   return handle;
 }
 
+export function sendPasswordResetEmail(email :string) {
+  const data = getData();
 
+  if (isEmailUsed(email, data.users)) {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp-comp1531mulo.alwaysdata.net',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'comp1531mulo@alwaysdata.net',
+        pass: 'HAHA123a?',
+      },
+    });
+    const code = generateToken();
+    data.passwordReset.push({
+      email,
+      resetCode: code
+    });
+    setData(data);
+    transporter.sendMail({
+      from: '"UNSW BEANS" <trey.hickle@ethereal.email>',
+      to: `${email}`,
+      subject: 'UNSW BEANS: Password Reset',
+      text: `Keep the code: ${code.toString()}`,
+    });
+  }
+  return {};
+}

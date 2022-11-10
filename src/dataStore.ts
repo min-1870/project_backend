@@ -34,7 +34,7 @@ let data: dataStore = {
     messages: [object]
     */
   ],
-  passwordreset: [
+  passwordReset: [
     /*
     email: string,
     resetcode: string
