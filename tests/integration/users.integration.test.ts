@@ -81,202 +81,182 @@ describe('HTTP tests for /user/profile/v3', () => {
   });
 });
 
-describe('HTTP tests for /user/profile/sethandle/v1', () => {
+describe('HTTP tests for /user/profile/sethandle/v2', () => {
   test('Failed due to invalid handleStr (length < 3)', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v2', {
       handleStr: 'ha'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'handleStr is not correct size' });
   });
 
   test('Failed due to invalid handleStr (length > 20)', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v2', {
       handleStr: 'hahahahahahahahahahahahahahahahahahahaahahaha'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'handleStr is not correct size' });
   });
 
   test('Failed due to invalid characters in handleStr', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v2', {
       handleStr: "ha'w'e<?*"
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'handleStr has non-alphanumeric characters' });
   });
 
   test('Failed due to handleStr already in use', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v2', {
       handleStr: 'monkeyluffy'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'handle is already in use' });
   });
 
   test('Failed due to token invalid', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
-      token: (token + 443),
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v2', {
       handleStr: 'monkeydamnluffy'
-    });
+    }, (token + 99));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 
   test('Successful implementation of user/profile/sethandle/v1', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/sethandle/v2', {
       handleStr: 'monkeydamnluffy'
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });
 
-describe('Tests for /user/profile/setemail/v1', () => {
+describe('Tests for /user/profile/setemail/v2', () => {
   test('Successful update of email', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v2', {
       email: 'gomugomu1@hotmail.com'
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
   test('Email is invalid', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v2', {
       email: 'notanemail'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid Email' });
   });
 
   test('Email is already in use', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v2', {
       email: 'gomugomu@hotmail.com'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'email is already in use' });
   });
 
   test('Token is invalid', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setemail/v1', {
-      token: (token + 443),
-      email: 'gomugomu@hotmail.com'
-    });
+    const res = sendPutRequestToEndpoint('/user/profile/setemail/v2', {
+      email: 'gomugomu1@hotmail.com'
+    }, (token + 69));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 });
 
-describe('Tests for /user/profile/setname/v1', () => {
+describe('Tests for /user/profile/setname/v2', () => {
   test('Successful update of first and last name', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steve',
       nameLast: 'Man'
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
   test('First name too long', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steveveveveveveveveveveveveveveveveveveveveveveveveveveve',
       nameLast: 'Man'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'First name is not correct length' });
   });
   test('Last name too long', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steve',
       nameLast: 'Manananananananananananananananananananananananananananananananananananananananan'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Last name is not correct length' });
   });
   test('First name too short', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: '',
       nameLast: 'Man'
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'First name is not correct length' });
   });
   test('Last name too short', () => {
-    const res = sendPutRequestToEndpoint('/user/profile/setname/v1', {
-      token: token,
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
       nameFirst: 'Steve',
       nameLast: ''
-    });
+    }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'Last name is not correct length' });
+  });
+  test('Token is invalid', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
+      nameFirst: 'Steve',
+      nameLast: 'Lacy'
+    }, (token + 69));
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
   });
 });
 
-describe('Tests for /users/all/v1', () => {
+describe('Tests for /users/all/v2', () => {
   test('token is invalid', () => {
-    const res = sendGetRequestToEndpoint('/users/all/v1', {
-      token: '99999999',
-    });
+    const res = sendGetRequestToEndpoint('/users/all/v2', {
+    }, (token + 999));
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid token'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid token' });
   });
   test('A list of all users and their associated details is successfully returned.', () => {
-    const res = sendGetRequestToEndpoint('/users/all/v1', {
-      token: token,
-    });
+    const res = sendGetRequestToEndpoint('/users/all/v2', {
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({

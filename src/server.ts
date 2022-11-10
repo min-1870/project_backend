@@ -29,7 +29,6 @@ import {
   messageEditRequest,
   channelDetailsRequest,
   channelAddownerRequest,
-  usersAllRequest,
   dmMessagesRequest,
   messageSendDmRequest,
   channelLeaveRequest,
@@ -41,6 +40,7 @@ import fs from 'fs';
 import { setData } from './dataStore';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messageRemove, messageSend } from './message';
+import HTTPError from 'http-errors';
 
 // Set up web app
 const app = express();
@@ -240,14 +240,18 @@ app.post('/channel/removeowner/v1', (req: Request, res: Response) => {
   res.json(result);
 });
 
-app.get('/users/all/v1', (req: Request, res: Response) => {
-  const { token } = req.query as unknown as usersAllRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-  if (authUserId == null) {
-    return res.json({ error: 'Invalid token' });
-  } else {
-    const result = listAllUsersV1(token);
-    res.json(result);
+app.get('/users/all/v2', (req: Request, res: Response, next) => {
+  try {
+    const token = req.header('token');
+    const authUserId = getAuthUserIdFromToken(token);
+    if (authUserId == null) {
+      throw HTTPError(403, 'Invalid token');
+    } else {
+      const result = listAllUsersV1(token);
+      res.json(result);
+    }
+  } catch (err) {
+    next(err);
   }
 });
 
@@ -264,27 +268,37 @@ app.get('/user/profile/v3', (req: Request, res: Response, next) => {
   }
 });
 
-app.put('/user/profile/sethandle/v1', (req: Request, res: Response) => {
-  const { token, handleStr } = req.body as userProfileSethandleRequest;
-
-  const result = userProfileHandleChange(token, handleStr);
-
-  res.json(result);
+app.put('/user/profile/sethandle/v2', (req: Request, res: Response, next) => {
+  try {
+    const { handleStr } = req.body as userProfileSethandleRequest;
+    const token = req.header('token');
+    const result = userProfileHandleChange(token, handleStr);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.put('/user/profile/setemail/v1', (req: Request, res: Response) => {
-  const { token, email } = req.body as userProfileSetemail;
-
-  const result = userProfileEmailChange(token, email);
-
-  res.json(result);
+app.put('/user/profile/setemail/v2', (req: Request, res: Response, next) => {
+  try {
+    const { email } = req.body as userProfileSetemail;
+    const token = req.header('token');
+    const result = userProfileEmailChange(token, email);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
-app.put('/user/profile/setname/v1', (req: Request, res: Response) => {
-  const { token, nameFirst, nameLast } = req.body as userProfileSetname;
-
-  const result = userProfileNameChange(token, nameLast, nameFirst);
-  res.json(result);
+app.put('/user/profile/setname/v2', (req: Request, res: Response, next) => {
+  try {
+    const { nameFirst, nameLast } = req.body as userProfileSetname;
+    const token = req.header('token');
+    const result = userProfileNameChange(token, nameFirst, nameLast);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post('/message/send/v1', (req: Request, res: Response) => {
