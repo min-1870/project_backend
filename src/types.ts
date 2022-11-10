@@ -214,3 +214,8 @@ export type channelLeaveRequest = {
   token: string
   channelId: number
 }
+
+export type passwordResetRequest = {
+  resetCode: string
+  newPassword: string
+}
