@@ -1,4 +1,4 @@
-import { authResponse, channels, error } from '../../src/types';
+import { authResponse, channels } from '../../src/types';
 import { parseJsonResponse, sendDeleteRequestToEndpoint, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'adfadf@gmail.com';
@@ -45,6 +45,6 @@ describe('HTTP tests for /clear', () => {
       error: {
         message: expect.any(String)
       }
-    }); 
+    });
   });
 });
