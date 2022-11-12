@@ -82,7 +82,7 @@ export type dataStore = {
   users: dataStoreUser[],
   channels: dataStoreChannel[],
   dms: dataStoreDm[],
-  passwordReset: dataStorePassReset[]
+  passwordResets: dataStorePassReset[]
 }
 
 export type authResponse = {

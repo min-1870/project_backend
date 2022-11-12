@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import { TokenHash } from './hash';
+import { hashToken } from './hash';
 import { generateDmId } from './ids';
 import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
 import { duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
@@ -41,7 +41,7 @@ export function dmCreation(token:string, uIds: number[]): ({dmId: number} | erro
   for (let i = 0; i < data.users.length; i++) {
     const user: dataStoreUser = data.users[i];
     for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (TokenHash(user.sessionTokens[j]) === token) {
+      if (hashToken(user.sessionTokens[j]) === token) {
         const dm = {
           dmId: generateDmId(),
           name: DmName,

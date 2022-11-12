@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore';
+import { database } from './dataStore';
 import {
   error,
   messages,
@@ -6,22 +6,8 @@ import {
   channel
 } from './types';
 import {
-  addUserToChannel,
-  getDataStoreChannel,
-  getDataStoreUser,
-  isAuthUserIdValid,
-  isUserMemberInChannel,
   toOutputChannelDetail,
   dataStoreUserToUser,
-  getDataStoreChannelSpecial,
-  getDataStoreUserSpecial,
-  isChannelIdValid,
-  isUserOwnerInChannel,
-  isGlobalOwner,
-  addUserToChannelAsOwner,
-  getAuthUserIdFromToken,
-  isUserOwnerMemberInChannel,
-  removeUserFromChannelAsOwner
 } from './utils';
 
 /**
@@ -35,6 +21,7 @@ import {
   * @returns {object} - An object containing basic details of the channel such as name, isPublic, ownerMembers and allMembers
 */
 export function channelDetailsV1(authUserId: number, channelId: number): (channel | error) {
+  const channel = database.getDataStoreChannelByChannelId(channelId);
   const data = getData();
   const channel = getDataStoreChannelSpecial(channelId, data);
   if (channel == null) {

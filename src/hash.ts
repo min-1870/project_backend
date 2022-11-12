@@ -6,6 +6,6 @@ export function getHashOf(plaintext: string) {
   return crypto.createHash('sha256').update(plaintext).digest('hex');
 }
 
-export function TokenHash(plaintext: string) {
+export function hashToken(plaintext: string) {
   return crypto.createHash('sha256').update(plaintext + totallysecretstring).digest('hex');
 }
