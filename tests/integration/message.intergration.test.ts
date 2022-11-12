@@ -411,7 +411,7 @@ describe('HTTP tests for message/edit/v1', () => {
     const dmRes = parseJsonResponse(sendPostRequestToEndpoint('/dm/create/v2', {
       uIds: [authUserId2]
     }, token)) as unknown as dmId;
-    const dmId = dmRes.dmId;  
+    const dmId = dmRes.dmId;
 
     const senddmRes = parseJsonResponse(sendPostRequestToEndpoint('/message/senddm/v2', {
       dmId: dmId,
@@ -437,6 +437,4 @@ describe('HTTP tests for message/edit/v1', () => {
       end: -1
     });
   });
-
-
 });

@@ -75,14 +75,13 @@ export function messageRemove (authUserId: number, messageId: number): (Record<s
 export function messageEdit (authUserId: number, messageId: number, message: string): (Record<string, never> | error) {
   // assume toke is valid
   const data:dataStore = getData();
-  
 
   if (message.length < 1 || message.length > 1000) {
     return { error: 'length of message is less than 1 or over 1000 characters' };
   } else if (!isMessageIdValid(messageId, data)) {
     return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
   }
-  
+
   if (isMessageInChannels(messageId, data)) {
     const channelId = findChannelIdByMessageId(messageId, data);
     if (!isUserMemberInChannel(authUserId, channelId, data)) {
@@ -93,7 +92,6 @@ export function messageEdit (authUserId: number, messageId: number, message: str
     const dataStoreChannel = getDataStoreChannel(channelId, data);
     const editedMessage: messages = dataStoreChannel.messages.find(message => message.messageId === messageId);
     editedMessage.message = message;
-
   } else {
     const dmId = findDmIdByMessageId(messageId, data);
     if (!isUserMemberInDm(authUserId, dmId, data)) {
@@ -104,10 +102,7 @@ export function messageEdit (authUserId: number, messageId: number, message: str
     const dataStoreDm = getDataStoreDm(dmId, data);
     const editedMessage: messages = dataStoreDm.messages.find(message => message.messageId === messageId);
     editedMessage.message = message;
-
   }
-  
-
 
   setData(data);
   return {};

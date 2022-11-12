@@ -168,7 +168,7 @@ export function removeUserFromChannelAsOwner(uId: number, channelId: number, dat
 // -----FUCTIONS ABOUT MESSAGE ONYL
 
 export function isMessageIdValid(messageId: number, data: dataStore): boolean {
-  return findChannelIdByMessageId(messageId, data) != null || findDmIdByMessageId(messageId, data) != null ;
+  return findChannelIdByMessageId(messageId, data) != null || findDmIdByMessageId(messageId, data) != null;
 }
 
 export function isMessageInChannels(messageId: number, data: dataStore): boolean {
