@@ -168,6 +168,10 @@ export function removeUserFromChannelAsOwner(uId: number, channelId: number, dat
 // -----FUCTIONS ABOUT MESSAGE ONYL
 
 export function isMessageIdValid(messageId: number, data: dataStore): boolean {
+  return findChannelIdByMessageId(messageId, data) != null || findDmIdByMessageId(messageId, data) != null;
+}
+
+export function isMessageInChannels(messageId: number, data: dataStore): boolean {
   return findChannelIdByMessageId(messageId, data) != null;
 }
 
@@ -181,10 +185,26 @@ export function findChannelIdByMessageId(messageId: number, data: dataStore): nu
   return null;
 }
 
+export function findDmIdByMessageId(messageId: number, data: dataStore): number|null {
+  for (let i = 0; i < data.dms.length; i++) {
+    if (data.dms[i].messages.find(message => message.messageId === messageId) != null) {
+      return data.dms[i].dmId;
+    }
+  }
+
+  return null;
+}
+
 export function getDataStoreMessage(messageId: number, data: dataStore): messages|null {
   for (let channels = 0; channels < data.channels.length; channels++) {
     if (data.channels[channels].messages.find(message => message.messageId === messageId) != null) {
       return data.channels[channels].messages.find(message => message.messageId === messageId);
+    }
+  }
+
+  for (let i = 0; i < data.dms.length; i++) {
+    if (data.dms[i].messages.find(message => message.messageId === messageId) != null) {
+      return data.dms[i].messages.find(message => message.messageId === messageId);
     }
   }
 
@@ -232,4 +252,8 @@ export function duplicateValueCheck(array) {
 
 export function isUserMemberInDm(authUserId: number, dmId: number, data: dataStore): boolean {
   return getDataStoreDm(dmId, data).allMembers.includes(authUserId);
+}
+
+export function isUserOwnerMemberInDm(authUserId: number, dmId: number, data: dataStore): boolean {
+  return getDataStoreDm(dmId, data).ownerMembers.includes(authUserId);
 }
