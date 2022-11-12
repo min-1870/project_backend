@@ -7,6 +7,11 @@ import {
   sendGetRequestToEndpoint,
 } from './integrationTestUtils';
 
+const CHANNELS_CREATE = '/channels/create/v3';
+const CHANNELS_LIST = '/channels/list/v3';
+const CHANNELS_LIST_ALL = '/channels/listAll/v3';
+const AUTH_REGISTER = '/auth/register/v3';
+
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
 const NAME_FIRST = 'Barty';
@@ -21,7 +26,7 @@ let token: string;
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
 
-  const res = sendPostRequestToEndpoint('/auth/register/v3', {
+  const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: EMAIL,
     password: PASSWORD,
     nameFirst: NAME_FIRST,
@@ -32,9 +37,9 @@ beforeEach(() => {
   token = jsonResponse.token;
 });
 
-describe('HTTP tests for /channels/create/v2', () => {
+describe('HTTP tests for /channels/create', () => {
   test('Create public channel successful', () => {
-    const res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -47,7 +52,7 @@ describe('HTTP tests for /channels/create/v2', () => {
   });
 
   test('Create private channel successful', () => {
-    const res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: false
@@ -60,49 +65,55 @@ describe('HTTP tests for /channels/create/v2', () => {
   });
 
   test('Create channel name more than 20 characters returns fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: LONG_CHANNEL_NAME,
       isPublic: false
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
   test('Create channel name less than 1 characters returns fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: SHORT_CHANNEL_NAME,
       isPublic: false
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
   test('Create channel name with invalid token returns fail', () => {
-    const res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: TEST_INVALID_TOKEN,
       name: SHORT_CHANNEL_NAME,
       isPublic: false
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 });
 
-describe('HTTP tests for /channels/list/v2', () => {
+describe('HTTP tests for /channels/list', () => {
   let channelId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -113,7 +124,7 @@ describe('HTTP tests for /channels/list/v2', () => {
   });
 
   test('channels list successful', () => {
-    const res = sendGetRequestToEndpoint('/channels/list/v2', {
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST, {
       token
     });
 
@@ -129,21 +140,23 @@ describe('HTTP tests for /channels/list/v2', () => {
   });
 
   test('channels list with invalid token fail', () => {
-    const res = sendGetRequestToEndpoint('/channels/list/v2', {
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST, {
       token: TEST_INVALID_TOKEN
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 });
 
-describe('HTTP tests for /channels/listAll/v2', () => {
+describe('HTTP tests for /channels/listAll', () => {
   test('Test successful status code and return', () => {
     // test user 2
-    const user2Res = sendPostRequestToEndpoint('/auth/register/v3', {
+    const user2Res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: '2' + EMAIL,
       password: '2' + PASSWORD,
       nameFirst: NAME_FIRST + 'b',
@@ -152,7 +165,7 @@ describe('HTTP tests for /channels/listAll/v2', () => {
     const token2 = (parseJsonResponse(user2Res) as unknown as authResponse).token;
 
     // test user 1's public channel
-    const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -160,14 +173,14 @@ describe('HTTP tests for /channels/listAll/v2', () => {
     const channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
 
     // test user 2's private channel
-    const channel2Res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel2Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token2,
       name: TEST_CHANNEL_NAME + '2',
       isPublic: false
     });
     const channel2Id = (parseJsonResponse(channel2Res) as unknown as channelId).channelId;
 
-    const res = sendGetRequestToEndpoint('/channels/listAll/v2', {
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {
       token: token
     });
 
@@ -187,13 +200,15 @@ describe('HTTP tests for /channels/listAll/v2', () => {
   });
 
   test('Test return error when an invalid token is given', () => {
-    const res = sendGetRequestToEndpoint('/channels/listAll/v2', {
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {
       token: TEST_INVALID_TOKEN
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'invalid token'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 });

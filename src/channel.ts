@@ -23,19 +23,24 @@ import {
   isUserOwnerMemberInChannel,
   removeUserFromChannelAsOwner
 } from './utils';
+import HTTPError from 'http-errors';
 
 /**
   * Given a channelId of a channel Given a channel with ID channelId
   * that the authorised user is a member of,
   * provide basic details about the channel.
   *
-  * @param {number} authUserId - uId in user
+  * @param {string} token - token of the user
   * @param {number} channelId - channelId in channel
   *
   * @returns {object} - An object containing basic details of the channel such as name, isPublic, ownerMembers and allMembers
 */
-export function channelDetailsV1(authUserId: number, channelId: number): (channel | error) {
+export function channelDetails(token: string, channelId: number): (channel | error) {
   const data = getData();
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(authUserId, data)) {
+    throw HTTPError(403, 'Invalid user ID');
+  }
   const channel = getDataStoreChannelSpecial(channelId, data);
   if (channel == null) {
     return { error: 'Channel ID does not refer to a valid channel' };
@@ -52,13 +57,17 @@ export function channelDetailsV1(authUserId: number, channelId: number): (channe
   * Given a channelId of a channel that the authorised user can join,
   * adds them to that channel.
   *
-  * @param {number} authUserId - uId in user
+  * @param {string} token - access token of the user
   * @param {number} channelId - channelId in channel
   *
   * @returns {} - empty object returned
 */
-export function channelJoinV1(authUserId: number, channelId: number): (Record<string, never> | error) {
-  const data: dataStore = getData();
+export function channelJoin(token: string, channelId: number): (Record<string, never> | error) {
+  const data = getData();
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(authUserId, data)) {
+    throw HTTPError(403, 'Invalid user ID');
+  }
   const dataStoreUser = getDataStoreUser(authUserId, data);
   const channel = getDataStoreChannel(channelId, data);
 
@@ -82,17 +91,21 @@ export function channelJoinV1(authUserId: number, channelId: number): (Record<st
   * Once invited, the user is added to the channel immediately.
   * In both public and private channels, all members are able to invite users.
   *
-  * @param {number} authUserId - uId in user
+  * @param {number} token - access token of the user
   * @param {number} channelId - channelId in channel
   * @param {number} uId - uId in user
   *
   * @returns {} - empty object returned
 */
-export function channelInviteV1(
-  authUserId: number,
+export function channelInvite(
+  token: string,
   channelId: number,
   uId: number): (Record<string, never> | error) {
   const data = getData();
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(authUserId, data)) {
+    throw HTTPError(403, 'Invalid user ID');
+  }
 
   const channel = getDataStoreChannel(channelId, data);
   if (channel == null) {
@@ -169,19 +182,23 @@ export function channelMessagesV1(authUserId: number, channelId: number, start: 
   };
 }
 /**
- * Add a user with user Id to channel to become nan owner of the channel
+ * Add a user to channel to become nan owner of the channel
  * If there something that is not meet the requirement, return error.
  * Otherwise make that user an onwner of the channel
- * @param {number} authUserId - the authUserId of the person perforing the add action
+ * @param {string} token - the auth token of the person perforing the add action
  * @param {number} channelId - the Id of the channel that user want to be the owner
  * @param {number} ownerToAddId - the Id of the person who want to become owner of the channel
  * @returns
  */
-export function channelAddOwnersV1(
-  authUserId: number,
+export function channelAddOwners(
+  token: string,
   channelId: number,
   ownerToAddId: number): (Record<string, never> | error) {
   const data = getData();
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(authUserId, data)) {
+    throw HTTPError(403, 'Invalid user ID');
+  }
 
   if (!isChannelIdValid(channelId, data)) {
     return { error: 'channelId does not refer to a valid channel.' };
@@ -220,16 +237,20 @@ export function channelAddOwnersV1(
  * If there is something does not meet the requirement then return error.
  * Otherwise remove them from the channel.
  *
- * @param {number} authUserId - the auth user id of the person performing the remove action.
+ * @param {string} token - the auth token of the person performing the remove action.
  * @param {number} channelId - the channel they will be remove from.
- * @param {number}ownerToRemoveId - the user Id of the person who will be remove from channel.
+ * @param {number} ownerToRemoveId - the user Id of the person who will be remove from channel.
  * @returns
  */
-export function channelRemoveOwnersV1(
-  authUserId: number,
+export function channelRemoveOwners(
+  token: string,
   channelId: number,
   ownerToRemoveId: number): (Record<string, never> | error) {
   const data = getData();
+  const authUserId = getAuthUserIdFromToken(token);
+  if (!isAuthUserIdValid(authUserId, data)) {
+    throw HTTPError(403, 'Invalid user ID');
+  }
   const dataStoreChannel = getDataStoreChannel(channelId, data);
   if (!isChannelIdValid(channelId, data)) {
     return { error: 'channelId does not refer to a valid channel.' };
@@ -272,7 +293,7 @@ export function channelRemoveOwnersV1(
   *
   * @returns {} - empty object returned
 */
-export function channelLeaveV1(token: string, channelId: number): (Record<string, never> | error) {
+export function channelLeave(token: string, channelId: number): (Record<string, never> | error) {
   const data: dataStore = getData();
   const authUserId = getAuthUserIdFromToken(token);
   if (!isAuthUserIdValid(authUserId, data)) {
