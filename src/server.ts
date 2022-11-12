@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
-import { channelsCreateV1, channelsListAllV1, channelsListV1 } from './channels';
+import { channelsCreateV1, channelsListAll, channelsList } from './channels';
 import { getAuthUserIdFromToken, removetoken } from './utils';
 import { clearV1 } from './other';
 import { authLoginV1, authRegisterV1, resetPassword, sendPasswordResetEmail } from './auth';
@@ -36,7 +36,7 @@ import {
   dmDetailsRequest,
   passwordResetRequest,
 } from './types';
-import { channelMessagesV1, channelJoinV1, channelInviteV1, channelDetailsV1, channelAddOwnersV1, channelLeaveV1, channelRemoveOwnersV1 } from './channel';
+import { channelMessagesV1, channelJoin, channelInvite, channelDetails, channelAddOwners, channelLeave, channelRemoveOwners } from './channel';
 import fs from 'fs';
 import { setData } from './dataStore';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
@@ -136,15 +136,9 @@ app.post('/auth/passwordreset/reset/v1', (req: Request, res: Response, next) => 
  *
  * @returns {number} channelId - channelId made by the function
  */
-app.post('/channels/create/v2', (req: Request, res: Response) => {
+app.post('/channels/create/v3', (req: Request, res: Response) => {
   const { token, name, isPublic } = req.body as channelsCreateRequest;
-
-  // get the authUserId using token
-  const authUserId = getAuthUserIdFromToken(token);
-
-  // after get authUserId, we call channelsCreateV1
-  const result = channelsCreateV1(authUserId, name, isPublic);
-
+  const result = channelsCreateV1(token, name, isPublic);
   res.json(result);
 });
 
@@ -156,22 +150,15 @@ app.post('/channels/create/v2', (req: Request, res: Response) => {
  *
  * @returns {number} channelId - channelId made by the function
  */
-app.get('/channels/list/v2', (req: Request, res: Response) => {
+app.get('/channels/list/v3', (req: Request, res: Response) => {
   const { token } = req.query as channelsListRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-  const result = channelsListV1(authUserId);
+  const result = channelsList(token);
   res.json(result);
 });
 
-app.get('/channels/listAll/v2', (req: Request, res: Response) => {
+app.get('/channels/listAll/v3', (req: Request, res: Response) => {
   const { token } = req.query as channelsListAllRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-
-  if (authUserId == null) {
-    return res.json({ error: 'invalid token' });
-  } else {
-    return res.json(channelsListAllV1(authUserId));
-  }
+  return res.json(channelsListAll(token));
 });
 
 app.post('/auth/logout/v2', (req: Request, res: Response, next) => {
@@ -195,63 +182,45 @@ app.get('/channel/messages/v2', (req: Request, res: Response) => {
   }
 });
 
-app.post('/channel/join/v2', (req: Request, res: Response) => {
+app.post('/channel/join/v3', (req: Request, res: Response) => {
   const { token, channelId } = req.body as channelJoinRequest;
-
-  // get the authUserId using token
-  const authUserId = getAuthUserIdFromToken(token);
-
-  // after get authUserId, we call channelJoinV1
-  const result = channelJoinV1(authUserId, channelId);
+  const result = channelJoin(token, channelId);
 
   res.json(result);
 });
 
-app.post('/channel/invite/v2', (req: Request, res: Response) => {
+app.post('/channel/invite/v3', (req: Request, res: Response) => {
   const { token, channelId, uId } = req.body as channelInviteRequest;
-
-  // get the authUserId using token
-  const authUserId = getAuthUserIdFromToken(token);
-
-  // after get authUserId, we call channelInviteV1
-  const result = channelInviteV1(authUserId, channelId, uId);
-
+  const result = channelInvite(token, channelId, uId);
   res.json(result);
 });
 
-app.post('/channel/leave/v1', (req: Request, res: Response) => {
+app.post('/channel/leave/v2', (req: Request, res: Response) => {
   const { token, channelId } = req.body as channelLeaveRequest;
-  const result = channelLeaveV1(token, channelId);
+  const result = channelLeave(token, channelId);
   res.json(result);
 });
 
-app.get('/channel/details/v2', (req: Request, res: Response) => {
+app.get('/channel/details/v3', (req: Request, res: Response) => {
   const { token, channelId } = req.query as unknown as channelDetailsRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-  if (authUserId == null) {
-    return res.json({ error: 'Token is invalid' });
-  } else {
-    const result = channelDetailsV1(authUserId, channelId);
-    res.json(result);
-  }
+  const result = channelDetails(token, channelId);
+  res.json(result);
 });
 
-app.post('/channel/addowner/v1', (req: Request, res: Response) => {
+app.post('/channel/addowner/v2', (req: Request, res: Response) => {
   const { token, channelId, uId } = req.body as channelAddownerRequest;
-  const authUserId = getAuthUserIdFromToken(token);
-  const result = channelAddOwnersV1(
-    parseInt(encodeURI(authUserId.toString())),
+  const result = channelAddOwners(
+    token,
     parseInt(encodeURI(channelId.toString())),
     parseInt(encodeURI(uId.toString())));
   res.json(result);
 });
 
-app.post('/channel/removeowner/v1', (req: Request, res: Response) => {
+app.post('/channel/removeowner/v2', (req: Request, res: Response) => {
   const { token, channelId, uId } = req.body as channelRemoveownerRequest;
-  const authUserId = getAuthUserIdFromToken(token);
 
-  const result = channelRemoveOwnersV1(
-    parseInt(encodeURI(authUserId.toString())),
+  const result = channelRemoveOwners(
+    token,
     parseInt(encodeURI(channelId.toString())),
     parseInt(encodeURI(uId.toString())));
   res.json(result);

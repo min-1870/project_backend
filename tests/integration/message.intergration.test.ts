@@ -1,4 +1,4 @@
-import { authResponse, channelId, channelMessagesOutput, messageId } from '../../src/types';
+import { authResponse, channelId, channelMessagesOutput, dmId, messageId } from '../../src/types';
 import {
   OK,
   parseJsonResponse,
@@ -7,6 +7,9 @@ import {
   sendPostRequestToEndpoint,
   sendPutRequestToEndpoint
 } from './integrationTestUtils';
+
+const CHANNELS_CREATE = '/channels/create/v3';
+const CHANNEL_JOIN = '/channel/join/v3';
 
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
@@ -26,6 +29,7 @@ for (let i = 0; i < 1000; i++) VERY_LONG_MESSAGE = VERY_LONG_MESSAGE + ':(';
 let token: string; // token of test user 1
 let token2: string; // token of test user 2
 let authUserId: number; // token of test user 1
+let authUserId2: number; // token of test user 1
 
 beforeEach(() => {
   sendDeleteRequestToEndpoint('/clear/v1', {});
@@ -45,12 +49,13 @@ beforeEach(() => {
     nameLast: 'b' + NAME_LAST
   });
   token2 = (parseJsonResponse(res2) as unknown as authResponse).token;
+  authUserId2 = (parseJsonResponse(res2) as unknown as authResponse).authUserId;
 });
 
 describe('HTTP tests for message/send/v1', () => {
   let channel1Id: number;
   beforeEach(() => {
-    const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -181,7 +186,7 @@ describe('HTTP tests for message/remove/v1', () => {
   let testChannelId: number;
   let testMessageId: number;
   beforeEach(() => {
-    const channel = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -221,7 +226,7 @@ describe('HTTP tests for message/remove/v1', () => {
   });
 
   test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
-    const joinRes = sendPostRequestToEndpoint('/channel/join/v2', {
+    const joinRes = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       token: token2,
       channelId: testChannelId
     });
@@ -274,7 +279,7 @@ describe('HTTP tests for message/edit/v1', () => {
   let testChannelId: number;
   let testMessageId: number;
   beforeEach(() => {
-    const channel = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -329,7 +334,7 @@ describe('HTTP tests for message/edit/v1', () => {
   });
 
   test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
-    sendPostRequestToEndpoint('/channel/join/v2', {
+    sendPostRequestToEndpoint(CHANNEL_JOIN, {
       token: token2,
       channelId: testChannelId
     });
@@ -386,6 +391,48 @@ describe('HTTP tests for message/edit/v1', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
       messages: [{ messageId: testMessageId, uId: authUserId, message: TEST_MESSAGE_2, timeSent: expect.any(Number) }],
+      start: 0,
+      end: -1
+    });
+  });
+
+  // test('correct input, correct return (dm)', () => {
+  //   const res = sendPutRequestToEndpoint('/message/edit/v1', {
+  //     token: token,
+  //     messageId: testMessageId,
+  //     message: TEST_MESSAGE_2
+  //   });
+
+  //   expect(res.statusCode).toBe(OK);
+  //   expect(parseJsonResponse(res)).toStrictEqual({});
+  // });
+
+  test('correct input, correct message (dm)', () => {
+    const dmRes = parseJsonResponse(sendPostRequestToEndpoint('/dm/create/v2', {
+      uIds: [authUserId2]
+    }, token)) as unknown as dmId;
+    const dmId = dmRes.dmId;
+
+    const senddmRes = parseJsonResponse(sendPostRequestToEndpoint('/message/senddm/v2', {
+      dmId: dmId,
+      message: TEST_MESSAGE,
+    }, token)) as unknown as messageId;
+    const msgId = senddmRes.messageId;
+
+    const res = sendPutRequestToEndpoint('/message/edit/v1', {
+      token: token,
+      messageId: msgId,
+      message: TEST_MESSAGE_2
+    });
+
+    const res2 = sendGetRequestToEndpoint('/dm/messages/v2', {
+      dmId: dmId,
+      start: 0,
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res2)).toStrictEqual({
+      messages: [{ messageId: msgId, uId: authUserId, message: TEST_MESSAGE_2, timeSent: expect.any(Number) }],
       start: 0,
       end: -1
     });
