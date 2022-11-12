@@ -8,6 +8,9 @@ import {
   sendPutRequestToEndpoint
 } from './integrationTestUtils';
 
+const CHANNELS_CREATE = '/channels/create/v3';
+const CHANNEL_JOIN = '/channel/join/v3';
+
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
 const NAME_FIRST = 'Barty';
@@ -50,7 +53,7 @@ beforeEach(() => {
 describe('HTTP tests for message/send/v1', () => {
   let channel1Id: number;
   beforeEach(() => {
-    const channel1Res = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -181,7 +184,7 @@ describe('HTTP tests for message/remove/v1', () => {
   let testChannelId: number;
   let testMessageId: number;
   beforeEach(() => {
-    const channel = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -221,7 +224,7 @@ describe('HTTP tests for message/remove/v1', () => {
   });
 
   test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
-    const joinRes = sendPostRequestToEndpoint('/channel/join/v2', {
+    const joinRes = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       token: token2,
       channelId: testChannelId
     });
@@ -274,7 +277,7 @@ describe('HTTP tests for message/edit/v1', () => {
   let testChannelId: number;
   let testMessageId: number;
   beforeEach(() => {
-    const channel = sendPostRequestToEndpoint('/channels/create/v2', {
+    const channel = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -329,7 +332,7 @@ describe('HTTP tests for message/edit/v1', () => {
   });
 
   test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
-    sendPostRequestToEndpoint('/channel/join/v2', {
+    sendPostRequestToEndpoint(CHANNEL_JOIN, {
       token: token2,
       channelId: testChannelId
     });

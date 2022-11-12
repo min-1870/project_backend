@@ -7,7 +7,7 @@ const NAME_FIRST = 'Barty';
 const NAME_LAST = 'Potter';
 const TEST_CHANNEL_NAME = 'Test channel';
 
-describe('HTTP tests for /clear/v1', () => {
+describe('HTTP tests for /clear', () => {
   test('Clear data succeeds', () => {
     const registerResponse = sendPostRequestToEndpoint('/auth/register/v3', {
       email: EMAIL,
@@ -19,13 +19,13 @@ describe('HTTP tests for /clear/v1', () => {
     const registerJsonResponse = parseJsonResponse(registerResponse) as unknown as authResponse;
     const token = registerJsonResponse.token;
 
-    sendPostRequestToEndpoint('/channels/create/v2', {
+    sendPostRequestToEndpoint('/channels/create/v3', {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
     });
 
-    let listChannelRes = sendGetRequestToEndpoint('/channels/list/v2', {
+    let listChannelRes = sendGetRequestToEndpoint('/channels/list/v3', {
       token
     });
 
@@ -36,13 +36,15 @@ describe('HTTP tests for /clear/v1', () => {
 
     expect(parseJsonResponse(clearRes)).toStrictEqual({});
 
-    listChannelRes = sendGetRequestToEndpoint('/channels/list/v2', {
+    listChannelRes = sendGetRequestToEndpoint('/channels/list/v3', {
       token
     });
 
-    const listChannelJsonResError = parseJsonResponse(listChannelRes) as unknown as error;
-    expect(listChannelJsonResError).toStrictEqual({
-      error: expect.any(String)
-    });
+    expect(listChannelRes.statusCode).toBe(403);
+    expect(parseJsonResponse(listChannelRes)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
+    }); 
   });
 });
