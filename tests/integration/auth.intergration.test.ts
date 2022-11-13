@@ -392,7 +392,7 @@ describe('HTTP tests for /auth/passwordreset/reset', () => {
   });
 
   test('authPasswordReset user change email then reset successful', () => {
-    const email = '312312b@gmail.com'
+    const email = '312312b@gmail.com';
     let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
@@ -402,16 +402,16 @@ describe('HTTP tests for /auth/passwordreset/reset', () => {
 
     sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
 
-    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL } );
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
     const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0];
 
     res = sendPostRequestToEndpoint(AUTH_LOGIN, {
       email: EMAIL,
       password: PASSWORD,
     });
-    const token = (parseJsonResponse(res) as unknown as authResponse).token
+    const token = (parseJsonResponse(res) as unknown as authResponse).token;
 
-    sendPostRequestToEndpoint(USER_PROFILE_SET_EMAIL, { email: 'n32Email@fasd'}, token)
+    sendPostRequestToEndpoint(USER_PROFILE_SET_EMAIL, { email }, token);
 
     res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode, newPassword: 'newthing12' });
     expect(res.statusCode).toBe(OK);

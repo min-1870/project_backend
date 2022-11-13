@@ -119,7 +119,7 @@ export function sendPasswordResetEmail(email :string) {
       },
     });
     const code = generateToken();
-    const userId = database.getUserByEmail(email).uId
+    const userId = database.getUserByEmail(email).uId;
     database.addPasswordResets(userId, code);
     transporter.sendMail({
       from: '"UNSW BEANS" <trey.hickle@ethereal.email>',

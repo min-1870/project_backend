@@ -566,7 +566,7 @@ class DataStore {
     const newPasswordReset: dataStorePassReset = {
       uId: user.uId,
       resetCode
-    }
+    };
     this.passwordResets.push(newPasswordReset);
     this.saveDataStore();
   }
@@ -577,8 +577,8 @@ class DataStore {
    * @returns {dataStorePassReset} data store pass reset.
    */
   getPasswordResetsByResetCode(resetCode: string): dataStorePassReset {
-    console.log(resetCode)
-    console.log(database.passwordResets)
+    console.log(resetCode);
+    console.log(database.passwordResets);
     const passReset = this.passwordResets.find(p => p.resetCode === resetCode);
     if (!passReset) {
       throw HTTPError(400, 'Reset code not found.');
