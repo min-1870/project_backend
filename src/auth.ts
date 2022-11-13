@@ -119,32 +119,34 @@ export function sendPasswordResetEmail(email :string) {
       },
     });
     const code = generateToken();
-    database.addPasswordResets(email, code);
+    const userId = database.getUserByEmail(email).uId
+    database.addPasswordResets(userId, code);
     transporter.sendMail({
       from: '"UNSW BEANS" <trey.hickle@ethereal.email>',
       to: `${email}`,
       subject: 'UNSW BEANS: Password Reset',
       text: `Keep the code: ${code.toString()}`,
     });
-    database.removeSessionTokenForUser(database.getUserByEmail(email).uId);
+    database.removeSessionTokenForUser(userId);
   }
   return {};
 }
 
 export function getResetCodes(email: string) {
   return {
-    codes: database.passwordResets.filter(pR => pR.email === email).map(pR => pR.resetCode)
+    codes: database.passwordResets
+      .filter(pR => pR.uId === database.getUserByEmail(email).uId)
+      .map(pR => pR.resetCode)
   };
 }
 
 export function resetPassword(resetCode: string, newPassword: string) {
-  const email = database.getPasswordResetsByResetCode(resetCode).email;
-
   if (newPassword.length < 6) {
     throw HTTPError(400, 'Password must be 6 character or longer');
   }
+  database.updateUserPassword(
+    database.getPasswordResetsByResetCode(resetCode).uId, newPassword);
   database.removePassWordReset(resetCode);
-  database.updateUserPassword(email, newPassword);
   return {};
 }
 

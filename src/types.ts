@@ -45,7 +45,7 @@ export type dataStoreDm = {
 }
 
 export type dataStorePassReset = {
-  email: string,
+  uId: number,
   resetCode: string
 }
 
