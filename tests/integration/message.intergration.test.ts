@@ -1,5 +1,5 @@
 import { authResponse, channelId, channelMessagesOutput, dmId, messageId } from '../../src/types';
-import {AUTH_REGISTER, CHANNEL_MESSAGES, DM_CREATE, DM_MESSGES, DM_SEND, MESSAGE_DM_SEND, MESSAGE_EDIT, MESSAGE_REMOVE, MESSAGE_SEND} from '../testBase';
+import { AUTH_REGISTER, CHANNEL_MESSAGES, DM_CREATE, DM_MESSGES, MESSAGE_DM_SEND, MESSAGE_EDIT, MESSAGE_REMOVE, MESSAGE_SEND } from '../testBase';
 import {
   OK,
   parseJsonResponse,
@@ -20,7 +20,6 @@ const TEST_CHANNEL_NAME = 'Test channel';
 const TEST_MESSAGE = 'hello world :)';
 const TEST_MESSAGE_2 = 'hello world :(';
 
-const TEST_INVALID_TOKEN = '999999';
 const TEST_INVALID_CHANNELID = '99999';
 
 // over 1000 characters
@@ -269,7 +268,7 @@ describe('HTTP tests for message/edit', () => {
     const res = sendPutRequestToEndpoint(MESSAGE_EDIT, {
       messageId: testMessageId,
       message: VERY_LONG_MESSAGE
-    },token);
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({

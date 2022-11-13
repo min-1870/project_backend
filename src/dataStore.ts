@@ -500,7 +500,7 @@ class DataStore {
       throw HTTPError(400, 'A channel must have at least one owner');
     }
     if (!this.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
-      throw HTTPError(400, 'The user to remove as owner is not an owner already.')
+      throw HTTPError(400, 'The user to remove as owner is not an owner already.');
     }
     this.channels
       .find(c => c.channelId === channelId)

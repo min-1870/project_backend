@@ -1,5 +1,5 @@
 import { authResponse, channels } from '../../src/types';
-import {AUTH_REGISTER, CHANNELS_CREATE, CHANNELS_LIST, CLEAR} from '../testBase';
+import { AUTH_REGISTER, CHANNELS_CREATE, CHANNELS_LIST, CLEAR } from '../testBase';
 import { parseJsonResponse, sendDeleteRequestToEndpoint, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'adfadf@gmail.com';

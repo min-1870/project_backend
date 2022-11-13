@@ -1,9 +1,19 @@
 import { authResponse, channelId, channelMessagesOutput } from '../../src/types';
-import {AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_ADD_OWNER, CHANNEL_DETAILS, CHANNEL_INVITE, CHANNEL_JOIN, CHANNEL_LEAVE, CHANNEL_MESSAGES, CHANNEL_REMOVE_OWNER, clearDataForTest, MESSAGE_SEND} from '../testBase';
+import {
+  AUTH_REGISTER,
+  CHANNELS_CREATE,
+  CHANNEL_ADD_OWNER,
+  CHANNEL_DETAILS,
+  CHANNEL_INVITE,
+  CHANNEL_JOIN,
+  CHANNEL_LEAVE, CHANNEL_MESSAGES,
+  CHANNEL_REMOVE_OWNER,
+  clearDataForTest,
+  MESSAGE_SEND
+} from '../testBase';
 import {
   OK,
   parseJsonResponse,
-  sendDeleteRequestToEndpoint,
   sendGetRequestToEndpoint,
   sendPostRequestToEndpoint
 } from './integrationTestUtils';
@@ -185,7 +195,7 @@ describe('HTTP tests for channel/messages', () => {
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: publicChannelId,
       start: 0,
-    }, globalOwnerToken)
+    }, globalOwnerToken);
 
     expect(res.statusCode).toBe(403);
   });
@@ -200,14 +210,14 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages more than 50 messages success', () => {
-    let expectedMessages = []
-    for(let i = 0; i < 100; i++) {
-      expectedMessages.push(`hello ${i}`)
+    let expectedMessages = [];
+    for (let i = 0; i < 100; i++) {
+      expectedMessages.push(`hello ${i}`);
       sendPostRequestToEndpoint(MESSAGE_SEND, {
         channelId: publicChannelId,
         message: `hello ${i}`
       },
-      publicChannelCreatorToken)
+      publicChannelCreatorToken);
     }
 
     const start = 0;
@@ -217,21 +227,21 @@ describe('HTTP tests for channel/messages', () => {
     }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
-    let resBody = parseJsonResponse(res) as unknown as channelMessagesOutput
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
     expect(parseJsonResponse(res)).toStrictEqual({
       messages: expect.any(Array),
       start,
       end: start + 50
     });
-    expectedMessages = [...expectedMessages].reverse().slice(start, start + 50)
-    const actualMessages = resBody.messages.map(m => m.message)
-    expect(expectedMessages).toStrictEqual(actualMessages)
+    expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
   });
 
   test('channelMessages less than 50 messages success', () => {
-    let expectedMessages = []
-    for(let i = 0; i < 11; i++) {
-      expectedMessages.push(`hello ${i}`)
+    let expectedMessages = [];
+    for (let i = 0; i < 11; i++) {
+      expectedMessages.push(`hello ${i}`);
 
       sendPostRequestToEndpoint(MESSAGE_SEND,
         {
@@ -239,7 +249,7 @@ describe('HTTP tests for channel/messages', () => {
           message: `hello ${i}`
         },
         publicChannelCreatorToken
-      )
+      );
     }
 
     const start = 0;
@@ -253,21 +263,26 @@ describe('HTTP tests for channel/messages', () => {
       start,
       end: -1
     });
-    let resBody = parseJsonResponse(res) as unknown as channelMessagesOutput
-    expectedMessages = expectedMessages.slice(0, 11).reverse()
-    const actualMessages = resBody.messages.map(m => m.message)
-    expect(expectedMessages).toStrictEqual(actualMessages)
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expectedMessages = expectedMessages.slice(0, 11).reverse();
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
   });
 
   test('channelMessages start from middle more than 50 messages success', () => {
-    let expectedMessages = []
-    for(let i = 0; i < 100; i++) {
-      expectedMessages.push(`hello ${i}`)
-      let res = sendPostRequestToEndpoint(MESSAGE_SEND, {
-        channelId: publicChannelId,
-        message: `hello ${i}`
-      }, publicChannelCreatorToken)
-      expect(res.statusCode).toBe(OK)
+    let expectedMessages = [];
+    for (let i = 0; i < 100; i++) {
+      const msg = `hello ${i}`;
+      expectedMessages.push(msg);
+      const res = sendPostRequestToEndpoint(
+        MESSAGE_SEND,
+        {
+          channelId: publicChannelId,
+          message: msg
+        },
+        publicChannelCreatorToken);
+
+      expect(res.statusCode).toBe(OK);
     }
 
     const start = 11;
@@ -278,28 +293,28 @@ describe('HTTP tests for channel/messages', () => {
     publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
-    expectedMessages = expectedMessages.slice().reverse().slice(start, start + 50),
+    expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
     expect(parseJsonResponse(res)).toStrictEqual({
       messages: expect.any(Array),
       start,
       end: start + 50
     });
-    let resBody = parseJsonResponse(res) as unknown as channelMessagesOutput
-    const actualMessages = resBody.messages.map(m => m.message)
-    expect(expectedMessages).toStrictEqual(actualMessages)
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
   });
 
   test('channelMessages start from middle less than 50 messages success', () => {
-    let expectedMessages = []
-    for(let i = 0; i < 11; i++) {
-      expectedMessages.push(`hello ${i}`)
-      let res = sendPostRequestToEndpoint(MESSAGE_SEND,
+    let expectedMessages = [];
+    for (let i = 0; i < 11; i++) {
+      expectedMessages.push(`hello ${i}`);
+      const res = sendPostRequestToEndpoint(MESSAGE_SEND,
         {
-           channelId: publicChannelId,
-            message: `hello ${i}`
-          },
-        publicChannelCreatorToken)
-      expect(res.statusCode).toBe(OK)
+          channelId: publicChannelId,
+          message: `hello ${i}`
+        },
+        publicChannelCreatorToken);
+      expect(res.statusCode).toBe(OK);
     }
 
     const start = 3;
@@ -314,10 +329,10 @@ describe('HTTP tests for channel/messages', () => {
       start,
       end: -1
     });
-    let resBody = parseJsonResponse(res) as unknown as channelMessagesOutput
-    expectedMessages = [...expectedMessages].reverse().slice(3)
-    const actualMessages = resBody.messages.map(m => m.message)
-    expect(expectedMessages).toStrictEqual(actualMessages)
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expectedMessages = [...expectedMessages].reverse().slice(3);
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
   });
 });
 
@@ -406,18 +421,18 @@ describe('HTTP tests for channel/join', () => {
 describe('HTTP tests for channel/invite', () => {
   let normalUserId: number;
   let normalUserToken: string;
-  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com'
-  const NORMAL_USER_PW = 'imnorm233'
-  const NORMAL_USER_NAME_FIRST = 'normalpers'
-  const NORMAL_USER_NAME_LAST = 'ffas'
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
   beforeEach(() => {
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: NORMAL_USER_EMAIL,
       password: NORMAL_USER_PW,
       nameFirst: NORMAL_USER_NAME_FIRST,
       nameLast: NORMAL_USER_NAME_LAST
     });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     normalUserId = jsonResponse.authUserId;
     normalUserToken = jsonResponse.token;
   });
@@ -772,43 +787,43 @@ describe('HTTP tests for channel/details', () => {
           nameLast: GLOBAL_USER_NAME_LAST,
           uId: globalOwnerUserId
         }
-    ]
+      ]
     });
-  })
+  });
 });
 
 describe('HTTP tests for channel/addowner', () => {
   let normalUserId: number;
 
-  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com'
-  const NORMAL_USER_PW = 'imnorm233'
-  const NORMAL_USER_NAME_FIRST = 'normalpers'
-  const NORMAL_USER_NAME_LAST = 'ffas'
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
 
   let publicChannelMemberId;
   let privateChannelMemberId;
 
   beforeEach(() => {
-    publicChannelMemberId = privateChannelCreatorUserId
-    privateChannelMemberId = publicChannelCreatorUserId
+    publicChannelMemberId = privateChannelCreatorUserId;
+    privateChannelMemberId = publicChannelCreatorUserId;
 
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: NORMAL_USER_EMAIL,
       password: NORMAL_USER_PW,
       nameFirst: NORMAL_USER_NAME_FIRST,
       nameLast: NORMAL_USER_NAME_LAST
     });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     normalUserId = jsonResponse.authUserId;
 
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: publicChannelMemberId
-    }, publicChannelCreatorToken)
+    }, publicChannelCreatorToken);
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: privateChannelMemberId
-    }, privateChannelCreatorToken)
+    }, privateChannelCreatorToken);
   });
 
   test('channelAddOwner add member to public channel owner success', () => {
@@ -874,7 +889,7 @@ describe('HTTP tests for channel/addowner', () => {
     }, globalOwnerToken);
 
     expect(res.statusCode).toBe(403);
-  })
+  });
 
   test('channelAddOwner invalid channel ID throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
@@ -927,12 +942,11 @@ describe('HTTP tests for channel/addowner', () => {
 });
 
 describe('HTTP tests for channel/leave', () => {
-  let normalUserId: number;
   let normalUserToken: string;
-  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com'
-  const NORMAL_USER_PW = 'imnorm233'
-  const NORMAL_USER_NAME_FIRST = 'normalpers'
-  const NORMAL_USER_NAME_LAST = 'ffas'
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
 
   let publicChannelMemberId;
   let publicChannelMemberToken;
@@ -946,24 +960,23 @@ describe('HTTP tests for channel/leave', () => {
     privateChannelMemberId = publicChannelCreatorUserId;
     privateChannelMemberToken = publicChannelCreatorToken;
 
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: NORMAL_USER_EMAIL,
       password: NORMAL_USER_PW,
       nameFirst: NORMAL_USER_NAME_FIRST,
       nameLast: NORMAL_USER_NAME_LAST
     });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    normalUserId = jsonResponse.authUserId;
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     normalUserToken = jsonResponse.token;
 
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: publicChannelMemberId
-    }, publicChannelCreatorToken)
+    }, publicChannelCreatorToken);
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: privateChannelMemberId
-    }, privateChannelCreatorToken)
+    }, privateChannelCreatorToken);
   });
 
   test('channelLeave invalid channel ID throws error', () => {
@@ -1052,11 +1065,10 @@ describe('HTTP tests for channel/leave', () => {
 
 describe('HTTP tests for channel/removeowner', () => {
   let normalUserId: number;
-  let normalUserToken: string;
-  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com'
-  const NORMAL_USER_PW = 'imnorm233'
-  const NORMAL_USER_NAME_FIRST = 'normalpers'
-  const NORMAL_USER_NAME_LAST = 'ffas'
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
 
   let publicChannelMemberId;
   let secondPublicChannelOwnerToken;
@@ -1070,28 +1082,27 @@ describe('HTTP tests for channel/removeowner', () => {
     privateChannelMemberId = publicChannelCreatorUserId;
     privateChannelMemberToken = publicChannelCreatorToken;
 
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: NORMAL_USER_EMAIL,
       password: NORMAL_USER_PW,
       nameFirst: NORMAL_USER_NAME_FIRST,
       nameLast: NORMAL_USER_NAME_LAST
     });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     normalUserId = jsonResponse.authUserId;
-    normalUserToken = jsonResponse.token;
 
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: publicChannelMemberId
-    }, publicChannelCreatorToken)
+    }, publicChannelCreatorToken);
     sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: publicChannelId,
       uId: publicChannelMemberId
-    }, publicChannelCreatorToken)
+    }, publicChannelCreatorToken);
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelMemberId
-    }, privateChannelCreatorToken)
+    }, privateChannelCreatorToken);
   });
 
   test('channelRemoveOwner self remove success', () => {
@@ -1126,11 +1137,11 @@ describe('HTTP tests for channel/removeowner', () => {
   test('channelRemoveOwner owner global owner remove another owner success', () => {
     sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: publicChannelId
-    }, globalOwnerToken)
+    }, globalOwnerToken);
     let res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: publicChannelId,
       uId: globalOwnerUserId
-    }, globalOwnerToken)
+    }, globalOwnerToken);
 
     expect(res.statusCode).toBe(200);
 

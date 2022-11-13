@@ -72,7 +72,7 @@ export function channelInvite(
     throw HTTPError(403, 'Permission denied, non-channel user cannot invite other user to the channel');
   }
   if (!database.isUserIdValid(uId)) {
-    throw HTTPError(400, 'Invalid user ID.')
+    throw HTTPError(400, 'Invalid user ID.');
   }
   database.addUserToChannel(uId, channel.channelId);
   return {};
@@ -108,13 +108,13 @@ export function channelMessages(
     throw HTTPError(403, 'Not a member of channel.');
   }
 
-  let messages = [...channel.messages].reverse();
+  const messages = [...channel.messages].reverse();
   let slicedMessages: messages[];
   let end: number;
 
   if (start + 50 >= messages.length) {
     end = -1;
-    slicedMessages = messages.slice(start, messages.length)
+    slicedMessages = messages.slice(start, messages.length);
   } else {
     end = start + 50;
     slicedMessages = messages.slice(start, end);

@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
 import errorHandler from 'middleware-http-errors';
-import { channelsCreate as channelsCreate, channelsListAll, channelsList } from './channels';
+import { channelsCreate, channelsListAll, channelsList } from './channels';
 import { clear } from './other';
 import {
   authLoginV1,
@@ -26,8 +26,6 @@ import {
   authLoginRequest,
   channelMessagesRequest,
   channelsCreateRequest,
-  channelsListRequest,
-  channelsListAllRequest,
   userProfileRequest,
   dmCreateRequest,
   userProfileSethandleRequest,
