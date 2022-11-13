@@ -45,7 +45,7 @@ export type dataStoreDm = {
 }
 
 export type dataStorePassReset = {
-  email: string,
+  uId: number,
   resetCode: string
 }
 
@@ -219,4 +219,8 @@ export type channelLeaveRequest = {
 export type passwordResetRequest = {
   resetCode: string
   newPassword: string
+}
+
+export type listResetCodeResponse = {
+  codes: [string]
 }

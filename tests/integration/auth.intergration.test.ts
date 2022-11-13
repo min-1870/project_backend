@@ -1,9 +1,19 @@
-import { authResponse } from '../../src/types';
+import { authResponse, listResetCodeResponse } from '../../src/types';
+import {
+  AUTH_LOGIN,
+  AUTH_LOGOUT,
+  AUTH_PASSWORD_RESET,
+  AUTH_PASSWORD_RESET_REQUEST,
+  AUTH_REGISTER,
+  CHANNELS_LIST_ALL,
+  clearDataForTest,
+  USER_PROFILE_SET_EMAIL
+} from '../testBase';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
   OK,
-  sendDeleteRequestToEndpoint,
+  sendGetRequestToEndpoint,
 } from './integrationTestUtils';
 
 const EMAIL = 'moniker2@hotmail.com';
@@ -12,24 +22,12 @@ const NAME_FIRST = '7re$#%^@$#al43E';
 const NAME_LAST = 'MoN(*#@@#!i9IO64kerMoNi9IO64kerMoNi9IO64ker';
 
 beforeEach(() => {
-  sendDeleteRequestToEndpoint('/clear/v1', {});
+  clearDataForTest();
 });
 
-describe('HTTP tests for /auth/register/v3', () => {
-  test('Successful authRegisterV1', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
-      email: 'moniker1@hotmail.com',
-      password: PASSWORD,
-      nameFirst: NAME_FIRST,
-      nameLast: NAME_LAST
-    });
-    sendPostRequestToEndpoint('/auth/register/v3', {
-      email: 'moniker@hotmail.com',
-      password: PASSWORD,
-      nameFirst: NAME_FIRST,
-      nameLast: NAME_LAST
-    });
-    const res = sendPostRequestToEndpoint('/auth/register/v3', {
+describe('HTTP tests for /auth/register', () => {
+  test('authRegister success', () => {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
@@ -43,8 +41,8 @@ describe('HTTP tests for /auth/register/v3', () => {
     });
   });
 
-  test('error passing invalid email through authRegister', () => {
-    const res = sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authRegister invalid email throws error', () => {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: 'mapplebotoo',
       password: PASSWORD,
       nameFirst: NAME_FIRST,
@@ -53,17 +51,17 @@ describe('HTTP tests for /auth/register/v3', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Invalid Email' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
-  test('error passing already registered email through authRegister', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authRegister already used email throws error', () => {
+    sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const res = sendPostRequestToEndpoint('/auth/register/v3', {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
@@ -72,11 +70,11 @@ describe('HTTP tests for /auth/register/v3', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Email Address already in use' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
-  test('error passing invalid password through authRegister', () => {
-    const res = sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authRegister invalid password throws error', () => {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: 'pvss',
       nameFirst: NAME_FIRST,
@@ -85,11 +83,11 @@ describe('HTTP tests for /auth/register/v3', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'password has to be six characters or longer' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
-  test('error passing invalid first name through authRegister', () => {
-    const res = sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authRegister empty firstName throws error', () => {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: '',
@@ -98,11 +96,11 @@ describe('HTTP tests for /auth/register/v3', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'First name has to be between 1 and 50 characters in length' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
-  test('error passing invalid last name through authRegister', () => {
-    const res = sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authRegister empty last name throws error', () => {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
@@ -111,20 +109,46 @@ describe('HTTP tests for /auth/register/v3', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Last name has to be between 1 and 50 characters in length' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('authRegister firstName too long throws error', () => {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: 'a'.repeat(100),
+      nameLast: NAME_LAST
+    });
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('authRegister last name too long throws error', () => {
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: 'b'.repeat(100)
+    });
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
-describe('HTTP tests for /auth/login/v2', () => {
-  test('Successful authLogin', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
+describe('HTTP tests for /auth/login', () => {
+  test('authLogin success', () => {
+    sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
 
-    const res = sendPostRequestToEndpoint('/auth/login/v3', {
+    const res = sendPostRequestToEndpoint(AUTH_LOGIN, {
       email: EMAIL,
       password: PASSWORD,
     });
@@ -136,7 +160,7 @@ describe('HTTP tests for /auth/login/v2', () => {
     });
   });
 
-  test('Successful authLogin with multiple registered users and duplicate names and password', () => {
+  test('authLogin users with dumplicate name and password success', () => {
     const users = [
       {
         email: EMAIL,
@@ -163,7 +187,7 @@ describe('HTTP tests for /auth/login/v2', () => {
         nameLast: NAME_LAST
       },
     ];
-    users.forEach(user => sendPostRequestToEndpoint('/auth/register/v3', {
+    users.forEach(user => sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: user.email,
       password: user.password,
       nameFirst: user.nameFirst,
@@ -171,7 +195,7 @@ describe('HTTP tests for /auth/login/v2', () => {
     }));
 
     users.forEach(user => {
-      const res = sendPostRequestToEndpoint('/auth/login/v3', {
+      const res = sendPostRequestToEndpoint(AUTH_LOGIN, {
         email: user.email,
         password: user.password,
       });
@@ -185,43 +209,43 @@ describe('HTTP tests for /auth/login/v2', () => {
     });
   });
 
-  test('Error passing invalid email through authLoginV1', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authLogin invalid email throws error', () => {
+    sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const res = sendPostRequestToEndpoint('/auth/login/v3', {
+    const res = sendPostRequestToEndpoint(AUTH_LOGIN, {
       email: 'idkifthisisright@gmail.com',
       password: PASSWORD,
     });
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Email address is not registered' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
-  test('Error passing invalid password through authLoginV1', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authLogin invalid password throws error', () => {
+    sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const res = sendPostRequestToEndpoint('/auth/login/v3', {
+    const res = sendPostRequestToEndpoint(AUTH_LOGIN, {
       email: EMAIL,
       password: 'nappy',
     });
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Incorrect Password' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
-describe('HTTP tests for /auth/logout/v2', () => {
-  test('Successful auth logout', () => {
-    const ret = sendPostRequestToEndpoint('/auth/register/v3', {
+describe('HTTP tests for /auth/logout', () => {
+  test('authLogout success', () => {
+    const ret = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
@@ -231,19 +255,19 @@ describe('HTTP tests for /auth/logout/v2', () => {
     const jsonResponse = parseJsonResponse(ret) as unknown as authResponse;
     const token = jsonResponse.token;
 
-    const res = sendPostRequestToEndpoint('/auth/logout/v2', {}, token);
+    const res = sendPostRequestToEndpoint(AUTH_LOGOUT, {}, token);
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
-  test('Error passing invalid token through auth/logout/v2', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
+  test('authLogout invalid token throws forbidden.', () => {
+    sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const res = sendPostRequestToEndpoint('/auth/logout/v2', {}, 'this is definitely wrong');
+    const res = sendPostRequestToEndpoint(AUTH_LOGOUT, {}, 'this is definitely wrong');
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
@@ -251,31 +275,146 @@ describe('HTTP tests for /auth/logout/v2', () => {
   });
 });
 
-describe('HTTP tests for /auth/passwordreset functions', () => {
-  test('Successful password reset request', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
-      email: 'unswbeanstotally@gmail.com',
+describe('HTTP tests for /auth/passwordreset/request', () => {
+  test('authPasswordReset request successful', () => {
+    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
+    const token = (parseJsonResponse(res) as unknown as authResponse).token;
 
-    const res = sendPostRequestToEndpoint('/auth/passwordreset/request/v1', { email: 'unswbeanstotally@gmail.com' });
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
+
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      codes: [expect.any(String)]
+    });
+
+    // Token should be cleared after reset request so this should fail.
+    res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {}, token);
+    expect(res.statusCode).toBe(403);
   });
-  test('invalid reset code for reset', () => {
-    sendPostRequestToEndpoint('/auth/register/v3', {
-      email: 'unswbeanstotally@gmail.com',
+
+  test('authPasswordReset request multuiple times successful', () => {
+    sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
 
-    const res = sendPostRequestToEndpoint('/auth/passwordreset/reset/v1', { resetCode: 'invalid code', newPassword: 'hahahahahhaha' });
+    let res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      codes: [expect.any(String), expect.any(String), expect.any(String)]
+    });
+  });
+});
+
+describe('HTTP tests for /auth/passwordreset/reset', () => {
+  test('authPasswordReset reset successful', () => {
+    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+
+    sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
+
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0];
+
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode, newPassword: 'newthing12' });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    const response = (parseJsonResponse(res) as unknown as listResetCodeResponse);
+    expect(response.codes.length).toBe(1);
+  });
+
+  test('authPasswordReset new password less than 6 characters throws error', () => {
+    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0];
+
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode, newPassword: '12345' });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('authPasswordReset invalid reset code throws error', () => {
+    sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+
+    const res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode: 'invalid code', newPassword: 'hahahahahhaha' });
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
     expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('authPasswordReset user change email then reset successful', () => {
+    const email = '312312b@gmail.com';
+    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: EMAIL,
+      password: PASSWORD,
+      nameFirst: NAME_FIRST,
+      nameLast: NAME_LAST
+    });
+
+    sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
+
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0];
+
+    res = sendPostRequestToEndpoint(AUTH_LOGIN, {
+      email: EMAIL,
+      password: PASSWORD,
+    });
+    const token = (parseJsonResponse(res) as unknown as authResponse).token;
+
+    sendPostRequestToEndpoint(USER_PROFILE_SET_EMAIL, { email }, token);
+
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode, newPassword: 'newthing12' });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });

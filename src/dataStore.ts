@@ -235,6 +235,19 @@ class DataStore {
   }
 
   /**
+   * Remove a session token in the data store for a user.
+   *
+   * @param userId - user id to clear sessions for.
+   * @returns {} an empty object if success.
+   */
+  removeSessionTokenForUser(userId: number): Record<string, never> {
+    this.users.find(user => user.uId === userId)
+      .sessionTokens = [];
+    this.saveDataStore();
+    return {};
+  }
+
+  /**
    * Get data store channel by channel ID.
    *
    * @param channelId - channel ID to get.
@@ -533,11 +546,11 @@ class DataStore {
   /**
    * Update the user's password.
    *
-   * @param email - email of the user to update.
+   * @param userId - user ID of the user to update.
    * @param newPassword - the new password.
    */
-  updateUserPassword(email: string, newPassword: string) {
-    const user = this.getUserByEmail(email);
+  updateUserPassword(userId: number, newPassword: string) {
+    const user = this.getUserById(userId);
     this.users.find(u => u.uId === user.uId).password = getHashOf(newPassword);
     this.saveDataStore();
   }
@@ -545,14 +558,16 @@ class DataStore {
   /**
    * Add password reset info into the database.
    *
-   * @param email - email sent to for reset.
+   * @param userId - user ID sent to for reset.
    * @param resetCode - the reset code given.
    */
-  addPasswordResets(email: string, resetCode: string) {
-    this.passwordResets.push({
-      email,
+  addPasswordResets(userId: number, resetCode: string) {
+    const user = this.getUserById(userId);
+    const newPasswordReset: dataStorePassReset = {
+      uId: user.uId,
       resetCode
-    });
+    };
+    this.passwordResets.push(newPasswordReset);
     this.saveDataStore();
   }
 
@@ -562,9 +577,11 @@ class DataStore {
    * @returns {dataStorePassReset} data store pass reset.
    */
   getPasswordResetsByResetCode(resetCode: string): dataStorePassReset {
+    console.log(resetCode);
+    console.log(database.passwordResets);
     const passReset = this.passwordResets.find(p => p.resetCode === resetCode);
     if (!passReset) {
-      throw HTTPError(400, 'Invalid reset code.');
+      throw HTTPError(400, 'Reset code not found.');
     }
     return passReset;
   }

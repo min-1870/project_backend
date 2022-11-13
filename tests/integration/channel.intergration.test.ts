@@ -134,7 +134,23 @@ describe('HTTP tests for channel/messages', () => {
     });
   });
 
-  test('correct input correct return ', () => { // need to add some messages and test when we have message function
+  test('no messages success', () => {
+    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
+      token: token,
+      channelId: channel1Id,
+      start: 0,
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: [],
+      start: 0,
+      end: -1
+    });
+  });
+
+  // TODO: update this test
+  test('has more than 50 messages success', () => {
     const res = sendGetRequestToEndpoint('/channel/messages/v2', {
       token: token,
       channelId: channel1Id,
