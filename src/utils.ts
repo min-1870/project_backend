@@ -1,5 +1,6 @@
 import { database } from './dataStore';
-import { channel,
+import {
+  channel,
   channels,
   dataStoreChannel,
   dataStoreUser,

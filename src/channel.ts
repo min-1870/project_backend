@@ -2,12 +2,10 @@ import { database } from './dataStore';
 import {
   error,
   messages,
-  dataStore,
   channel
 } from './types';
 import {
   toOutputChannelDetail,
-  dataStoreUserToUser,
 } from './utils';
 import HTTPError from 'http-errors';
 
@@ -21,26 +19,13 @@ import HTTPError from 'http-errors';
   *
   * @returns {object} - An object containing basic details of the channel such as name, isPublic, ownerMembers and allMembers
 */
-<<<<<<< HEAD
-export function channelDetailsV1(authUserId: number, channelId: number): (channel | error) {
-  const channel = database.getDataStoreChannelByChannelId(channelId);
-=======
 export function channelDetails(token: string, channelId: number): (channel | error) {
->>>>>>> master
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
+  const user = database.getUserByToken(token);
+  console.log(database.channels);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
+    throw HTTPError(400, 'User not a member of channel.');
   }
-  const channel = getDataStoreChannelSpecial(channelId, data);
-  if (channel == null) {
-    return { error: 'Channel ID does not refer to a valid channel' };
-  } else if (getDataStoreUserSpecial(authUserId, data) == null) {
-    return { error: 'User ID does not exist' };
-  } else if (channel.allMembers.includes(authUserId) === false) {
-    return { error: 'User ID is not a member of channel' };
-  }
-
   return toOutputChannelDetail(channel);
 }
 
@@ -53,27 +38,16 @@ export function channelDetails(token: string, channelId: number): (channel | err
   *
   * @returns {} - empty object returned
 */
-export function channelJoin(token: string, channelId: number): (Record<string, never> | error) {
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
+export function channelJoin(
+  token: string,
+  channelId: number): (Record<string, never> | error) {
+  const user = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  if (!channel.isPublic && !database.isUserGlobalOwner(user.uId)) {
+    throw HTTPError(403,
+      'Permission denied, non-global owner is not allowed to access private channel');
   }
-  const dataStoreUser = getDataStoreUser(authUserId, data);
-  const channel = getDataStoreChannel(channelId, data);
-
-  if (channel == null) {
-    return { error: 'Invalid channel ID' };
-  } else if (dataStoreUser == null) {
-    return { error: 'Invalid token' };
-  } else if (channel.allMembers.includes(authUserId) !== false) {
-    return { error: 'User already in channel' };
-  } else if (!channel.isPublic && !dataStoreUser.isGlobalOwner) {
-    return { error: 'Permission denied, non-global owner is not allowed to access private channel' };
-  }
-
-  addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
-  setData(data);
+  database.addUserToChannel(user.uId, channel.channelId);
   return {};
 }
 
@@ -92,35 +66,13 @@ export function channelInvite(
   token: string,
   channelId: number,
   uId: number): (Record<string, never> | error) {
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
-  }
+  const authUser = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
 
-  const channel = getDataStoreChannel(channelId, data);
-  if (channel == null) {
-    return { error: 'Invalid channel ID' };
+  if (!database.isUserMemberInChannel(authUser.uId, channel.channelId)) {
+    throw HTTPError(403, 'Permission denied, non-channel user cannot invite other user to the channel');
   }
-
-  if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'Invalid token' };
-  }
-  const dataStoreUser = getDataStoreUser(uId, data);
-  if (dataStoreUser == null) {
-    return { error: 'Invalid user ID' };
-  }
-
-  if (isUserMemberInChannel(uId, channelId, data)) {
-    return { error: 'User already in channel' };
-  }
-
-  if (!isUserMemberInChannel(authUserId, channelId, data)) {
-    return { error: 'Permission denied, non-channel user cannot invite other user to the channel' };
-  }
-
-  addUserToChannel(dataStoreUserToUser(dataStoreUser), channel.channelId, data);
-  setData(data);
+  database.addUserToChannel(uId, channel.channelId);
   return {};
 }
 
@@ -136,22 +88,22 @@ export function channelInvite(
   * the channel, "end" equals -1 to indicate that there are no
   * more messages to load after this return.
   *
-  * @param {number} authUserId - a user ID in the dataStore
+  * @param {string} token - access token of a user in the dataStore
   * @param {number} channelId - a channel ID in the dataStore
   * @param {number} start - the index of the starting point
   * @returns {{messages: array, start: number, end: number}} - an object contains the messages and information of pages
 */
-export function channelMessagesV1(authUserId: number, channelId: number, start: number): ({ messages: messages[], start: number, end: number } | error) {
-  const data = getData();
-  const channel = getDataStoreChannel(channelId, data);
-  if (channel == null) {
-    return { error: 'Invalid channel ID' };
-  } else if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'Invalid user ID' };
-  } else if (start < 0 || start > channel.messages.length) {
-    return { error: 'Invalid start' };
-  } else if (isUserMemberInChannel(authUserId, channelId, data) === false) {
-    return { error: 'Not a member of the channel' };
+export function channelMessagesV1(
+  token: string,
+  channelId: number,
+  start: number): ({ messages: messages[], start: number, end: number } | error) {
+  const authUser = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  if (start < 0 || start > channel.messages.length) {
+    throw HTTPError(400, 'Invalid start');
+  }
+  if (!database.isUserMemberInChannel(authUser.uId, channel.channelId)) {
+    throw HTTPError(403, 'Not a member of channel.');
   }
 
   const messages = channel.messages;
@@ -185,41 +137,14 @@ export function channelAddOwners(
   token: string,
   channelId: number,
   ownerToAddId: number): (Record<string, never> | error) {
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
+  const authUser = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  if (!database.isUserOwnerMemberInChannel(authUser.uId, channel.channelId) &&
+      !database.isUserGlobalOwner(authUser.uId)) {
+    throw HTTPError(403, 'Not an authorised user to add owner to channel.');
   }
 
-  if (!isChannelIdValid(channelId, data)) {
-    return { error: 'channelId does not refer to a valid channel.' };
-  }
-  const dataStoreChannel = getDataStoreChannel(channelId, data);
-
-  if (!isAuthUserIdValid(ownerToAddId, data)) {
-    return { error: 'uId does not refer to a valid user.' };
-  }
-  if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'authUserId is not a valid user.' };
-  }
-
-  if (!isUserMemberInChannel(ownerToAddId, dataStoreChannel.channelId, data)) {
-    return { error: 'uId refers to a user who is not a member of the channel.' };
-  }
-
-  if (isUserOwnerInChannel(dataStoreChannel, ownerToAddId)) {
-    return { error: 'uId refers to a user who is already an owner of the channel' };
-  }
-  if (isChannelIdValid(channelId, data) &&
-    !isUserOwnerInChannel(dataStoreChannel, authUserId) &&
-    !isGlobalOwner(authUserId, data)) {
-    return {
-      error: 'channelId is valid and the authorised user does not have owner permissions in the channel.'
-    };
-  }
-  addUserToChannelAsOwner(
-    dataStoreUserToUser(getDataStoreUser(ownerToAddId, data)), channelId, data);
-  setData(data);
+  database.addOwnerToChannel(ownerToAddId, channel.channelId);
   return {};
 }
 
@@ -237,38 +162,14 @@ export function channelRemoveOwners(
   token: string,
   channelId: number,
   ownerToRemoveId: number): (Record<string, never> | error) {
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
-  }
-  const dataStoreChannel = getDataStoreChannel(channelId, data);
-  if (!isChannelIdValid(channelId, data)) {
-    return { error: 'channelId does not refer to a valid channel.' };
+  const authUser = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  if (!database.isUserOwnerMemberInChannel(authUser.uId, channel.channelId) &&
+      !database.isUserGlobalOwner(authUser.uId)) {
+    throw HTTPError(403, 'Not an authorised user to add owner to channel.');
   }
 
-  if (!isAuthUserIdValid(ownerToRemoveId, data)) {
-    return { error: 'uId does not refer to a valid user.' };
-  }
-
-  if (!isUserOwnerMemberInChannel(ownerToRemoveId, channelId, data)) {
-    return { error: 'uId refers to a user who is already an owner of the channel' };
-  }
-
-  if (isChannelIdValid(channelId, data) &&
-    !isUserOwnerInChannel(dataStoreChannel, authUserId) &&
-    !isGlobalOwner(authUserId, data)) {
-    return {
-      error: 'channelId is valid and the authorised user does not have owner permissions in the channel.'
-    };
-  }
-
-  if (dataStoreChannel.ownerMembers.length === 1) {
-    return { error: 'uId refers to a user who is currently the only owner of the channel' };
-  }
-
-  removeUserFromChannelAsOwner(ownerToRemoveId, channelId, data);
-  setData(data);
+  database.removeOwnerFromChannel(ownerToRemoveId, channel.channelId);
   return {};
 }
 
@@ -284,21 +185,11 @@ export function channelRemoveOwners(
   *
   * @returns {} - empty object returned
 */
-export function channelLeave(token: string, channelId: number): (Record<string, never> | error) {
-  const data: dataStore = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'Invalid token' };
-  }
-  if (!isChannelIdValid(channelId, data)) {
-    return { error: 'Invalid channel ID' };
-  }
-  if (!isUserMemberInChannel(authUserId, channelId, data)) {
-    return { error: 'Permission denied, non-channel user cannot leave the channel' };
-  }
-  const indexOne = data.channels.findIndex(channel => channel.channelId.toString() === channelId.toString());
-  const indexTwo = data.channels[indexOne].allMembers.findIndex(member => member.toString() === getAuthUserIdFromToken(token).toString());
-  data.channels[indexOne].allMembers.splice(indexTwo, 1);
-  setData(data);
+export function channelLeave(
+  token: string,
+  channelId: number): (Record<string, never> | error) {
+  const user = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  database.removeUserFromChannel(user.uId, channel.channelId);
   return {};
 }

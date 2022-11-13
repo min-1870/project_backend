@@ -247,7 +247,7 @@ describe('HTTP tests for /auth/logout/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -276,6 +276,6 @@ describe('HTTP tests for /auth/passwordreset functions', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Invalid reset code' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });

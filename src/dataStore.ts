@@ -8,29 +8,29 @@ import {
 } from './types';
 import fs from 'fs';
 import HTTPError from 'http-errors';
-import {getHashOf, hashToken} from './hash';
-import {generateAuthUserId, generateToken} from './ids';
+import { getHashOf, hashToken } from './hash';
+import { generateAuthUserId, generateChannelId, generateDmId, generateMessageId, generateToken } from './ids';
 
 class DataStore {
   users: dataStoreUser[];
   channels: dataStoreChannel[];
   dms: dataStoreDm[];
   passwordResets: dataStorePassReset[];
-  dataSournceFile = './database.json'
+  dataSournceFile = './database.json';
 
   constructor() {
     if (fs.existsSync(this.dataSournceFile)) {
       const dbstr = fs.readFileSync(this.dataSournceFile);
       const data = JSON.parse(String(dbstr)) as dataStore;
-      this.users = data.users
-      this.channels = data.channels
-      this.dms = data.dms
-      this.passwordResets = this.passwordResets
+      this.users = data.users;
+      this.channels = data.channels;
+      this.dms = data.dms;
+      this.passwordResets = data.passwordResets;
     } else {
-      this.users = []
-      this.channels = []
-      this.dms = []
-      this.passwordResets = []
+      this.users = [];
+      this.channels = [];
+      this.dms = [];
+      this.passwordResets = [];
     }
   }
 
@@ -41,8 +41,8 @@ class DataStore {
    * @returns {dataStoreUser} of the target user.
    */
   getUserById(userId: number): dataStoreUser {
-    const user = this.users.find(user => user.uId === userId)
-    if (user === null) {
+    const user = this.users.find(user => user.uId === userId);
+    if (!user) {
       throw HTTPError(400, 'Invalid user ID');
     }
     return user;
@@ -54,8 +54,8 @@ class DataStore {
    * @returns {dataStoreUser} of the target user.
    */
   getUserByEmail(email: string): dataStoreUser {
-    const user = this.users.find(user => user.email === email)
-    if (user === null) {
+    const user = this.users.find(user => user.email === email);
+    if (!user) {
       throw HTTPError(400, 'Invalid user email');
     }
     return user;
@@ -67,9 +67,9 @@ class DataStore {
    * @param token - token to validaite
    */
   validateSessionToken(token: string) {
-    const user = this.users.find(user => user.sessionTokens.some(t => t === token))
-    if (user === null) {
-      throw HTTPError(403, 'Invalid token.')
+    const user = this.users.find(user => user.sessionTokens.includes(token));
+    if (!user) {
+      throw HTTPError(403, 'Invalid token.');
     }
   }
 
@@ -81,7 +81,7 @@ class DataStore {
    */
   getUserByToken(token: string): dataStoreUser {
     this.validateSessionToken(token);
-    return this.users.find(user => user.sessionTokens.some(t => t === token))
+    return this.users.find(user => user.sessionTokens.includes(token));
   }
 
   /**
@@ -95,6 +95,29 @@ class DataStore {
   }
 
   /**
+   * Checks if a user ID is valid.
+   *
+   * @param userId - user ID to check.
+   * @returns {boolean} true if valid else false.
+   */
+  isUserIdValid(userId: number) {
+    return this.users.some(user => user.uId === userId);
+  }
+
+  isChannelIdValid(channelId: number) {
+    return this.channels.some(c => c.channelId === channelId);
+  }
+
+  isMessageIdValid(messageId: number) {
+    return this.channels.some(c => c.messages.map(m => m.messageId).includes(messageId)) ||
+      this.dms.some(d => d.messages.map(m => m.messageId).includes(messageId));
+  }
+
+  isDmIdValid(dmId: number) {
+    return this.dms.some(dm => dm.dmId === dmId);
+  }
+
+  /**
    * Checks if a handle str is used.
    *
    * @param handleStr - handleStr to check for
@@ -102,6 +125,40 @@ class DataStore {
    */
   isHandleStrUsed(handleStr: string): boolean {
     return this.users.some(user => user.handleStr === handleStr);
+  }
+
+  updateUserHandleStr(userId: number, handleStr: string) {
+    if (handleStr.length < 3 || handleStr.length > 20) {
+      throw HTTPError(400, 'handleStr is not correct size');
+    }
+    if (!(/^[A-Za-z0-9]*$/.test(handleStr))) {
+      throw HTTPError(400, 'handleStr has non-alphanumeric characters');
+    }
+    if (this.isHandleStrUsed(handleStr)) {
+      throw HTTPError(400, 'handle is already in use');
+    }
+    this.users.find(u => u.uId === userId).handleStr = handleStr;
+    this.saveDataStore();
+  }
+
+  updateUserEmail(userId: number, email: string) {
+    if (this.isEmailUsed(email)) {
+      throw HTTPError(400, 'email is already in use');
+    }
+    this.users.find(u => u.uId === userId).email = email;
+    this.saveDataStore();
+  }
+
+  updateUserName(userId: number, nameFirst, nameLast) {
+    if (nameFirst.length < 1 || nameFirst.length > 50) {
+      throw HTTPError(400, 'First name is not correct length');
+    }
+    if (nameLast.length < 1 || nameLast.length > 50) {
+      throw HTTPError(400, 'Last name is not correct length');
+    }
+    this.users.find(u => u.uId === userId).nameFirst = nameFirst;
+    this.users.find(u => u.uId === userId).nameLast = nameLast;
+    this.saveDataStore();
   }
 
   /**
@@ -112,7 +169,7 @@ class DataStore {
    */
   isUserGlobalOwner(userId: number) {
     const user = this.users.find(user => user.uId === userId);
-    if (user === null) {
+    if (!user) {
       throw HTTPError(400, 'Invalid user ID');
     }
     return user.isGlobalOwner;
@@ -131,7 +188,7 @@ class DataStore {
     email: string,
     password: string,
     nameFirst: string,
-     nameLast: string,
+    nameLast: string,
     handleStr: string): dataStoreUser {
     const newUser: dataStoreUser = {
       uId: generateAuthUserId(),
@@ -144,7 +201,7 @@ class DataStore {
       sessionTokens: []
     };
     this.users.push(newUser);
-    this.addSessionTokenForUser(newUser.uId)
+    this.addSessionTokenForUser(newUser.uId);
     this.saveDataStore();
     return newUser;
   }
@@ -160,7 +217,7 @@ class DataStore {
     const token = hashToken(generateToken());
     this.users.find(user => user.uId === userId).sessionTokens.push(token);
     this.saveDataStore();
-    return token
+    return token;
   }
 
   /**
@@ -170,14 +227,11 @@ class DataStore {
    * @returns {} an empty object if success.
    */
   removeSessionToken(token: string): Record<string, never> {
-    this.validateSessionToken(token)
-    this.users.forEach(user => {
-      if (user.sessionTokens.some(t => t === token)) {
-        user.sessionTokens.splice(user.sessionTokens.indexOf(token), 1);
-      }
-    })
+    const user = this.getUserByToken(token);
+    this.users.find(user => user.sessionTokens.includes(token))
+      .sessionTokens.splice(user.sessionTokens.indexOf(token), 1);
     this.saveDataStore();
-    return {}
+    return {};
   }
 
   /**
@@ -187,8 +241,8 @@ class DataStore {
    * @returns {dataStoreChannel} dataStoreChannel with that ID.
    */
   getDataStoreChannelByChannelId(channelId: number): dataStoreChannel {
-    const channel = this.channels.find(channel => channel.channelId === channelId)
-    if (channel === null) {
+    const channel = this.channels.find(c => c.channelId === channelId);
+    if (!channel) {
       throw HTTPError(400, 'Invalid channel ID.');
     }
     return channel;
@@ -200,14 +254,25 @@ class DataStore {
    * @param messageId - message ID of the message.
    * @returns {dataStoreChannel} dataStoreChannel with that message.
    */
-  getDataStoreChannelByMessageId(messageId: number): dataStoreChannel  {
+  getDataStoreChannelByMessageId(messageId: number): dataStoreChannel {
     const channelWithMessage = this.channels.find(channel =>
-      channel.messages.some(m => m.messageId === messageId))
+      channel.messages.some(m => m.messageId === messageId));
 
-    if (channelWithMessage === null) {
-      throw HTTPError(400, 'Invalid message ID.')
+    if (!channelWithMessage) {
+      throw HTTPError(400, 'Invalid message ID.');
     }
     return channelWithMessage;
+  }
+
+  /**
+   * Checks if a message is in any channels.
+   *
+   * @param messageId - message ID to check for
+   * @returns true if message ID is used.
+   */
+  isMessageInChannels(messageId: number): boolean {
+    return this.channels
+      .some(c => c.messages.some(m => m.messageId === messageId));
   }
 
   /**
@@ -217,8 +282,35 @@ class DataStore {
    * @returns {messages} meesage with that ID.
    */
   getDataStoreMessageByMessageId(messageId: number): messages {
+    if (this.isMessageInChannels(messageId)) {
+      const channel = this.getDataStoreChannelByMessageId(messageId);
+      const messageInChannel = channel.messages.find(m => m.messageId === messageId);
+      return messageInChannel;
+    }
+    const messageInDm = this.dms.find(
+      dm => dm.messages.some(m => m.messageId === messageId))
+      .messages.find(m => m.messageId === messageId);
+    if (!messageInDm) {
+      throw HTTPError(400, 'Invalid message ID');
+    }
+    return messageInDm;
+  }
+
+  getDmByMessageId(messageId: number) {
+    const dm = this.dms.find(dm => dm.messages.some(message => message.messageId === messageId));
+    if (!dm) {
+      throw HTTPError(400, 'Message not in DM.');
+    }
+    return dm;
+  }
+
+  removeChannelMessageById(messageId: number) {
     const channel = this.getDataStoreChannelByMessageId(messageId);
-    return channel.messages.find(m => m.messageId === messageId);
+    const message = this.getDataStoreMessageByMessageId(messageId);
+    this.channels.find(c =>
+      c.channelId === channel.channelId).messages.splice(
+      channel.messages.findIndex(m => m.messageId === message.messageId), 1);
+    this.saveDataStore();
   }
 
   /**
@@ -229,10 +321,32 @@ class DataStore {
    */
   getDataStoreDm(dmId: number): dataStoreDm {
     const dm = this.dms.find(dm => dm.dmId === dmId);
-    if (dm === null) {
-      throw HTTPError(400, 'Invalid dmId.')
+    if (!dm) {
+      throw HTTPError(400, 'Invalid dmId.');
     }
     return dm;
+  }
+
+  /**
+   * Create a new channel and return its ID.
+   *
+   * @param name - name of the channel.
+   * @param isPublic - indicate if the channel is public or not.
+   * @param creatorId - creator of the channel's user ID.
+   * @returns {dataStoreChannel} created channel object.
+   */
+  addNewChannel(name: string, isPublic: boolean, creatorId: number): dataStoreChannel {
+    const newChannel: dataStoreChannel = {
+      channelId: generateChannelId(),
+      isPublic,
+      name,
+      ownerMembers: [creatorId],
+      allMembers: [creatorId],
+      messages: []
+    };
+    this.channels.push(newChannel);
+    this.saveDataStore();
+    return newChannel;
   }
 
   /**
@@ -248,13 +362,34 @@ class DataStore {
   }
 
   /**
+   * Get all channel that the user is part of.
+   *
+   * @param userId - target user ID.
+   * @returns {dataStoreChannel[]} the list of channels.
+   */
+  getAllChannelsUserIsMemberOf(userId: number): dataStoreChannel[] {
+    return this.channels
+      .filter(channel => this.isUserMemberInChannel(userId, channel.channelId)) ||
+      [];
+  }
+
+  /**
+   * Get all the channels.
+   *
+   * @returns {dataStoreChannel[]} the list of channels.
+   */
+  getAllChannels(): dataStoreChannel[] {
+    return this.channels;
+  }
+
+  /**
    * Check if a user is an owner of a channel.
    *
    * @param userId - user ID of the member to check for.
    * @param channelId - channel ID of the channel to check for.
    * @returns {boolean} true if an owner else false.
    */
-   isUserOwnerMemberInChannel(userId: number, channelId: number): boolean {
+  isUserOwnerMemberInChannel(userId: number, channelId: number): boolean {
     const user = this.getUserById(userId);
     return this.getDataStoreChannelByChannelId(channelId).ownerMembers.includes(user.uId);
   }
@@ -283,12 +418,34 @@ class DataStore {
     // when adding global owner, they would bypass the being a member first rule.
     // TODO: Check behaviour of global owner when they are added then removed.
     if (this.isUserMemberInChannel(user.uId, channelId)) {
-      throw HTTPError(400, 'Already a member of the channel.')
+      throw HTTPError(400, 'Already a member of the channel.');
     }
     this.channels
       .find(c => c.channelId === channel.channelId)
       .allMembers
-      .push(user.uId)
+      .push(user.uId);
+    this.saveDataStore();
+  }
+
+  /**
+   * Remove a user from a channel. Their messages will remain. If they are
+   * an owner, they also remved as owner.
+   *
+   * @param userId - the user ID of the user leaving.
+   * @param channelId - the channel ID of the channel to leave from.
+   */
+  removeUserFromChannel(userId: number, channelId: number) {
+    const user = this.getUserById(userId);
+    const channel = this.getDataStoreChannelByChannelId(channelId);
+    if (!this.isUserMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(403, 'The user is already not in the channel.');
+    }
+    this.channels.find(c => c.channelId === channel.channelId)
+      .allMembers.splice(channel.allMembers.indexOf(user.uId), 1);
+    if (this.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
+      this.channels.find(c => c.channelId === channel.channelId)
+        .ownerMembers.splice(channel.ownerMembers.indexOf(user.uId), 1);
+    }
     this.saveDataStore();
   }
 
@@ -307,15 +464,15 @@ class DataStore {
       return;
     }
     if (this.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
-      throw HTTPError(400, 'Already an owner of the channel.')
+      throw HTTPError(400, 'Already an owner of the channel.');
     }
-    if (this.isUserMemberInChannel(user.uId, channel.channelId)) {
-      throw HTTPError(400, 'Not a member of the channel.')
+    if (!this.isUserMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(400, 'Not a member of the channel.');
     }
     this.channels
       .find(c => c.channelId === channel.channelId)
       .ownerMembers
-      .push(user.uId)
+      .push(user.uId);
     this.saveDataStore();
   }
 
@@ -366,11 +523,11 @@ class DataStore {
    */
   removePassWordReset(resetCode: string) {
     if (!this.isResetCodeValid(resetCode)) {
-      throw HTTPError(400, 'Invalid reset code.')
+      throw HTTPError(400, 'Invalid reset code.');
     }
     this.passwordResets.splice(this.passwordResets.indexOf(
       this.passwordResets.find(p => p.resetCode === resetCode)), 1);
-    this.saveDataStore()
+    this.saveDataStore();
   }
 
   /**
@@ -381,7 +538,7 @@ class DataStore {
    */
   updateUserPassword(email: string, newPassword: string) {
     const user = this.getUserByEmail(email);
-    this.users.find(u => u.uId === user.uId).password = getHashOf(newPassword)
+    this.users.find(u => u.uId === user.uId).password = getHashOf(newPassword);
     this.saveDataStore();
   }
 
@@ -395,7 +552,7 @@ class DataStore {
     this.passwordResets.push({
       email,
       resetCode
-    })
+    });
     this.saveDataStore();
   }
 
@@ -406,10 +563,113 @@ class DataStore {
    */
   getPasswordResetsByResetCode(resetCode: string): dataStorePassReset {
     const passReset = this.passwordResets.find(p => p.resetCode === resetCode);
-    if (passReset === null) {
-      throw HTTPError(400, 'Invalid reset code.')
+    if (!passReset) {
+      throw HTTPError(400, 'Invalid reset code.');
     }
     return passReset;
+  }
+
+  /**
+   * Add a new DM.
+   *
+   * @param creatorId - creator of the DM.
+   * @param name - name of DM.
+   * @param uIds - member uIDs of the dm.
+   * @returns {{dmId: number}} object
+   */
+  addDm(creatorId: number, name: string, uIds: number[]): {dmId: number} {
+    const creator = this.getUserById(creatorId);
+    const newDm: dataStoreDm = {
+      dmId: generateDmId(),
+      name,
+      ownerMembers: [creator.uId],
+      allMembers: [creator.uId].concat(uIds),
+      messages: [],
+      creatorId
+    };
+    this.dms.push(newDm);
+    return {
+      dmId: newDm.dmId
+    };
+  }
+
+  addMessageToChannel(message: string, userId: number, channelId: number) {
+    const channel = this.getDataStoreChannelByChannelId(channelId);
+    const user = this.getUserById(userId);
+    const newMessage = createNewMessage(user.uId, message);
+    this.channels.find(c => c === channel).messages.push(newMessage);
+    this.saveDataStore();
+    return newMessage;
+  }
+
+  addMessageToDm(message: string, userId: number, dmId: number) {
+    const dm = this.getDmById(dmId);
+    const user = this.getUserById(userId);
+    const newMessage = createNewMessage(user.uId, message);
+    this.dms.find(d => d === dm).messages.push(newMessage);
+    this.saveDataStore();
+    return newMessage;
+  }
+
+  editChannelMessage(messageId: number, newMessage: string) {
+    this.channels.find(c => c.messages.some(message => message.messageId === messageId))
+      .messages.find(m => m.messageId === messageId).message = newMessage;
+    this.saveDataStore();
+  }
+
+  editDmMessage(messageId: number, newMessage: string) {
+    this.getDmByMessageId(messageId).messages.find(m => m.messageId === messageId).message = newMessage;
+    this.saveDataStore();
+  }
+
+  /**
+   * Get all dms.
+   * @returns {dataStoreDm[]} all the dms
+   */
+  getAllDms(): dataStoreDm[] {
+    return this.dms;
+  }
+
+  isUserOwnerInDm(userId: number, dmId: number): boolean {
+    const user = this.getUserById(userId);
+    return this.dms.find(d => d.dmId === dmId).ownerMembers.includes(user.uId);
+  }
+
+  isUserInDm(userId: number, dmId: number) {
+    const user = this.getUserById(userId);
+    return this.dms.find(d => d.dmId === dmId).allMembers.includes(user.uId) ||
+      this.isUserOwnerInDm(user.uId, dmId);
+  }
+
+  isUserCreatorOfDm(userId: number, dmId) {
+    const user = this.getUserById(userId);
+    const dm = this.getDmById(dmId);
+    return dm.creatorId === user.uId;
+  }
+
+  getDmById(dmId: number) {
+    const dm = this.dms.find(d => d.dmId === dmId);
+    if (!dm) {
+      throw HTTPError(400, 'Invalid dm ID.');
+    }
+    return dm;
+  }
+
+  removeDm(dmId: number) {
+    const dm = this.getDmById(dmId);
+    this.dms.splice(this.dms.findIndex(d => d === dm), 1);
+    this.saveDataStore();
+  }
+
+  removeUserFromDm(userId: number, dmId: number) {
+    const dm = this.getDmById(dmId);
+    const user = this.getUserById(userId);
+    if (!this.isUserMemberInDm(userId, dm.dmId)) {
+      throw HTTPError(403, 'Not a member of DM.');
+    }
+    this.dms.find(d => d === dm).allMembers.splice(dm.allMembers.indexOf(user.uId), 1);
+    this.dms.find(d => d === dm).ownerMembers.splice(dm.ownerMembers.indexOf(user.uId), 1);
+    this.saveDataStore();
   }
 
   /**
@@ -424,6 +684,23 @@ class DataStore {
     });
     fs.writeFileSync(this.dataSournceFile, jsonstr);
   }
+
+  clear() {
+    this.users = [];
+    this.channels = [];
+    this.dms = [];
+    this.passwordResets = [];
+    this.saveDataStore();
+  }
+}
+
+function createNewMessage(uId, message): messages {
+  return {
+    messageId: generateMessageId(),
+    uId,
+    message,
+    timeSent: Date.now()
+  };
 }
 
 export const database = new DataStore();

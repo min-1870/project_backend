@@ -1,12 +1,10 @@
-import { dataStoreUserToUser, getAuthUserIdFromToken, getDataStoreUser, isAuthUserIdValid, toOutputChannels } from './utils';
-import { getData, setData } from './dataStore';
+import { toOutputChannels } from './utils';
+import { database } from './dataStore';
 import {
   channelId,
   error,
   channels,
-  dataStoreChannel,
 } from './types';
-import { generateChannelId } from './ids';
 import HTTPError from 'http-errors';
 
 /**
@@ -22,27 +20,11 @@ export function channelsCreateV1(
   token: string,
   name: string,
   isPublic: boolean): (channelId | error) {
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
-  }
+  const user = database.getUserByToken(token);
   if (name.length < 1 || name.length > 20) {
     throw HTTPError(400, 'name is not between 1 and 20 characters');
   }
-  const dataStoreUser = getDataStoreUser(authUserId, data);
-  const member = dataStoreUserToUser(dataStoreUser);
-  const newChannel: dataStoreChannel = {
-    channelId: generateChannelId(),
-    isPublic,
-    name,
-    ownerMembers: [member.uId],
-    allMembers: [member.uId],
-    messages: [],
-  };
-
-  data.channels.push(newChannel);
-  setData(data);
+  const newChannel = database.addNewChannel(name, isPublic, user.uId);
   return {
     channelId: newChannel.channelId,
   };
@@ -56,17 +38,8 @@ export function channelsCreateV1(
  * @returns { channels }
  */
 export function channelsList(token: string) : (channels | error) {
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
-  }
-
-  const channels = data.channels
-    .filter(channel => channel.allMembers
-      .includes(authUserId) !== false) || [];
-
-  return toOutputChannels(channels);
+  const user = database.getUserByToken(token);
+  return toOutputChannels(database.getAllChannelsUserIsMemberOf(user.uId));
 }
 
 /**
@@ -77,12 +50,7 @@ export function channelsList(token: string) : (channels | error) {
   * @returns { channels } - Array of objects, where each object contains types { channelId, name }
 */
 export function channelsListAll(token: string): (channels | error) {
-  const data = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Invalid user ID');
-  }
-
-  // Return every channels in the data without Id & name only
-  return toOutputChannels(data.channels);
+  database.getUserByToken(token);
+  // Return every channels in the data with Id & name only
+  return toOutputChannels(database.getAllChannels());
 }

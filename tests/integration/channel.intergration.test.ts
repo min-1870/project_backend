@@ -81,9 +81,11 @@ describe('HTTP tests for channel/messages', () => {
       start: 0,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid channel ID'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -94,9 +96,11 @@ describe('HTTP tests for channel/messages', () => {
       start: 99999999,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid start'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -107,9 +111,11 @@ describe('HTTP tests for channel/messages', () => {
       start: 0,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Not a member of the channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -120,9 +126,11 @@ describe('HTTP tests for channel/messages', () => {
       start: 0,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'invalid token'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -166,9 +174,11 @@ describe('HTTP tests for channel/join', () => {
       channelId: 99999999,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid channel ID'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -178,9 +188,11 @@ describe('HTTP tests for channel/join', () => {
       channelId: channel1Id,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'User already in channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -190,9 +202,11 @@ describe('HTTP tests for channel/join', () => {
       channelId: channel2Id,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Permission denied, non-global owner is not allowed to access private channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -239,9 +253,11 @@ describe('HTTP tests for channel/invite', () => {
       uId: uId2,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid channel ID'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -252,9 +268,11 @@ describe('HTTP tests for channel/invite', () => {
       uId: 99999999,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid user ID'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -265,9 +283,11 @@ describe('HTTP tests for channel/invite', () => {
       uId: uId1,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'User already in channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -278,9 +298,11 @@ describe('HTTP tests for channel/invite', () => {
       uId: uId2,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Permission denied, non-channel user cannot invite other user to the channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -312,41 +334,48 @@ describe('HTTP tests for channel/invite', () => {
 });
 
 describe('HTTP tests for channel/details', () => {
-  let channel1Id: number;
+  let channelId: number;
   beforeEach(() => {
     const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
     });
-    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    channelId = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
   });
+
   test('UserId is not a member of channel', () => {
     const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
       token: token2,
-      channelId: channel1Id,
+      channelId,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'User ID is not a member of channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
+
   test('ChannelId does not refer to a valid channel', () => {
     const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
       token: token,
       channelId: 999999999999999
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Channel ID does not refer to a valid channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
+
   test('Invalid Token', () => {
     const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
       token: '99999999',
-      channelId: channel1Id,
+      channelId,
     });
 
     expect(res.statusCode).toBe(403);
@@ -356,10 +385,11 @@ describe('HTTP tests for channel/details', () => {
       }
     });
   });
+
   test('correct input correct return for channel', () => {
     const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
-      token: token,
-      channelId: channel1Id,
+      token,
+      channelId,
     });
 
     expect(res.statusCode).toBe(OK);
@@ -464,9 +494,11 @@ describe('HTTP tests for channel/addowner', () => {
       uId: uId1
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Add global owner to public with invalid channel id returns fails', () => {
@@ -476,9 +508,11 @@ describe('HTTP tests for channel/addowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Add owner to private channel with invalid channel id returns fails', () => {
@@ -488,9 +522,11 @@ describe('HTTP tests for channel/addowner', () => {
       uId: uId1
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Add global owner to public with invalid channel id returns fails', () => {
@@ -500,33 +536,39 @@ describe('HTTP tests for channel/addowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Add owner to public channel with channel uId not a member returns fails', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token2,
+      token: token,
       channelId: publicChannelId,
       uId: 1234444
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Add owner to private channel with channel uId not a member returns fails', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token2,
+      token: token,
       channelId: privateChannelId,
       uId: 2222222
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Owner add new existing owner returns fails', () => {
@@ -545,9 +587,11 @@ describe('HTTP tests for channel/addowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Non owner add new owner returns fails', () => {
@@ -557,9 +601,11 @@ describe('HTTP tests for channel/addowner', () => {
       uId: 2222222
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
   test('Add owner with invalid uId returns fails', () => {
@@ -569,9 +615,11 @@ describe('HTTP tests for channel/addowner', () => {
       uId: 2222222
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 });
@@ -593,9 +641,11 @@ describe('HTTP tests for channel/leave', () => {
       channelId: 99999999,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid channel ID'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -605,9 +655,11 @@ describe('HTTP tests for channel/leave', () => {
       channelId: channel1Id,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Permission denied, non-channel user cannot leave the channel'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -617,9 +669,11 @@ describe('HTTP tests for channel/leave', () => {
       channelId: channel1Id,
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'Invalid token'
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -690,6 +744,7 @@ describe('HTTP tests for channel/removeowner', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
+
   test('Global owner remove another channel owner successful', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
       token: token3,
@@ -708,9 +763,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId1
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -721,9 +778,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -734,9 +793,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -747,9 +808,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: 123123123
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -760,9 +823,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: 123123123
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -773,9 +838,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -786,9 +853,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -799,9 +868,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId2
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -812,9 +883,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId1
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -825,9 +898,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId3
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -838,9 +913,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId1
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 
@@ -851,9 +928,11 @@ describe('HTTP tests for channel/removeowner', () => {
       uId: uId1
     });
 
-    expect(res.statusCode).toBe(OK);
+    expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
-      error: expect.any(String)
+      error: {
+        message: expect.any(String)
+      }
     });
   });
 });

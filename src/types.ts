@@ -40,7 +40,8 @@ export type dataStoreDm = {
   name: string,
   ownerMembers: number[],
   allMembers: number[],
-  messages: messages[]
+  messages: messages[],
+  creatorId: number
 }
 
 export type dataStorePassReset = {

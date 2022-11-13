@@ -1,11 +1,9 @@
-import {
-  database,
-} from './dataStore';
+import { database } from './dataStore';
 import validator from 'validator';
-import { authUserId, error, dataStoreUser } from './types';
-import { generateAuthUserId, generateToken } from './ids';
+import { authUserId, error } from './types';
+import { generateToken } from './ids';
 import HTTPError from 'http-errors';
-import { getHashOf, hashToken } from './hash';
+import { getHashOf } from './hash';
 import { createTransport } from 'nodemailer';
 
 /**
@@ -29,8 +27,8 @@ export function authLoginV1(
     throw HTTPError(400, 'Incorrect Password');
   }
 
-  const token = database.addSessionTokenForUser(user.uId)
-  return  {
+  const token = database.addSessionTokenForUser(user.uId);
+  return {
     token,
     authUserId: user.uId
   };
@@ -140,4 +138,10 @@ export function resetPassword(resetCode: string, newPassword: string) {
   }
   database.removePassWordReset(resetCode);
   database.updateUserPassword(email, newPassword);
+}
+
+export function logOut(token) {
+  database.getUserByToken(token);
+  database.removeSessionToken(token);
+  return {};
 }
