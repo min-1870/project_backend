@@ -40,7 +40,8 @@ export type dataStoreDm = {
   name: string,
   ownerMembers: number[],
   allMembers: number[],
-  messages: messages[]
+  messages: messages[],
+  creatorId: number
 }
 
 export type dataStorePassReset = {
@@ -82,7 +83,7 @@ export type dataStore = {
   users: dataStoreUser[],
   channels: dataStoreChannel[],
   dms: dataStoreDm[],
-  passwordReset: dataStorePassReset[]
+  passwordResets: dataStorePassReset[]
 }
 
 export type authResponse = {

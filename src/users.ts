@@ -1,11 +1,8 @@
-import { getDataStoreUser, isAuthUserIdValid, dataStoreUserToUser } from './utils';
-import {
-  getData, setData,
-} from './dataStore';
-import { dataStore, dataStoreUser, error, user } from './types';
+import { dataStoreUserToUser } from './utils';
+import { database } from './dataStore';
+import { error, user } from './types';
 import validator from 'validator';
 import HTTPError from 'http-errors';
-import { TokenHash } from './hash';
 
 /**
  * For a valid user, return info about their user ID, email, firstname , last name and handle
@@ -16,19 +13,10 @@ import { TokenHash } from './hash';
  * * *
  * @returns {user} - Object containing uId, email, nameFirst, nameLast, handleStr
  */
-export function userProfileV1(authUserId: number, uID: number): { user: user } | error {
-  const data = getData();
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'invalid token');
-  }
+export function userProfileV1(token: string, uID: number): { user: user } | error {
+  database.getUserByToken(token);
 
-  if (!isAuthUserIdValid(uID, data)) {
-    throw HTTPError(400, 'uId is not valid');
-  }
-
-  const dataStoreUser = getDataStoreUser(uID, data);
-
-  return { user: dataStoreUserToUser(dataStoreUser) };
+  return { user: dataStoreUserToUser(database.getUserById(uID)) };
 }
 
 /**
@@ -36,36 +24,12 @@ export function userProfileV1(authUserId: number, uID: number): { user: user } |
   *
   * @param {string} token - unique token associated with user login
   * @param {string} handleStr- new handleStr user would like to change to
-  * ...
   *
 */
 export function userProfileHandleChange(token: string, handleStr: string): (Record<string, never> | error) {
-  const data: dataStore = getData();
-  if (handleStr.length < 3 || handleStr.length > 20) {
-    throw HTTPError(400, 'handleStr is not correct size');
-  }
-  if (!(/^[A-Za-z0-9]*$/.test(handleStr))) {
-    throw HTTPError(400, 'handleStr has non-alphanumeric characters');
-  }
-
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    if (user.handleStr === handleStr) {
-      throw HTTPError(400, 'handle is already in use');
-    }
-  }
-
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (TokenHash(user.sessionTokens[j]) === token) {
-        user.handleStr = handleStr;
-        setData(data);
-        return {};
-      }
-    }
-  }
-  throw HTTPError(403, 'Token is Invalid');
+  const user = database.getUserByToken(token);
+  database.updateUserHandleStr(user.uId, handleStr);
+  return {};
 }
 
 /**
@@ -73,33 +37,15 @@ export function userProfileHandleChange(token: string, handleStr: string): (Reco
   *
   * @param {string} token - unique token associated with user login
   * @param {string} email - new email user would like to change to
-  * ...
   *
 */
 export function userProfileEmailChange(token: string, email: string): (Record<string, never> | error) {
-  const data: dataStore = getData();
-  if (!(validator.isEmail(email))) { // checking if email is valid
+  const user = database.getUserByToken(token);
+  if (!validator.isEmail(email)) {
     throw HTTPError(400, 'Invalid Email');
   }
-
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    if (user.email === email) {
-      throw HTTPError(400, 'email is already in use');
-    }
-  }
-
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (TokenHash(user.sessionTokens[j]) === token) {
-        user.email = email;
-        setData(data);
-        return {};
-      }
-    }
-  }
-  throw HTTPError(403, 'Token is Invalid');
+  database.updateUserEmail(user.uId, email);
+  return {};
 }
 
 /**
@@ -108,28 +54,11 @@ export function userProfileEmailChange(token: string, email: string): (Record<st
   * @param {string} token - description of paramter
   * @param {string} nameFirst - description of parameter
   * @param {string} nameLast - description of parameter
-  * ...
 */
 export function userProfileNameChange(token: string, nameFirst: string, nameLast: string): (Record<string, never> | error) {
-  const data: dataStore = getData();
-  if (nameFirst.length < 1 || nameFirst.length > 50) {
-    throw HTTPError(400, 'First name is not correct length');
-  }
-  if (nameLast.length < 1 || nameLast.length > 50) {
-    throw HTTPError(400, 'Last name is not correct length');
-  }
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (TokenHash(user.sessionTokens[j]) === token) {
-        user.nameFirst = nameFirst;
-        user.nameLast = nameLast;
-        setData(data);
-        return {};
-      }
-    }
-  }
-  throw HTTPError(403, 'Token is Invalid');
+  const user = database.getUserByToken(token);
+  database.updateUserName(user.uId, nameFirst, nameLast);
+  return {};
 }
 
 /**
@@ -140,12 +69,6 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
   * @returns {users} - array of objects, where each object contains types of user
 */
 export function listAllUsersV1(token: string): ({ users: user[] } | error) {
-  const data: dataStore = getData();
-  const myarray: user[] = [];
-
-  for (const item of data.users) {
-    const dataStoreUser = getDataStoreUser(item.uId, data);
-    myarray.push(dataStoreUserToUser(dataStoreUser));
-  }
-  return { users: myarray };
+  database.getUserByToken(token);
+  return { users: database.users.map(user => dataStoreUserToUser(user)) };
 }

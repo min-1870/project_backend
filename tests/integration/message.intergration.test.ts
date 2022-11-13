@@ -70,10 +70,9 @@ describe('HTTP tests for message/send/v1', () => {
       message: TEST_MESSAGE,
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'channelId does not refer to a valid channel'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('length of message is less than 1 characters', () => {
@@ -83,10 +82,9 @@ describe('HTTP tests for message/send/v1', () => {
       message: '',
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('length of message is over 1000 characters', () => {
@@ -96,10 +94,9 @@ describe('HTTP tests for message/send/v1', () => {
       message: VERY_LONG_MESSAGE,
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('channelId is valid and the authorised user is not a member of the channel', () => {
@@ -109,10 +106,9 @@ describe('HTTP tests for message/send/v1', () => {
       message: TEST_MESSAGE,
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'channelId is valid and the authorised user is not a member of the channel'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('token is invalid', () => {
@@ -122,10 +118,9 @@ describe('HTTP tests for message/send/v1', () => {
       message: TEST_MESSAGE,
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'token is invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('correct input correct return', () => {
@@ -207,10 +202,9 @@ describe('HTTP tests for message/remove/v1', () => {
       messageId: testMessageId
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'token is invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('messageId does not refer to a valid message within a channel/DM that the authorised user has joined', () => {
@@ -219,10 +213,9 @@ describe('HTTP tests for message/remove/v1', () => {
       messageId: testMessageId
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
@@ -238,15 +231,14 @@ describe('HTTP tests for message/remove/v1', () => {
       messageId: testMessageId
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('correct input correct return', () => {
     const res = sendDeleteRequestToEndpoint('/message/remove/v1', {
-      token: token,
+      token,
       messageId: testMessageId
     });
 
@@ -254,25 +246,25 @@ describe('HTTP tests for message/remove/v1', () => {
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
-  test('correct input correct channel/message', () => {
-    sendDeleteRequestToEndpoint('/message/remove/v1', {
-      token: token,
-      messageId: testMessageId
-    });
+  // test('correct input correct channel/message', () => {
+  //   sendDeleteRequestToEndpoint('/message/remove/v1', {
+  //     token: token,
+  //     messageId: testMessageId
+  //   });
 
-    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
-      token: token,
-      channelId: testChannelId,
-      start: 0,
-    });
+  //   const res = sendGetRequestToEndpoint('/channel/messages/v2', {
+  //     token: token,
+  //     channelId: testChannelId,
+  //     start: 0,
+  //   });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      messages: [],
-      start: 0,
-      end: -1
-    });
-  });
+  //   expect(res.statusCode).toBe(OK);
+  //   expect(parseJsonResponse(res)).toStrictEqual({
+  //     messages: [],
+  //     start: 0,
+  //     end: -1
+  //   });
+  // });
 });
 
 describe('HTTP tests for message/edit/v1', () => {
@@ -358,10 +350,9 @@ describe('HTTP tests for message/edit/v1', () => {
       message: TEST_MESSAGE_2
     });
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'token is invalid'
-    });
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('correct input, correct return', () => {
@@ -395,17 +386,6 @@ describe('HTTP tests for message/edit/v1', () => {
       end: -1
     });
   });
-
-  // test('correct input, correct return (dm)', () => {
-  //   const res = sendPutRequestToEndpoint('/message/edit/v1', {
-  //     token: token,
-  //     messageId: testMessageId,
-  //     message: TEST_MESSAGE_2
-  //   });
-
-  //   expect(res.statusCode).toBe(OK);
-  //   expect(parseJsonResponse(res)).toStrictEqual({});
-  // });
 
   test('correct input, correct message (dm)', () => {
     const dmRes = parseJsonResponse(sendPostRequestToEndpoint('/dm/create/v2', {

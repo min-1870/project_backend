@@ -1,110 +1,89 @@
-import { getData, setData } from './dataStore';
-import { generateMessageId } from './ids';
-import { dataStore, error, messages } from './types';
-import { findDmIdByMessageId, findChannelIdByMessageId, getDataStoreChannel, getDataStoreDm, getDataStoreMessage, isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid, isMessageInChannels, isUserMemberInChannel, isUserMemberInDm, isUserOwnerMemberInChannel, isUserOwnerMemberInDm } from './utils';
+import { database } from './dataStore';
+import { error } from './types';
 import HTTPError from 'http-errors';
 
 /** Send a message from the authorised user to the channel specified by channelId.
  * Note: Each message should have its own unique ID, i.e. no messages should share
  * an ID with another message, even if that other message is in a different channel.
  *
- * @param authUserId
+ * @param token
  * @param channelId
  * @param message
  * @returns  message Id
  */
-export function messageSend (authUserId: number, channelId: number, message: string): ({messageId: number} | error) {
-  const data = getData();
-  const channel = getDataStoreChannel(channelId, data);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    return { error: 'token is invalid' };
-  } else if (!isChannelIdValid(channelId, data)) {
-    return { error: 'channelId does not refer to a valid channel' };
-  } else if (message.length < 1 || message.length > 1000) {
-    return { error: 'length of message is less than 1 or over 1000 characters' };
-  } else if (!isUserMemberInChannel(authUserId, channelId, data)) {
-    return { error: 'channelId is valid and the authorised user is not a member of the channel' };
+export function messageSend (
+  token: string,
+  channelId: number,
+  message: string): ({messageId: number} | error) {
+  const user = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  if (message.length < 1 || message.length > 1000) {
+    throw HTTPError(400, 'length of message is less than 1 or over 1000 characters');
   }
-
-  const newMessage: messages = {
-    messageId: generateMessageId(),
-    uId: authUserId,
-    message: message,
-    timeSent: Date.now()
-  };
-
-  channel.messages.push(newMessage);
-  setData(data);
+  if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
+    throw HTTPError(403, 'channelId is valid and the authorised user is not a member of the channel');
+  }
+  const newMessage = database.addMessageToChannel(message, user.uId, channel.channelId);
 
   return { messageId: newMessage.messageId };
 }
 
 /** Given a messageId for a message, this message is removed from the channel/DM
  *
- * @param authUserId
+ * @param token
  * @param messageId
  * @returns
  */
-export function messageRemove (authUserId: number, messageId: number): (Record<string, never> | error) {
-// assume toke is valid
-  const data:dataStore = getData();
-  const channelId = findChannelIdByMessageId(messageId, data);
+export function messageRemove(token: string, messageId: number): (Record<string, never> | error) {
+  const user = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByMessageId(messageId);
 
-  if (!isMessageIdValid(messageId, data)) {
-    return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
-  } else if (!isUserMemberInChannel(authUserId, channelId, data)) {
-    return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
-  } else if (authUserId !== getDataStoreMessage(messageId, data).uId && !isUserOwnerMemberInChannel(authUserId, channelId, data)) {
-    return { error: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM' };
+  if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
+    throw HTTPError(400, 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined');
   }
 
-  const dataStoreChannel = getDataStoreChannel(channelId, data);
-  dataStoreChannel.messages = dataStoreChannel.messages.filter(message => message.messageId !== messageId);
-  setData(data);
+  const message = database.getDataStoreMessageByMessageId(messageId);
+  if (message.uId !== user.uId &&
+      !database.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
+    throw HTTPError(403, 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM');
+  }
+  database.removeChannelMessageById(message.messageId);
   return {};
 }
 
 /** Given a message, update its text with new text. If the new message is an empty
  * string, the message is deleted.
  *
- * @param authUserId
+ * @param token
  * @param messageId
  * @param message
  * @returns
  */
-export function messageEdit (authUserId: number, messageId: number, message: string): (Record<string, never> | error) {
-  // assume toke is valid
-  const data:dataStore = getData();
+export function messageEdit (token: string, messageId: number, message: string): (Record<string, never> | error) {
+  const user = database.getUserByToken(token);
+  const dataStoreMessage = database.getDataStoreMessageByMessageId(messageId);
 
   if (message.length < 1 || message.length > 1000) {
     return { error: 'length of message is less than 1 or over 1000 characters' };
-  } else if (!isMessageIdValid(messageId, data)) {
-    return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
   }
 
-  if (isMessageInChannels(messageId, data)) {
-    const channelId = findChannelIdByMessageId(messageId, data);
-    if (!isUserMemberInChannel(authUserId, channelId, data)) {
+  if (database.isMessageInChannels(messageId)) {
+    const channel = database.getDataStoreChannelByMessageId(messageId);
+    if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
       return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
-    } else if (authUserId !== getDataStoreMessage(messageId, data).uId && !isUserOwnerMemberInChannel(authUserId, channelId, data)) {
+    } else if (user.uId !== dataStoreMessage.uId &&
+        !database.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
       return { error: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM' };
     }
-    const dataStoreChannel = getDataStoreChannel(channelId, data);
-    const editedMessage: messages = dataStoreChannel.messages.find(message => message.messageId === messageId);
-    editedMessage.message = message;
+    database.editChannelMessage(messageId, message);
   } else {
-    const dmId = findDmIdByMessageId(messageId, data);
-    if (!isUserMemberInDm(authUserId, dmId, data)) {
-      return { error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' };
-    } else if (authUserId !== getDataStoreMessage(messageId, data).uId && !isUserOwnerMemberInDm(authUserId, dmId, data)) {
+    const dm = database.getDmByMessageId(messageId);
+    if (user.uId !== dataStoreMessage.uId ||
+        !database.isUserOwnerInDm(user.uId, dm.dmId)) {
       return { error: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM' };
     }
-    const dataStoreDm = getDataStoreDm(dmId, data);
-    const editedMessage: messages = dataStoreDm.messages.find(message => message.messageId === messageId);
-    editedMessage.message = message;
+    database.editDmMessage(messageId, message);
   }
-
-  setData(data);
   return {};
 }
 
@@ -112,33 +91,23 @@ export function messageEdit (authUserId: number, messageId: number, message: str
  * should have it's own unique ID, i.e. no messages should share an ID with another
  * message, even if that other message is in a different channel or DM.
  *
- * @param authUserId
+ * @param token
  * @param dmId
  * @param message
  * @returns
  */
-export function dmMessageSend (authUserId: number, dmId: number, message: string): ({messageId: number} | error) {
-  const data = getData();
-  const dm = getDataStoreDm(dmId, data);
-  if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Token is Invalid');
-  } else if (!isDataStoreDmValid(dmId, data)) {
-    throw HTTPError(400, 'dmId is Invalid');
-  } else if (message.length < 1 || message.length > 1000) {
+export function dmMessageSend(
+  token: string,
+  dmId: number,
+  message: string): ({messageId: number} | error) {
+  const user = database.getUserByToken(token);
+  const dm = database.getDmById(dmId);
+  if (message.length < 1 || message.length > 1000) {
     throw HTTPError(400, 'length of message is less than 1 or over 1000 characters');
-  } else if (!isUserMemberInDm(authUserId, dmId, data)) {
+  }
+  if (!database.isUserMemberInDm(user.uId, dmId)) {
     throw HTTPError(403, 'user is not part of dm');
   }
-
-  const newMessage: messages = {
-    messageId: generateMessageId(),
-    uId: authUserId,
-    message: message,
-    timeSent: Date.now()
-  };
-
-  dm.messages.push(newMessage);
-
-  setData(data);
+  const newMessage = database.addMessageToDm(message, user.uId, dm.dmId);
   return { messageId: newMessage.messageId };
 }

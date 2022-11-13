@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getData } from './dataStore';
-import { isAuthUserIdValid, isChannelIdValid, isDataStoreDmValid, isMessageIdValid } from './utils';
+import { database } from './dataStore';
 
 /**
  * Generate a token.
@@ -17,10 +16,9 @@ export function generateToken(): string {
  * @returns { number }
  */
 export function generateAuthUserId(): number {
-  const dataStore = getData();
   const maxId = 1000000;
   let id = Math.floor(Math.random() * maxId);
-  while (isAuthUserIdValid(id, dataStore)) {
+  while (database.isUserIdValid(id)) {
     id = Math.floor(Math.random() * maxId);
   }
   return id;
@@ -32,10 +30,9 @@ export function generateAuthUserId(): number {
  * @returns { number }
  */
 export function generateChannelId(): number {
-  const dataStore = getData();
   const maxId = 1000000;
   let id = Math.floor(Math.random() * maxId);
-  while (isChannelIdValid(id, dataStore)) {
+  while (database.isChannelIdValid(id)) {
     id = Math.floor(Math.random() * maxId);
   }
   return id;
@@ -47,10 +44,9 @@ export function generateChannelId(): number {
  * @returns { number }
  */
 export function generateMessageId(): number {
-  const dataStore = getData();
   const maxId = 1000000;
   let id = Math.floor(Math.random() * maxId);
-  while (isMessageIdValid(id, dataStore)) {
+  while (database.isMessageIdValid(id)) {
     id = Math.floor(Math.random() * maxId);
   }
   return id;
@@ -62,10 +58,9 @@ export function generateMessageId(): number {
  * @returns { number }
  */
 export function generateDmId(): number {
-  const dataStore = getData();
   const maxId = 1000000;
   let id = Math.floor(Math.random() * maxId);
-  while (isDataStoreDmValid(id, dataStore)) {
+  while (database.isDmIdValid(id)) {
     id = Math.floor(Math.random() * maxId);
   }
   return id;

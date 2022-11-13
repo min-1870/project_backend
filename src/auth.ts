@@ -1,14 +1,10 @@
-import {
-  setData,
-  getData,
-} from './dataStore';
+import { database } from './dataStore';
 import validator from 'validator';
-import { authUserId, error, dataStoreUser } from './types';
-import { addSessionTokenForUser, getDataStoreUserByEmail, isEmailUsed, isHandleStrExist } from './utils';
-import { generateAuthUserId, generateToken } from './ids';
+import { authUserId, error } from './types';
+import { generateToken } from './ids';
 import HTTPError from 'http-errors';
-import { getHashOf, TokenHash } from './hash';
-const nodemailer = require('nodemailer');
+import { getHashOf } from './hash';
+import { createTransport } from 'nodemailer';
 
 /**
  * Given a registered user's email and password, returns their authUserId value
@@ -18,28 +14,24 @@ const nodemailer = require('nodemailer');
  *
  * @returns {authUserId} an object containing authUserId
  */
-export function authLoginV1(email: string, password: string): (authUserId | error) {
-  const data = getData();
-
+export function authLoginV1(
+  email: string,
+  password: string): (authUserId | error) {
   // checking if email has already been used
-  if (!isEmailUsed(email, data.users)) {
+  if (!database.isEmailUsed(email)) {
     throw HTTPError(400, 'Email address is not registered');
   }
 
-  const user = getDataStoreUserByEmail(email, data);
+  const user = database.getUserByEmail(email);
   if (user.password !== getHashOf(password)) {
     throw HTTPError(400, 'Incorrect Password');
-  } else {
-    const token = generateToken();
-    const hashedToken = TokenHash(token);
-    const ret = {
-      token: hashedToken,
-      authUserId: user.uId
-    };
-    addSessionTokenForUser(user.uId, token, data);
-    setData(data);
-    return ret;
   }
+
+  const token = database.addSessionTokenForUser(user.uId);
+  return {
+    token,
+    authUserId: user.uId
+  };
 }
 
 /**
@@ -53,15 +45,16 @@ export function authLoginV1(email: string, password: string): (authUserId | erro
  *
  * @returns {authUserId} an object containing authUserId
  */
-export function authRegisterV1(email: string, password: string,
-  nameFirst: string, nameLast: string): (authUserId | error) {
-  const data = getData();
-
+export function authRegisterV1(
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string): (authUserId | error) {
   if (!(validator.isEmail(email))) { // checking if email is valid
     throw HTTPError(400, 'Invalid Email');
   }
 
-  if (isEmailUsed(email, data.users)) {
+  if (database.isEmailUsed(email)) {
     throw HTTPError(400, 'Email Address already in use');
   }
 
@@ -84,7 +77,7 @@ export function authRegisterV1(email: string, password: string,
 
   // checking if handleStr already exist and making unique if not already
   let j = 0;
-  while (isHandleStrExist(fullname, data.users)) {
+  while (database.isHandleStrUsed(fullname)) {
     if (j !== 0) {
       fullname = fullname.substring(0, fullname.length - 1);
     }
@@ -92,26 +85,12 @@ export function authRegisterV1(email: string, password: string,
     j++;
   }
 
-  const isGlobalOwner = data.users.length === 0;
-  password = getHashOf(password);
-  const uuID: number = generateAuthUserId();
-  const currentsessionID: string = generateToken();
-  const temp: dataStoreUser = {
-    uId: uuID,
-    email,
-    password,
-    nameFirst,
-    nameLast,
-    handleStr: fullname,
-    isGlobalOwner,
-    sessionTokens: [currentsessionID]
-  };
-  data.users.push(temp);
-  setData(data);
+  const newUser = database.addUser(
+    email, getHashOf(password), nameFirst, nameLast, fullname);
 
   return {
-    authUserId: uuID,
-    token: TokenHash(currentsessionID)
+    authUserId: newUser.uId,
+    token: newUser.sessionTokens[0]
   };
 }
 
@@ -129,10 +108,8 @@ function onlyalphanumeric(handle:string): string {
 }
 
 export function sendPasswordResetEmail(email :string) {
-  const data = getData();
-
-  if (isEmailUsed(email, data.users)) {
-    const transporter = nodemailer.createTransport({
+  if (database.isEmailUsed(email)) {
+    const transporter = createTransport({
       host: 'smtp-comp1531mulo.alwaysdata.net',
       port: 587,
       secure: false,
@@ -142,11 +119,7 @@ export function sendPasswordResetEmail(email :string) {
       },
     });
     const code = generateToken();
-    data.passwordReset.push({
-      email,
-      resetCode: code
-    });
-    setData(data);
+    database.addPasswordResets(email, code);
     transporter.sendMail({
       from: '"UNSW BEANS" <trey.hickle@ethereal.email>',
       to: `${email}`,
@@ -158,29 +131,17 @@ export function sendPasswordResetEmail(email :string) {
 }
 
 export function resetPassword(resetCode: string, newPassword: string) {
-  const data = getData();
-  let validEmail: string;
+  const email = database.getPasswordResetsByResetCode(resetCode).email;
 
-  if (!(data.passwordReset.find(user => user.resetCode === resetCode))) {
-    throw HTTPError(400, 'Invalid reset code');
-  } else {
-    for (let i = 0; i < data.passwordReset.length; i++) {
-      if (data.passwordReset[i].resetCode === resetCode) {
-        validEmail = data.passwordReset[i].email;
-        data.passwordReset.splice(i, 1);
-      }
-    }
-  }
   if (newPassword.length < 6) {
     throw HTTPError(400, 'Password must be 6 character or longer');
   }
+  database.removePassWordReset(resetCode);
+  database.updateUserPassword(email, newPassword);
+}
 
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    if (user.email === validEmail) {
-      user.password = getHashOf(newPassword);
-      setData(data);
-      return {};
-    }
-  }
+export function logOut(token) {
+  database.getUserByToken(token);
+  database.removeSessionToken(token);
+  return {};
 }

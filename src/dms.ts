@@ -1,8 +1,6 @@
-import { getData, setData } from './dataStore';
-import { TokenHash } from './hash';
-import { generateDmId } from './ids';
-import { dataStore, dataStoreUser, dm, dms, error, messages } from './types';
-import { duplicateValueCheck, getAuthUserIdFromToken, getDataStoreDm, getDataStoreUser, isAuthUserIdValid, isDataStoreDmValid, isUserMemberInDm, toOutputDms, toOutputDmDetails } from './utils';
+import { database } from './dataStore';
+import { dm, dms, error, messages } from './types';
+import { duplicateValueCheck, toOutputDms, toOutputDmDetails } from './utils';
 import HTTPError from 'http-errors';
 
 /**
@@ -10,51 +8,25 @@ import HTTPError from 'http-errors';
   *
   * @param {string} token - user that initiated command
   * @param {number[]} uIds - array of uIds dm is directed to
-  * ...
   *
   * @returns {number} - returns an object containing dmId
 */
 export function dmCreation(token:string, uIds: number[]): ({dmId: number} | error) {
-  const data: dataStore = getData();
-
-  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    throw HTTPError(403, 'invalid token');
-  }
-
+  const authUser = database.getUserByToken(token);
   for (const uId of uIds) {
-    if (!isAuthUserIdValid(uId, data)) {
+    if (!database.isUserIdValid(uId)) {
       throw HTTPError(400, 'Invalid uId in uIds');
     }
   }
-  if (duplicateValueCheck(uIds) === true) {
+  if (duplicateValueCheck(uIds)) {
     throw HTTPError(400, 'Duplicate uId values entered');
   }
 
-  const DmName = dmNameGenerator(token, uIds);
-  const ownerMembers = getAuthUserIdFromToken(token);
-  const allMembers = [ownerMembers];
-
-  for (const uId of uIds) {
-    allMembers.push(uId);
-  }
-
-  for (let i = 0; i < data.users.length; i++) {
-    const user: dataStoreUser = data.users[i];
-    for (let j = 0; j < user.sessionTokens.length; j++) {
-      if (TokenHash(user.sessionTokens[j]) === token) {
-        const dm = {
-          dmId: generateDmId(),
-          name: DmName,
-          ownerMembers: [ownerMembers],
-          allMembers: allMembers,
-          messages: []
-        };
-        data.dms.push(dm);
-        setData(data);
-        return { dmId: dm.dmId };
-      }
-    }
-  }
+  const name = dmNameGenerator(token, uIds);
+  const newDm = database.addDm(authUser.uId, name, uIds);
+  return {
+    dmId: newDm.dmId
+  };
 }
 
 /**
@@ -62,20 +34,16 @@ export function dmCreation(token:string, uIds: number[]): ({dmId: number} | erro
   *
   * @param {string} token - user that initiated command
   * @param {number[]} uIds - array of uIds dm is directed to
-  * ...
   *
   * @returns {string} - returns a string which is the name of the function
 */
 function dmNameGenerator(token:string, uIds: number[]): (string) {
-  const data: dataStore = getData();
-  const owner = getAuthUserIdFromToken(token);
+  const owner = database.getUserByToken(token);
 
   let arr = [];
-  const ownerUser = getDataStoreUser(owner, data);
-  arr.push(ownerUser.handleStr);
-
+  arr.push(owner.handleStr);
   for (const uId of uIds) {
-    const user = getDataStoreUser(uId, data);
+    const user = database.getUserById(uId);
     arr.push(user.handleStr);
   }
   arr = arr.sort();
@@ -87,50 +55,28 @@ function dmNameGenerator(token:string, uIds: number[]): (string) {
   * Returns the list of DMs that the user is a member of
   *
   * @param {string} token - user that initiated command
-  * ...
   *
   * @returns {[object]} - array of objects, each containing {dmId, name}
 */
-export function dmlist(token:string): (dms | error) {
-  const data: dataStore = getData();
-  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    throw HTTPError(403, 'Token is Invalid');
-  }
-  const authUserId = getAuthUserIdFromToken(token);
-  const dms = data.dms
-    .filter(dm => dm.allMembers
-      .includes(authUserId) !== false) || [];
+export function dmlist(token: string): (dms | error) {
+  const authUser = database.getUserByToken(token);
+  const dms = database.getAllDms()
+    .filter(dm => database.isUserMemberInDm(authUser.uId, dm.dmId)) || [];
 
   return toOutputDms(dms);
 }
 
-export function deleteDm(token:string, dmId:number) {
-  const data: dataStore = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    throw HTTPError(403, 'Token is Invalid');
+export function deleteDm(token: string, dmId: number) {
+  const dm = database.getDmById(dmId);
+  const authUser = database.getUserByToken(token);
+  if (!database.isUserInDm(authUser.uId, dm.dmId)) {
+    throw HTTPError(403, 'user is not part of dm');
   }
-  if (!isDataStoreDmValid(dmId, data)) {
-    throw HTTPError(400, 'dmId is Invalid');
-  }
-  for (const dm of data.dms) {
-    if (dm.dmId.toString() === dmId.toString()) {
-      if (dm.ownerMembers[0] !== getAuthUserIdFromToken(token)) {
-        throw HTTPError(403, 'user is not owner of dm');
-      }
-    }
-  }
-  for (const dm of data.dms) {
-    if (dm.dmId.toString() === dmId.toString()) {
-      if (dm.allMembers.find(user => user.toString() === authUserId.toString()) == null) {
-        throw HTTPError(403, 'user is not part of dm');
-      }
-    }
+  if (!database.isUserCreatorOfDm(authUser.uId, dm.dmId)) {
+    throw HTTPError(403, 'Have to be creator to delete dm');
   }
 
-  const index = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
-  data.dms.splice(index, 1);
-  setData(data);
+  database.removeDm(dmId);
   return {};
 }
 
@@ -140,28 +86,12 @@ export function deleteDm(token:string, dmId:number) {
   * @param {string} token - user that initiated command
   * @param {number} dmId - dm to remove user from
   *
-  * ...
   *
   * @returns {{}} - empty array
 */
 export function dmLeave(token:string, dmId:number): (Record<string, never> | error) {
-  const data: dataStore = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    throw HTTPError(403, 'Token is Invalid');
-  }
-  if (!isDataStoreDmValid(dmId, data)) {
-    throw HTTPError(400, 'dmId is Invalid');
-  }
-
-  if (!isUserMemberInDm(authUserId, dmId, data)) {
-    throw HTTPError(403, 'user is not part of dm');
-  }
-
-  const indexOne = data.dms.findIndex(dm => dm.dmId.toString() === dmId.toString());
-  const indexTwo = data.dms[indexOne].allMembers.findIndex(member => member.toString() === getAuthUserIdFromToken(token).toString());
-  data.dms[indexOne].allMembers.splice(indexTwo, 1);
-  setData(data);
+  const authUser = database.getUserByToken(token);
+  database.removeUserFromDm(authUser.uId, dmId);
   return {};
 }
 
@@ -172,20 +102,20 @@ export function dmLeave(token:string, dmId:number): (Record<string, never> | err
   * @param {number} dmId - a dm ID in the dataStore
   * @param {number} start - the index of the starting point
   *
-  * ...
   *
   * @returns { {messages: messages[], start: number, end: number} } - an object contains the messages and information of pages
 */
-export function dmMessages(authUserId: number, dmId: number, start: number): ({ messages: messages[], start: number, end: number } | error) {
-  const data = getData();
-  const dm = getDataStoreDm(dmId, data);
-  if (dm == null) {
-    throw HTTPError(400, 'dmId is Invalid');
-  } else if (!isAuthUserIdValid(authUserId, data)) {
-    throw HTTPError(403, 'Token is Invalid');
-  } else if (start < 0 || start > dm.messages.length) {
+export function dmMessages(
+  token: string,
+  dmId: number,
+  start: number): ({ messages: messages[], start: number, end: number } | error) {
+  const user = database.getUserByToken(token);
+  const dm = database.getDmById(dmId);
+
+  if (start < 0 || start > dm.messages.length) {
     throw HTTPError(400, 'Invalid start');
-  } else if (!isUserMemberInDm(authUserId, dmId, data)) {
+  }
+  if (!database.isUserMemberInDm(user.uId, dm.dmId)) {
     throw HTTPError(403, 'user is not part of dm');
   }
 
@@ -217,19 +147,11 @@ export function dmMessages(authUserId: number, dmId: number, start: number): ({ 
   *
   * @returns {object} - An object containing basic details of the dm, name and members
 */
-export function dmDetails(token:string, dmId:number): (dm | error) {
-  const data: dataStore = getData();
-  const authUserId = getAuthUserIdFromToken(token);
-  if (!isAuthUserIdValid(getAuthUserIdFromToken(token), data)) {
-    throw HTTPError(403, 'Token is Invalid');
-  }
-  if (!isDataStoreDmValid(dmId, data)) {
-    throw HTTPError(400, 'dmId is Invalid');
-  }
-
-  if (!isUserMemberInDm(authUserId, dmId, data)) {
+export function dmDetails(token: string, dmId: number): (dm | error) {
+  const user = database.getUserByToken(token);
+  const dm = database.getDmById(dmId);
+  if (!database.isUserMemberInDm(user.uId, dm.dmId)) {
     throw HTTPError(403, 'user is not part of dm');
   }
-
-  return toOutputDmDetails(getDataStoreDm(dmId, data));
+  return toOutputDmDetails(dm);
 }

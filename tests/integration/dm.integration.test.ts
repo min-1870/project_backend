@@ -88,7 +88,7 @@ describe('HTTP tests for /dm/create/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Invalid uId in uIds' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('Failure due to duplicate uId', () => {
@@ -98,7 +98,7 @@ describe('HTTP tests for /dm/create/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Duplicate uId values entered' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('Failure due to invalid tokens', () => {
@@ -108,7 +108,7 @@ describe('HTTP tests for /dm/create/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -164,7 +164,7 @@ describe('HTTP tests for /dm/list/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -195,7 +195,7 @@ describe('HTTP tests for /dm/remove/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('dm/remove with invalid dmId', () => {
@@ -205,7 +205,7 @@ describe('HTTP tests for /dm/remove/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('dm/remove failure, user not owner of dm', () => {
@@ -215,7 +215,7 @@ describe('HTTP tests for /dm/remove/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'user is not owner of dm' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('dm/remove failure, user not member of dm', () => {
@@ -229,7 +229,7 @@ describe('HTTP tests for /dm/remove/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -260,7 +260,7 @@ describe('HTTP tests for /dm/leave/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('dm/leave with invalid dmId', () => {
@@ -270,7 +270,7 @@ describe('HTTP tests for /dm/leave/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('dm/leave failure, user not part of dm', () => {
@@ -280,7 +280,7 @@ describe('HTTP tests for /dm/leave/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -317,7 +317,7 @@ describe('HTTP tests for /dm/messages/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('dm/messages with invalid dmId', () => {
@@ -328,7 +328,7 @@ describe('HTTP tests for /dm/messages/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('dm/messages failure, user not part of dm', () => {
@@ -339,7 +339,7 @@ describe('HTTP tests for /dm/messages/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('start is greater than the total number of messages in the dm', () => {
@@ -350,7 +350,7 @@ describe('HTTP tests for /dm/messages/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Invalid start' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -373,7 +373,7 @@ describe('HTTP tests for message/senddm/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('length of message is less than 1 characters', () => {
@@ -384,7 +384,7 @@ describe('HTTP tests for message/senddm/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'length of message is less than 1 or over 1000 characters' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('length of message is over 1000 characters', () => {
@@ -395,7 +395,7 @@ describe('HTTP tests for message/senddm/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'length of message is less than 1 or over 1000 characters' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('failure, user not part of dm', () => {
@@ -406,7 +406,7 @@ describe('HTTP tests for message/senddm/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('token is invalid', () => {
@@ -417,7 +417,7 @@ describe('HTTP tests for message/senddm/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('correct input correct return', () => {
@@ -485,7 +485,7 @@ describe('HTTP tests for dm/details/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of dm' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
   test('user is not part of dm', () => {
     const res = sendGetRequestToEndpoint('/dm/details/v2', {
@@ -494,7 +494,7 @@ describe('HTTP tests for dm/details/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'dmId is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
   test('Invalid Token', () => {
     const res = sendGetRequestToEndpoint('/dm/details/v2', {
@@ -503,7 +503,7 @@ describe('HTTP tests for dm/details/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
   test('valid dmDetails', () => {
     const res = sendGetRequestToEndpoint('/dm/details/v2', {

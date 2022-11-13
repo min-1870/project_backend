@@ -67,7 +67,7 @@ describe('HTTP tests for /user/profile/v3', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'uId is not valid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('error passing invalid token', () => {
@@ -77,7 +77,7 @@ describe('HTTP tests for /user/profile/v3', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'invalid token' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -109,7 +109,7 @@ describe('HTTP tests for /user/profile/sethandle/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'handleStr has non-alphanumeric characters' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('Failed due to handleStr already in use', () => {
@@ -119,7 +119,7 @@ describe('HTTP tests for /user/profile/sethandle/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'handle is already in use' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('Failed due to token invalid', () => {
@@ -129,7 +129,7 @@ describe('HTTP tests for /user/profile/sethandle/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('Successful implementation of user/profile/sethandle/v1', () => {
@@ -159,7 +159,7 @@ describe('Tests for /user/profile/setemail/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Invalid Email' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('Email is already in use', () => {
@@ -169,7 +169,7 @@ describe('Tests for /user/profile/setemail/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'email is already in use' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
   test('Token is invalid', () => {
@@ -179,7 +179,7 @@ describe('Tests for /user/profile/setemail/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -221,7 +221,7 @@ describe('Tests for /user/profile/setname/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'First name is not correct length' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
   test('Last name too short', () => {
     const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
@@ -231,7 +231,7 @@ describe('Tests for /user/profile/setname/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'Last name is not correct length' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
   test('Token is invalid', () => {
     const res = sendPutRequestToEndpoint('/user/profile/setname/v2', {
@@ -241,7 +241,7 @@ describe('Tests for /user/profile/setname/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Token is Invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 });
 
@@ -252,7 +252,7 @@ describe('Tests for /users/all/v2', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'Invalid token' });
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
   test('A list of all users and their associated details is successfully returned.', () => {
     const res = sendGetRequestToEndpoint('/users/all/v2', {
