@@ -21,7 +21,6 @@ import HTTPError from 'http-errors';
 */
 export function channelDetails(token: string, channelId: number): (channel | error) {
   const user = database.getUserByToken(token);
-  console.log(database.channels);
   const channel = database.getDataStoreChannelByChannelId(channelId);
   if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
     throw HTTPError(400, 'User not a member of channel.');
