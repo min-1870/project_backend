@@ -1,6 +1,6 @@
 import { database } from './dataStore';
 import validator from 'validator';
-import { authUserId, error, listResetCodeResponse } from './types';
+import { authUserId, error } from './types';
 import { generateToken } from './ids';
 import HTTPError from 'http-errors';
 import { getHashOf } from './hash';
@@ -134,7 +134,7 @@ export function sendPasswordResetEmail(email :string) {
 export function getResetCodes(email: string) {
   return {
     codes: database.passwordResets.filter(pR => pR.email === email).map(pR => pR.resetCode)
-  }
+  };
 }
 
 export function resetPassword(resetCode: string, newPassword: string) {
@@ -145,7 +145,7 @@ export function resetPassword(resetCode: string, newPassword: string) {
   }
   database.removePassWordReset(resetCode);
   database.updateUserPassword(email, newPassword);
-  return {}
+  return {};
 }
 
 export function logOut(token) {

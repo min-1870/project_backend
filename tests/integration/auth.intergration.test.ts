@@ -6,7 +6,8 @@ import {
   AUTH_PASSWORD_RESET_REQUEST,
   AUTH_REGISTER,
   CHANNELS_LIST_ALL,
-  clearDataForTest} from '../testBase';
+  clearDataForTest
+} from '../testBase';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
@@ -20,7 +21,7 @@ const NAME_FIRST = '7re$#%^@$#al43E';
 const NAME_LAST = 'MoN(*#@@#!i9IO64kerMoNi9IO64kerMoNi9IO64ker';
 
 beforeEach(() => {
-  clearDataForTest()
+  clearDataForTest();
 });
 
 describe('HTTP tests for /auth/register', () => {
@@ -281,20 +282,20 @@ describe('HTTP tests for /auth/passwordreset/request', () => {
       nameFirst: NAME_FIRST,
       nameLast: NAME_LAST
     });
-    const token = (parseJsonResponse(res) as unknown as authResponse).token
+    const token = (parseJsonResponse(res) as unknown as authResponse).token;
 
-    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL});
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
 
-    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL })
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
       codes: [expect.any(String)]
     });
 
     // Token should be cleared after reset request so this should fail.
-    res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {}, token)
+    res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {}, token);
     expect(res.statusCode).toBe(403);
   });
 
@@ -306,19 +307,19 @@ describe('HTTP tests for /auth/passwordreset/request', () => {
       nameLast: NAME_LAST
     });
 
-    let res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL});
+    let res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
 
-    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL});
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
 
-    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL});
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
 
-    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL })
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
       codes: [expect.any(String), expect.any(String), expect.any(String)]
@@ -335,22 +336,22 @@ describe('HTTP tests for /auth/passwordreset/reset', () => {
       nameLast: NAME_LAST
     });
 
-    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL});
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
 
-    sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL});
+    sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
 
-    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL })
-    const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0]
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0];
 
-    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode , newPassword: 'newthing12'});
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode, newPassword: 'newthing12' });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
 
-    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL })
-    const response = (parseJsonResponse(res) as unknown as listResetCodeResponse)
-    expect(response.codes.length).toBe(1)
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    const response = (parseJsonResponse(res) as unknown as listResetCodeResponse);
+    expect(response.codes.length).toBe(1);
   });
 
   test('authPasswordReset new password less than 6 characters throws error', () => {
@@ -361,14 +362,14 @@ describe('HTTP tests for /auth/passwordreset/reset', () => {
       nameLast: NAME_LAST
     });
 
-    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL});
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET_REQUEST, { email: EMAIL });
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
 
-    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL })
-    const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0]
+    res = sendGetRequestToEndpoint('/auth/passwordreset/listcodes/v1', { email: EMAIL });
+    const resetCode = (parseJsonResponse(res) as unknown as listResetCodeResponse).codes[0];
 
-    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode , newPassword: '12345'});
+    res = sendPostRequestToEndpoint(AUTH_PASSWORD_RESET, { resetCode, newPassword: '12345' });
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
     expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
@@ -388,4 +389,4 @@ describe('HTTP tests for /auth/passwordreset/reset', () => {
     expect(res.statusCode).toBe(400);
     expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
-})
+});

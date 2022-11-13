@@ -240,7 +240,7 @@ class DataStore {
    * @param userId - user id to clear sessions for.
    * @returns {} an empty object if success.
    */
-   removeSessionTokenForUser(userId: number): Record<string, never> {
+  removeSessionTokenForUser(userId: number): Record<string, never> {
     this.users.find(user => user.uId === userId)
       .sessionTokens = [];
     this.saveDataStore();

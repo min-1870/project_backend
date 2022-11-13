@@ -1,4 +1,4 @@
-import {sendDeleteRequestToEndpoint} from "./integration/integrationTestUtils";
+import { sendDeleteRequestToEndpoint } from './integration/integrationTestUtils';
 
 // API versions
 export const AUTH_LOGIN = '/auth/login/v3';
@@ -49,8 +49,8 @@ export const MESSAGE_REACT = '/message/react/v1';
 export const MESSAGE_UNREACT = '/message/unreact/v1';
 export const MESSAGE_PIN = '/message/pin/v1';
 export const MESSAGE_UNPIN = '/message/unpin/v1';
-export const MESSAGE_SEND_LATER = '/message/sendlater/v1'
-export const MESSAGE_SEND_LATER_DM = '/message/sendlaterdm/v1'
+export const MESSAGE_SEND_LATER = '/message/sendlater/v1';
+export const MESSAGE_SEND_LATER_DM = '/message/sendlaterdm/v1';
 
 export const STANDUP_START = '/standup/start/v1';
 export const STANDUP_ACTIVE = '/standup/active/v1';
