@@ -235,6 +235,19 @@ class DataStore {
   }
 
   /**
+   * Remove a session token in the data store for a user.
+   *
+   * @param userId - user id to clear sessions for.
+   * @returns {} an empty object if success.
+   */
+   removeSessionTokenForUser(userId: number): Record<string, never> {
+    this.users.find(user => user.uId === userId)
+      .sessionTokens = [];
+    this.saveDataStore();
+    return {};
+  }
+
+  /**
    * Get data store channel by channel ID.
    *
    * @param channelId - channel ID to get.

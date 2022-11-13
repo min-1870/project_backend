@@ -220,3 +220,7 @@ export type passwordResetRequest = {
   resetCode: string
   newPassword: string
 }
+
+export type listResetCodeResponse = {
+  codes: [string]
+}

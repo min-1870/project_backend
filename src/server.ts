@@ -9,6 +9,7 @@ import { clear } from './other';
 import {
   authLoginV1,
   authRegisterV1,
+  getResetCodes,
   logOut,
   resetPassword,
   sendPasswordResetEmail
@@ -129,8 +130,13 @@ app.post('/auth/register/v3', (req: Request, res: Response, next) => {
 
 app.post('/auth/passwordreset/request/v1', (req: Request, res: Response) => {
   const { email } = req.body;
-  const result = (sendPasswordResetEmail(email));
-  res.json(result);
+  res.json(sendPasswordResetEmail(email));
+});
+
+// Internal only function used for testing.
+app.get('/auth/passwordreset/listcodes/v1', (req: Request, res: Response) => {
+  const email = req.query.email as string;
+  res.json(getResetCodes(email));
 });
 
 app.post('/auth/passwordreset/reset/v1', (req: Request, res: Response, next) => {
