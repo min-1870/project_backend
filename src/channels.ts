@@ -16,7 +16,7 @@ import HTTPError from 'http-errors';
  * @param { boolean } isPublic - Whether the new channel is a public channel or not.
  * @returns { channelId }
  */
-export function channelsCreateV1(
+export function channelsCreate(
   token: string,
   name: string,
   isPublic: boolean): (channelId | error) {

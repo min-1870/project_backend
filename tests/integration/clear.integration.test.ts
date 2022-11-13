@@ -1,4 +1,5 @@
 import { authResponse, channels } from '../../src/types';
+import {AUTH_REGISTER, CHANNELS_CREATE, CHANNELS_LIST, CLEAR} from '../testBase';
 import { parseJsonResponse, sendDeleteRequestToEndpoint, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'adfadf@gmail.com';
@@ -9,7 +10,7 @@ const TEST_CHANNEL_NAME = 'Test channel';
 
 describe('HTTP tests for /clear', () => {
   test('Clear data succeeds', () => {
-    const registerResponse = sendPostRequestToEndpoint('/auth/register/v3', {
+    const registerResponse = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: EMAIL,
       password: PASSWORD,
       nameFirst: NAME_FIRST,
@@ -19,24 +20,22 @@ describe('HTTP tests for /clear', () => {
     const registerJsonResponse = parseJsonResponse(registerResponse) as unknown as authResponse;
     const token = registerJsonResponse.token;
 
-    sendPostRequestToEndpoint('/channels/create/v3', {
-      token: token,
+    sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: TEST_CHANNEL_NAME,
       isPublic: true
-    });
+    }, token);
 
-    let listChannelRes = sendGetRequestToEndpoint('/channels/list/v3', {
-      token
-    });
+    let listChannelRes = sendGetRequestToEndpoint(CHANNELS_LIST, {
+    }, token);
 
     const listChannelJsonRes = parseJsonResponse(listChannelRes) as unknown as channels;
     expect(listChannelJsonRes.channels.length).toStrictEqual(1);
 
-    const clearRes = sendDeleteRequestToEndpoint('/clear/v1', {});
+    const clearRes = sendDeleteRequestToEndpoint(CLEAR, {});
 
     expect(parseJsonResponse(clearRes)).toStrictEqual({});
 
-    listChannelRes = sendGetRequestToEndpoint('/channels/list/v3', {
+    listChannelRes = sendGetRequestToEndpoint(CHANNELS_LIST, {
       token
     });
 

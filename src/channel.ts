@@ -23,7 +23,7 @@ export function channelDetails(token: string, channelId: number): (channel | err
   const user = database.getUserByToken(token);
   const channel = database.getDataStoreChannelByChannelId(channelId);
   if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
-    throw HTTPError(400, 'User not a member of channel.');
+    throw HTTPError(403, 'User not a member of channel.');
   }
   return toOutputChannelDetail(channel);
 }
@@ -71,6 +71,9 @@ export function channelInvite(
   if (!database.isUserMemberInChannel(authUser.uId, channel.channelId)) {
     throw HTTPError(403, 'Permission denied, non-channel user cannot invite other user to the channel');
   }
+  if (!database.isUserIdValid(uId)) {
+    throw HTTPError(400, 'Invalid user ID.')
+  }
   database.addUserToChannel(uId, channel.channelId);
   return {};
 }
@@ -92,7 +95,7 @@ export function channelInvite(
   * @param {number} start - the index of the starting point
   * @returns {{messages: array, start: number, end: number}} - an object contains the messages and information of pages
 */
-export function channelMessagesV1(
+export function channelMessages(
   token: string,
   channelId: number,
   start: number): ({ messages: messages[], start: number, end: number } | error) {
@@ -105,22 +108,21 @@ export function channelMessagesV1(
     throw HTTPError(403, 'Not a member of channel.');
   }
 
-  const messages = channel.messages;
+  let messages = [...channel.messages].reverse();
   let slicedMessages: messages[];
   let end: number;
 
   if (start + 50 >= messages.length) {
     end = -1;
-    slicedMessages = messages.slice(start);
+    slicedMessages = messages.slice(start, messages.length)
   } else {
     end = start + 50;
     slicedMessages = messages.slice(start, end);
   }
-
   return {
-    messages: slicedMessages.reverse(),
-    start: start,
-    end: end
+    messages: slicedMessages,
+    start,
+    end
   };
 }
 /**
@@ -139,10 +141,10 @@ export function channelAddOwners(
   const authUser = database.getUserByToken(token);
   const channel = database.getDataStoreChannelByChannelId(channelId);
   if (!database.isUserOwnerMemberInChannel(authUser.uId, channel.channelId) &&
-      !database.isUserGlobalOwner(authUser.uId)) {
+    !(database.isUserMemberInChannel(authUser.uId, channel.channelId) &&
+      database.isUserGlobalOwner(authUser.uId))) {
     throw HTTPError(403, 'Not an authorised user to add owner to channel.');
   }
-
   database.addOwnerToChannel(ownerToAddId, channel.channelId);
   return {};
 }
@@ -164,7 +166,8 @@ export function channelRemoveOwners(
   const authUser = database.getUserByToken(token);
   const channel = database.getDataStoreChannelByChannelId(channelId);
   if (!database.isUserOwnerMemberInChannel(authUser.uId, channel.channelId) &&
-      !database.isUserGlobalOwner(authUser.uId)) {
+      !(database.isUserGlobalOwner(authUser.uId) &&
+        database.isUserMemberInChannel(authUser.uId, channel.channelId))) {
     throw HTTPError(403, 'Not an authorised user to add owner to channel.');
   }
 

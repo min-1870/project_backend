@@ -34,6 +34,8 @@ export const DM_LEAVE = '/dm/leave/v2';
 export const DM_MESSGES = '/dm/messages/v2';
 export const DM_SEND = '/dm/senddm/v2';
 
+export const MESSAGE_DM_SEND = '/message/senddm/v2';
+
 export const USERS_ALL = '/users/all/v2';
 
 export const USER_PROFILE_SET_NAME = '/user/profile/setname/v2';
