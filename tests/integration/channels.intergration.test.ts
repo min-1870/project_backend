@@ -1,16 +1,11 @@
 import { authResponse, channelId } from '../../src/types';
+import { AUTH_REGISTER, CHANNELS_CREATE, CHANNELS_LIST, CHANNELS_LIST_ALL, clearDataForTest } from '../testBase';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
   OK,
-  sendDeleteRequestToEndpoint,
   sendGetRequestToEndpoint,
 } from './integrationTestUtils';
-
-const CHANNELS_CREATE = '/channels/create/v3';
-const CHANNELS_LIST = '/channels/list/v3';
-const CHANNELS_LIST_ALL = '/channels/listAll/v3';
-const AUTH_REGISTER = '/auth/register/v3';
 
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
@@ -24,7 +19,7 @@ const SHORT_CHANNEL_NAME = '';
 let token: string;
 
 beforeEach(() => {
-  sendDeleteRequestToEndpoint('/clear/v1', {});
+  clearDataForTest();
 
   const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: EMAIL,
@@ -38,7 +33,7 @@ beforeEach(() => {
 });
 
 describe('HTTP tests for /channels/create', () => {
-  test('Create public channel successful', () => {
+  test('channelCreate public channel success', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
@@ -51,7 +46,7 @@ describe('HTTP tests for /channels/create', () => {
     });
   });
 
-  test('Create private channel successful', () => {
+  test('channelCreate private channel success', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
@@ -64,7 +59,7 @@ describe('HTTP tests for /channels/create', () => {
     });
   });
 
-  test('Create channel name more than 20 characters returns fail', () => {
+  test('channelCreate with channel name more than 20 characters throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: LONG_CHANNEL_NAME,
@@ -79,7 +74,7 @@ describe('HTTP tests for /channels/create', () => {
     });
   });
 
-  test('Create channel name less than 1 characters returns fail', () => {
+  test('channelCreate with channel name less than 1 characters returns fail', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: SHORT_CHANNEL_NAME,
@@ -94,7 +89,7 @@ describe('HTTP tests for /channels/create', () => {
     });
   });
 
-  test('Create channel name with invalid token returns fail', () => {
+  test('channelCreate with invalid token throws forbidden', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: TEST_INVALID_TOKEN,
       name: SHORT_CHANNEL_NAME,
@@ -112,8 +107,20 @@ describe('HTTP tests for /channels/create', () => {
 
 describe('HTTP tests for /channels/list', () => {
   let channelId: number;
-  beforeEach(() => {
-    const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+
+  test('channelsList no channels success', () => {
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST, {
+      token
+    });
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      channels: []
+    });
+  });
+
+  test('channelsList success', () => {
+    let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
@@ -121,10 +128,8 @@ describe('HTTP tests for /channels/list', () => {
 
     const jsonResponse = parseJsonResponse(res) as unknown as channelId;
     channelId = jsonResponse.channelId;
-  });
 
-  test('channels list successful', () => {
-    const res = sendGetRequestToEndpoint(CHANNELS_LIST, {
+    res = sendGetRequestToEndpoint(CHANNELS_LIST, {
       token
     });
 
@@ -139,7 +144,7 @@ describe('HTTP tests for /channels/list', () => {
     });
   });
 
-  test('channels list with invalid token fail', () => {
+  test('channelsList with invalid token throws forbidden', () => {
     const res = sendGetRequestToEndpoint(CHANNELS_LIST, {
       token: TEST_INVALID_TOKEN
     });
@@ -154,7 +159,7 @@ describe('HTTP tests for /channels/list', () => {
 });
 
 describe('HTTP tests for /channels/listAll', () => {
-  test('Test successful status code and return', () => {
+  test('channelsListAll multipleChannel from different users including private success', () => {
     // test user 2
     const user2Res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: '2' + EMAIL,
@@ -199,7 +204,7 @@ describe('HTTP tests for /channels/listAll', () => {
     });
   });
 
-  test('Test return error when an invalid token is given', () => {
+  test('channelsListAll with invalid token throws forbidden', () => {
     const res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {
       token: TEST_INVALID_TOKEN
     });
