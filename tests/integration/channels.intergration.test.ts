@@ -1,10 +1,9 @@
 import { authResponse, channelId } from '../../src/types';
-import {AUTH_REGISTER, CHANNELS_CREATE, CHANNELS_LIST, CHANNELS_LIST_ALL, clearDataForTest} from '../testBase';
+import { AUTH_REGISTER, CHANNELS_CREATE, CHANNELS_LIST, CHANNELS_LIST_ALL, clearDataForTest } from '../testBase';
 import {
   sendPostRequestToEndpoint,
   parseJsonResponse,
   OK,
-  sendDeleteRequestToEndpoint,
   sendGetRequestToEndpoint,
 } from './integrationTestUtils';
 
@@ -20,7 +19,7 @@ const SHORT_CHANNEL_NAME = '';
 let token: string;
 
 beforeEach(() => {
-  clearDataForTest()
+  clearDataForTest();
 
   const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: EMAIL,
