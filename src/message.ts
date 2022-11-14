@@ -78,9 +78,9 @@ export function messageEdit (token: string, messageId: number, message: string):
     database.editChannelMessage(messageId, message);
   } else {
     const dm = database.getDmByMessageId(messageId);
-    if (user.uId !== dataStoreMessage.uId ||
-        !database.isUserOwnerInDm(user.uId, dm.dmId)) {
-      return { error: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM' };
+    if (user.uId !== dataStoreMessage.uId &&
+        !database.isUserOwnerInDm(user.uId, dm.dmId) && user.uId != dm.creatorId) {
+      throw HTTPError(403, 'Only dm creator or message sender or DM owner can edit message.');
     }
     database.editDmMessage(messageId, message);
   }
