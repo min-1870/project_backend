@@ -35,18 +35,22 @@ export function messageSend (
  */
 export function messageRemove(token: string, messageId: number): (Record<string, never> | error) {
   const user = database.getUserByToken(token);
-  const channel = database.getDataStoreChannelByMessageId(messageId);
-
-  if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
-    throw HTTPError(400, 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined');
-  }
-
   const message = database.getDataStoreMessageByMessageId(messageId);
-  if (message.uId !== user.uId &&
-      !database.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
-    throw HTTPError(403, 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM');
+  if (database.isMessageInChannels(messageId)) {
+    const channel = database.getDataStoreChannelByMessageId(messageId);
+    if (message.uId !== user.uId &&
+        !database.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(403, 'Message can only be removed by sender, channel owners or global owner in that channel.');
+    }
+    database.removeChannelMessageById(message.messageId);
+  } else {
+    const dm = database.getDmByMessageId(messageId);
+    if (user.uId !== message.uId &&
+        !database.isUserOwnerInDm(user.uId, dm.dmId) && user.uId !== dm.creatorId) {
+      throw HTTPError(403, 'Only dm creator or message sender or DM owner can remove message.');
+    }
+    database.removeDmMessageById(message.messageId);
   }
-  database.removeChannelMessageById(message.messageId);
   return {};
 }
 
@@ -73,13 +77,13 @@ export function messageEdit (token: string, messageId: number, message: string):
         !database.isUserOwnerMemberInChannel(user.uId, channel.channelId) &&
         !(database.isUserGlobalOwner(user.uId) &&
           database.isUserMemberInChannel(user.uId, channel.channelId))) {
-      throw HTTPError(403, 'Message can only be edited by sender, owner of channel, or global owner in that channel');
+      throw HTTPError(403, 'Message can only be edited by sender, dm owners, or global owner in that channel.');
     }
     database.editChannelMessage(messageId, message);
   } else {
     const dm = database.getDmByMessageId(messageId);
     if (user.uId !== dataStoreMessage.uId &&
-        !database.isUserOwnerInDm(user.uId, dm.dmId) && user.uId != dm.creatorId) {
+        !database.isUserOwnerInDm(user.uId, dm.dmId) && user.uId !== dm.creatorId) {
       throw HTTPError(403, 'Only dm creator or message sender or DM owner can edit message.');
     }
     database.editDmMessage(messageId, message);

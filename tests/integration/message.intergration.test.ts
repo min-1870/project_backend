@@ -199,7 +199,7 @@ describe('HTTP tests for message/remove', () => {
     }, token2);
 
     const bodyObj = JSON.parse(res.body as string);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(403);
     expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 

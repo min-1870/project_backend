@@ -326,6 +326,14 @@ class DataStore {
     this.saveDataStore();
   }
 
+  removeDmMessageById(messageId: number) {
+    const dm = database.getDmByMessageId(messageId);
+    this.dms.find(d =>
+      d.dmId === dm.dmId).messages.splice(
+      dm.messages.findIndex(m => m.messageId === messageId), 1);
+    this.saveDataStore();
+  }
+
   /**
    * Get a data store dm.
    *
