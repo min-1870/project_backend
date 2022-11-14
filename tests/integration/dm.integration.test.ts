@@ -1,5 +1,5 @@
 import { authResponse, channelMessagesOutput, dmId, messageId } from '../../src/types';
-import {AUTH_REGISTER, clearDataForTest, DM_CREATE} from '../testBase';
+import { AUTH_REGISTER, clearDataForTest, DM_CREATE } from '../testBase';
 import {
   parseJsonResponse,
   OK,
