@@ -472,10 +472,7 @@ class DataStore {
   addOwnerToChannel(userId: number, channelId: number) {
     const user = this.getUserById(userId);
     const channel = this.getDataStoreChannelByChannelId(channelId);
-    if (this.isUserGlobalOwner(user.uId)) {
-      // Do nothing if a global owner as they are already an owner.
-      return;
-    }
+
     if (this.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
       throw HTTPError(400, 'Already an owner of the channel.');
     }
@@ -498,11 +495,12 @@ class DataStore {
   removeOwnerFromChannel(userId: number, channelId: number) {
     const user = this.getUserById(userId);
     const channel = this.getDataStoreChannelByChannelId(channelId);
-    if (!this.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
-      throw HTTPError(400, 'Not an owner of the channel.');
-    }
+
     if (channel.ownerMembers.length <= 1) {
       throw HTTPError(400, 'A channel must have at least one owner');
+    }
+    if (!this.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(400, 'The user to remove as owner is not an owner already.');
     }
     this.channels
       .find(c => c.channelId === channelId)
@@ -577,8 +575,6 @@ class DataStore {
    * @returns {dataStorePassReset} data store pass reset.
    */
   getPasswordResetsByResetCode(resetCode: string): dataStorePassReset {
-    console.log(resetCode);
-    console.log(database.passwordResets);
     const passReset = this.passwordResets.find(p => p.resetCode === resetCode);
     if (!passReset) {
       throw HTTPError(400, 'Reset code not found.');

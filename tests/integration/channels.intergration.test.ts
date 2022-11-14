@@ -11,10 +11,7 @@ const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
 const NAME_FIRST = 'Barty';
 const NAME_LAST = 'Potter';
-const TEST_INVALID_TOKEN = '';
 const TEST_CHANNEL_NAME = 'Test channel';
-const LONG_CHANNEL_NAME = 'This is a very long channel name';
-const SHORT_CHANNEL_NAME = '';
 
 let token: string;
 
@@ -35,10 +32,9 @@ beforeEach(() => {
 describe('HTTP tests for /channels/create', () => {
   test('channelCreate public channel success', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -48,10 +44,9 @@ describe('HTTP tests for /channels/create', () => {
 
   test('channelCreate private channel success', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: false
-    });
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -61,10 +56,9 @@ describe('HTTP tests for /channels/create', () => {
 
   test('channelCreate with channel name more than 20 characters throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: LONG_CHANNEL_NAME,
+      name: 'LONG_CHANNEL_NAMEfdasfasdfadsfadsfasd  fasdf asd',
       isPublic: false
-    });
+    }, token);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -76,10 +70,9 @@ describe('HTTP tests for /channels/create', () => {
 
   test('channelCreate with channel name less than 1 characters returns fail', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: SHORT_CHANNEL_NAME,
+      name: '',
       isPublic: false
-    });
+    }, token);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -91,10 +84,9 @@ describe('HTTP tests for /channels/create', () => {
 
   test('channelCreate with invalid token throws forbidden', () => {
     const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: TEST_INVALID_TOKEN,
-      name: SHORT_CHANNEL_NAME,
+      name: TEST_CHANNEL_NAME,
       isPublic: false
-    });
+    }, 'bad token');
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -109,9 +101,7 @@ describe('HTTP tests for /channels/list', () => {
   let channelId: number;
 
   test('channelsList no channels success', () => {
-    const res = sendGetRequestToEndpoint(CHANNELS_LIST, {
-      token
-    });
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST, { }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -121,17 +111,14 @@ describe('HTTP tests for /channels/list', () => {
 
   test('channelsList success', () => {
     let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
-    });
+    }, token);
 
     const jsonResponse = parseJsonResponse(res) as unknown as channelId;
     channelId = jsonResponse.channelId;
 
-    res = sendGetRequestToEndpoint(CHANNELS_LIST, {
-      token
-    });
+    res = sendGetRequestToEndpoint(CHANNELS_LIST, {}, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -145,9 +132,7 @@ describe('HTTP tests for /channels/list', () => {
   });
 
   test('channelsList with invalid token throws forbidden', () => {
-    const res = sendGetRequestToEndpoint(CHANNELS_LIST, {
-      token: TEST_INVALID_TOKEN
-    });
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST, {}, 'bad token');
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -171,23 +156,19 @@ describe('HTTP tests for /channels/listAll', () => {
 
     // test user 1's public channel
     const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
       name: TEST_CHANNEL_NAME,
       isPublic: true
-    });
+    }, token);
     const channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
 
     // test user 2's private channel
     const channel2Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token2,
       name: TEST_CHANNEL_NAME + '2',
       isPublic: false
-    });
+    }, token2);
     const channel2Id = (parseJsonResponse(channel2Res) as unknown as channelId).channelId;
 
-    const res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {
-      token: token
-    });
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, { }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -205,9 +186,7 @@ describe('HTTP tests for /channels/listAll', () => {
   });
 
   test('channelsListAll with invalid token throws forbidden', () => {
-    const res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {
-      token: TEST_INVALID_TOKEN
-    });
+    const res = sendGetRequestToEndpoint(CHANNELS_LIST_ALL, {}, 'bad token');
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({

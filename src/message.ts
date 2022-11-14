@@ -24,7 +24,6 @@ export function messageSend (
     throw HTTPError(403, 'channelId is valid and the authorised user is not a member of the channel');
   }
   const newMessage = database.addMessageToChannel(message, user.uId, channel.channelId);
-
   return { messageId: newMessage.messageId };
 }
 

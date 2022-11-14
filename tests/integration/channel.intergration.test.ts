@@ -1,85 +1,103 @@
-import { authResponse, channelId } from '../../src/types';
+import { authResponse, channelId, channelMessagesOutput } from '../../src/types';
+import {
+  AUTH_REGISTER,
+  CHANNELS_CREATE,
+  CHANNEL_ADD_OWNER,
+  CHANNEL_DETAILS,
+  CHANNEL_INVITE,
+  CHANNEL_JOIN,
+  CHANNEL_LEAVE, CHANNEL_MESSAGES,
+  CHANNEL_REMOVE_OWNER,
+  clearDataForTest,
+  MESSAGE_SEND
+} from '../testBase';
 import {
   OK,
   parseJsonResponse,
-  sendDeleteRequestToEndpoint,
   sendGetRequestToEndpoint,
   sendPostRequestToEndpoint
 } from './integrationTestUtils';
 
-const EMAIL = 'Bob123@gmail.com';
-const PASSWORD = '11223344';
-const NAME_FIRST = 'Barty';
-const NAME_LAST = 'Potter';
-const TEST_CHANNEL_NAME = 'Test channel';
+const PUBLIC_USER_EMAIL = 'Bob123@gmail.com';
+const PUBLIC_USER_PASSWORD = '11223344';
+const PUBLIC_USER_NAME_FIRST = 'Barty';
+const PUBLIC_USER_NAME_LAST = 'Potter';
 
-let token: string; // token of test user 1
-let token2: string; // token of test user 2
-let token3: string; // token of test user 3
-let uId1: number; // uId of test user 1
-let uId2: number; // uId of test user 2
-let uId3: number; // uId of test user 3
+const PRIVATE_USER_EMAIL = '1Bob123@gmail.com';
+const PRIVATE_USER_PASSWORD = '1122334dd4';
+const PRIVATE_USER_NAME_FIRST = 'Baoty';
+const PRIVATE_USER_NAME_LAST = 'Pottter';
 
-const CHANNELS_CREATE = '/channels/create/v3';
-const CHANNEL_JOIN = '/channel/join/v3';
-const CHANNEL_INVITE = '/channel/invite/v3';
-const CHANNEL_DETAILS = '/channel/details/v3';
-const CHANNEL_ADD_OWNER = '/channel/addowner/v2';
-const CHANNEL_LEAVE = '/channel/leave/v2';
-const CHANNEL_REMOVE_OWNER = '/channel/removeowner/v2';
-const AUTH_REGISTER = '/auth/register/v3';
+const GLOBAL_USER_EMAIL = '1Bobd123@gmail.com';
+const GLOBAL_USER_PASSWORD = '11223d34dd4';
+const GLOBAL_USER_NAME_FIRST = 'aBaoty';
+const GLOBAL_USER_NAME_LAST = 'Pottster';
+
+const PUBLIC_CHANNEL_NAME = 'Test public channel';
+const PRIVATE_CHANNEL_NAME = 'Test public channel';
+
+let privateChannelCreatorToken: string;
+let publicChannelCreatorToken: string;
+let globalOwnerToken: string;
+let privateChannelCreatorUserId: number;
+let publicChannelCreatorUserId: number;
+let globalOwnerUserId: number;
+
+let publicChannelId: number;
+let privateChannelId: number;
 
 beforeEach(() => {
-  sendDeleteRequestToEndpoint('/clear/v1', {});
-  const res3 = sendPostRequestToEndpoint(AUTH_REGISTER, {
-    email: '3' + EMAIL,
-    password: '3' + PASSWORD,
-    nameFirst: 'c' + NAME_FIRST,
-    nameLast: 'c' + NAME_LAST
-  });
-  const jsonResponse3 = (parseJsonResponse(res3) as unknown as authResponse);
-  uId3 = jsonResponse3.authUserId;
-  token3 = jsonResponse3.token;
+  clearDataForTest();
 
-  const res1 = sendPostRequestToEndpoint(AUTH_REGISTER, {
-    email: EMAIL,
-    password: PASSWORD,
-    nameFirst: NAME_FIRST,
-    nameLast: NAME_LAST
+  let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    email: GLOBAL_USER_EMAIL,
+    password: GLOBAL_USER_PASSWORD,
+    nameFirst: GLOBAL_USER_NAME_FIRST,
+    nameLast: GLOBAL_USER_NAME_LAST
   });
-  token = (parseJsonResponse(res1) as unknown as authResponse).token;
+  let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+  globalOwnerUserId = jsonResponse.authUserId;
+  globalOwnerToken = jsonResponse.token;
 
-  const res2 = sendPostRequestToEndpoint(AUTH_REGISTER, {
-    email: '2' + EMAIL,
-    password: '2' + PASSWORD,
-    nameFirst: 'b' + NAME_FIRST,
-    nameLast: 'b' + NAME_LAST
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    email: PUBLIC_USER_EMAIL,
+    password: PUBLIC_USER_PASSWORD,
+    nameFirst: PUBLIC_USER_NAME_FIRST,
+    nameLast: PUBLIC_USER_NAME_LAST
   });
-  token2 = (parseJsonResponse(res2) as unknown as authResponse).token;
+  jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+  publicChannelCreatorUserId = jsonResponse.authUserId;
+  publicChannelCreatorToken = jsonResponse.token;
 
-  const jsonResponse1 = parseJsonResponse(res1) as unknown as authResponse;
-  uId1 = jsonResponse1.authUserId;
-  const jsonResponse2 = parseJsonResponse(res2) as unknown as authResponse;
-  uId2 = jsonResponse2.authUserId;
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    email: PRIVATE_USER_EMAIL,
+    password: PRIVATE_USER_PASSWORD,
+    nameFirst: PRIVATE_USER_NAME_FIRST,
+    nameLast: PRIVATE_USER_NAME_LAST
+  });
+  jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+  privateChannelCreatorUserId = jsonResponse.authUserId;
+  privateChannelCreatorToken = jsonResponse.token;
+
+  res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    name: PUBLIC_CHANNEL_NAME,
+    isPublic: true
+  }, publicChannelCreatorToken);
+  publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+  res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    name: PRIVATE_CHANNEL_NAME,
+    isPublic: false
+  }, privateChannelCreatorToken);
+  privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
 });
 
 describe('HTTP tests for channel/messages', () => {
-  let channel1Id: number;
-  beforeEach(() => {
-    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
-    });
-    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
-  });
-
-  test('channelId does not refer to a valid channel', () => {
-    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
-      token: token,
+  test('channelMessages invalid channelId throws error', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: 99999999,
       start: 0,
-    });
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -89,12 +107,11 @@ describe('HTTP tests for channel/messages', () => {
     });
   });
 
-  test('start is greater than the total number of messages in the channel', () => {
-    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
-      token: token,
-      channelId: channel1Id,
+  test('channelMessages start is greater than the total messages number in channel throws error', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
       start: 99999999,
-    });
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -104,12 +121,11 @@ describe('HTTP tests for channel/messages', () => {
     });
   });
 
-  test('channelId is valid and the authorised user is not a member of the channel', () => {
-    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
-      token: token2,
-      channelId: channel1Id,
+  test('channelMessages not a member of private channel throws forbidden', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: privateChannelId,
       start: 0,
-    });
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -119,12 +135,11 @@ describe('HTTP tests for channel/messages', () => {
     });
   });
 
-  test('token is invalid', () => {
-    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
-      token: '99999999',
-      channelId: channel1Id,
+  test('channelMessages not a member of public channel throws forbidden', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
       start: 0,
-    });
+    }, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -134,12 +149,25 @@ describe('HTTP tests for channel/messages', () => {
     });
   });
 
-  test('no messages success', () => {
-    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
-      token: token,
-      channelId: channel1Id,
+  test('channelMessages with invalid token throws forbidden', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
       start: 0,
+    }, '9312423avbad token');
+
+    expect(res.statusCode).toBe(403);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
     });
+  });
+
+  test('channelMessages public channel success', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start: 0,
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -149,13 +177,11 @@ describe('HTTP tests for channel/messages', () => {
     });
   });
 
-  // TODO: update this test
-  test('has more than 50 messages success', () => {
-    const res = sendGetRequestToEndpoint('/channel/messages/v2', {
-      token: token,
-      channelId: channel1Id,
+  test('channelMessages private channel success', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: privateChannelId,
       start: 0,
-    });
+    }, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -163,32 +189,159 @@ describe('HTTP tests for channel/messages', () => {
       start: 0,
       end: -1
     });
+  });
+
+  test('channelMessages global owner not a member of public channel throws forbidden', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start: 0,
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('channelMessages global owner not a member of private channel throws forbidden', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: privateChannelId,
+      start: 0,
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('channelMessages more than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 100; i++) {
+      expectedMessages.push(`hello ${i}`);
+      sendPostRequestToEndpoint(MESSAGE_SEND, {
+        channelId: publicChannelId,
+        message: `hello ${i}`
+      },
+      publicChannelCreatorToken);
+    }
+
+    const start = 0;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: start + 50
+    });
+    expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
+  });
+
+  test('channelMessages less than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 11; i++) {
+      expectedMessages.push(`hello ${i}`);
+
+      sendPostRequestToEndpoint(MESSAGE_SEND,
+        {
+          channelId: publicChannelId,
+          message: `hello ${i}`
+        },
+        publicChannelCreatorToken
+      );
+    }
+
+    const start = 0;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    }, publicChannelCreatorToken);
+
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: -1
+    });
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expectedMessages = expectedMessages.slice(0, 11).reverse();
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
+  });
+
+  test('channelMessages start from middle more than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 100; i++) {
+      const msg = `hello ${i}`;
+      expectedMessages.push(msg);
+      const res = sendPostRequestToEndpoint(
+        MESSAGE_SEND,
+        {
+          channelId: publicChannelId,
+          message: msg
+        },
+        publicChannelCreatorToken);
+
+      expect(res.statusCode).toBe(OK);
+    }
+
+    const start = 11;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    },
+    publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: start + 50
+    });
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
+  });
+
+  test('channelMessages start from middle less than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 11; i++) {
+      expectedMessages.push(`hello ${i}`);
+      const res = sendPostRequestToEndpoint(MESSAGE_SEND,
+        {
+          channelId: publicChannelId,
+          message: `hello ${i}`
+        },
+        publicChannelCreatorToken);
+      expect(res.statusCode).toBe(OK);
+    }
+
+    const start = 3;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: -1
+    });
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expectedMessages = [...expectedMessages].reverse().slice(3);
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
   });
 });
 
 describe('HTTP tests for channel/join', () => {
-  let channel1Id: number;
-  let channel2Id: number;
-  beforeEach(() => {
-    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
-    });
-    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
-    const channel2Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME + '2',
-      isPublic: false
-    });
-    channel2Id = (parseJsonResponse(channel2Res) as unknown as channelId).channelId;
-  });
-
-  test('channelId does not refer to a valid channel', () => {
+  test('channelJoin invalid channel ID throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
-      token: token2,
       channelId: 99999999,
-    });
+    },
+    privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -198,11 +351,10 @@ describe('HTTP tests for channel/join', () => {
     });
   });
 
-  test('the authorised user is already a member of the channel', () => {
+  test('channelJoin already a memeber throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
-      token: token,
-      channelId: channel1Id,
-    });
+      channelId: publicChannelId,
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -212,11 +364,10 @@ describe('HTTP tests for channel/join', () => {
     });
   });
 
-  test('channelId refers to a channel that is private and the authorised user is not already a channel member and is not a global owner', () => {
+  test('channelJoin non-global owner join private channel throws forbidden', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
-      token: token2,
-      channelId: channel2Id,
-    });
+      channelId: privateChannelId,
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -226,11 +377,10 @@ describe('HTTP tests for channel/join', () => {
     });
   });
 
-  test('token is invalid', () => {
+  test('channelJoin invalid token throws forbidden', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
-      token: '99999999',
-      channelId: channel1Id,
-    });
+      channelId: publicChannelId,
+    }, 'some bad token');
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -240,11 +390,28 @@ describe('HTTP tests for channel/join', () => {
     });
   });
 
-  test('correct input correct return ', () => {
+  test('channelJoin non-global owner join public channel success', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
-      token: token2,
-      channelId: channel1Id,
-    });
+      channelId: publicChannelId,
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('channelJoin global owner join public channel success', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
+      channelId: publicChannelId,
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('channelJoin global owner join private channel success', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
+      channelId: privateChannelId,
+    }, globalOwnerToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
@@ -252,22 +419,30 @@ describe('HTTP tests for channel/join', () => {
 });
 
 describe('HTTP tests for channel/invite', () => {
-  let channel1Id: number;
+  let normalUserId: number;
+  let normalUserToken: string;
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
   beforeEach(() => {
-    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: NORMAL_USER_EMAIL,
+      password: NORMAL_USER_PW,
+      nameFirst: NORMAL_USER_NAME_FIRST,
+      nameLast: NORMAL_USER_NAME_LAST
     });
-    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    normalUserId = jsonResponse.authUserId;
+    normalUserToken = jsonResponse.token;
   });
 
-  test('channelId does not refer to a valid channel', () => {
+  test('channelInvite invalid channel ID throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: token,
-      channelId: 99999999,
-      uId: uId2,
-    });
+      channelId: 999993123111999,
+      uId: normalUserId,
+    },
+    privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -277,12 +452,11 @@ describe('HTTP tests for channel/invite', () => {
     });
   });
 
-  test('uId does not refer to a valid user', () => {
+  test('channelInvite invalid uId throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: token,
-      channelId: channel1Id,
+      channelId: publicChannelId,
       uId: 99999999,
-    });
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -292,12 +466,18 @@ describe('HTTP tests for channel/invite', () => {
     });
   });
 
-  test('uId refers to a user who is already a member of the channel', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: token,
-      channelId: channel1Id,
-      uId: uId1,
-    });
+  test('channelInvite invited uId is already a member throws error.', () => {
+    let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId,
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+
+    res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId,
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -307,12 +487,32 @@ describe('HTTP tests for channel/invite', () => {
     });
   });
 
-  test('channelId is valid and the authorised user is not a member of the channel', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: token2,
-      channelId: channel1Id,
-      uId: uId2,
+  test('channelInvite invited uId is already an owner throws error.', () => {
+    let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId,
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+
+    res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: publicChannelCreatorUserId,
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
     });
+  });
+
+  test('channelInvite inviter is not a member of public channel throws error', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: normalUserId,
+    }, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -322,12 +522,11 @@ describe('HTTP tests for channel/invite', () => {
     });
   });
 
-  test('token is invalid', () => {
+  test('channelInvite inviter is not a member of private channel throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: '99999999',
-      channelId: channel1Id,
-      uId: uId2,
-    });
+      channelId: privateChannelId,
+      uId: normalUserId,
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -337,62 +536,134 @@ describe('HTTP tests for channel/invite', () => {
     });
   });
 
-  test('correct input correct return ', () => {
+  test('channelInvite invitor invalid token throws fobidden', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: token,
-      channelId: channel1Id,
-      uId: uId2,
+      channelId: publicChannelId,
+      uId: normalUserId,
+    }, 'some bad token');
+
+    expect(res.statusCode).toBe(403);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
     });
+  });
+
+  test('channelInvite invite normal user to public channel success', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: normalUserId,
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
+
+  test('channelInvite invite normal user to private channel success', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: normalUserId,
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('channelInvite invite global owner to public channel success', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: globalOwnerUserId,
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('channelInvite invite global owner to private channel success', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: globalOwnerUserId,
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('channelInvite global owner not a member invite to public channel throws forbidden', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: normalUserId,
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('channelInvite global owner not a member invite to private channel throws forbidden', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: normalUserId,
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('channelInvite normal member invite to public channel throws forbidden', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: globalOwnerUserId,
+    }, normalUserToken);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('channelInvite normal member invite to private channel throws forbidden', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: globalOwnerUserId,
+    }, normalUserToken);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('channelInvite global owner added as a member then can invite in private channel success', () => {
+    let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: globalOwnerUserId,
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+
+    res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: normalUserId,
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(OK);
+  });
+
+  test('channelInvite global owner added as a member then can invite in public channel success', () => {
+    let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: globalOwnerUserId,
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+
+    res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: normalUserId,
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(OK);
+  });
 });
 
 describe('HTTP tests for channel/details', () => {
-  let channelId: number;
-  beforeEach(() => {
-    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
-    });
-    channelId = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
-  });
-
-  test('UserId is not a member of channel', () => {
+  test('channelDetails caller not a member of channel throws forbidden', () => {
     const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
-      token: token2,
-      channelId,
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('ChannelId does not refer to a valid channel', () => {
-    const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
-      token: token,
-      channelId: 999999999999999
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Invalid Token', () => {
-    const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
-      token: '99999999',
-      channelId,
-    });
+      channelId: publicChannelId
+    }, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -402,234 +673,264 @@ describe('HTTP tests for channel/details', () => {
     });
   });
 
-  test('correct input correct return for channel', () => {
+  test('channelDetails invalid channel ID throws error', () => {
     const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
-      token,
-      channelId,
+      channelId: 999999999999999
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
     });
+  });
+
+  test('channelDetails invalid token throws forbidden', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
+      channelId: publicChannelId,
+    }, 'bad token here');
+
+    expect(res.statusCode).toBe(403);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
+    });
+  });
+
+  test('channelDetails public channel success', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
+      channelId: publicChannelId
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
-      name: TEST_CHANNEL_NAME,
+      name: PUBLIC_CHANNEL_NAME,
       isPublic: true,
       ownerMembers: [{
-        email: 'Bob123@gmail.com',
-        handleStr: 'bartypotter',
-        nameFirst: 'Barty',
-        nameLast: 'Potter',
-        uId: uId1
+        email: PUBLIC_USER_EMAIL,
+        handleStr: expect.any(String),
+        nameFirst: PUBLIC_USER_NAME_FIRST,
+        nameLast: PUBLIC_USER_NAME_LAST,
+        uId: publicChannelCreatorUserId
       }],
       allMembers: [{
-        email: 'Bob123@gmail.com',
-        handleStr: 'bartypotter',
-        nameFirst: 'Barty',
-        nameLast: 'Potter',
-        uId: uId1
+        email: PUBLIC_USER_EMAIL,
+        handleStr: expect.any(String),
+        nameFirst: PUBLIC_USER_NAME_FIRST,
+        nameLast: PUBLIC_USER_NAME_LAST,
+        uId: publicChannelCreatorUserId
       }]
+    });
+  });
+
+  test('channelDetails private channel success', () => {
+    const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
+      channelId: privateChannelId
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      name: PRIVATE_CHANNEL_NAME,
+      isPublic: false,
+      ownerMembers: [{
+        email: PRIVATE_USER_EMAIL,
+        handleStr: expect.any(String),
+        nameFirst: PRIVATE_USER_NAME_FIRST,
+        nameLast: PRIVATE_USER_NAME_LAST,
+        uId: privateChannelCreatorUserId
+      }],
+      allMembers: [{
+        email: PRIVATE_USER_EMAIL,
+        handleStr: expect.any(String),
+        nameFirst: PRIVATE_USER_NAME_FIRST,
+        nameLast: PRIVATE_USER_NAME_LAST,
+        uId: privateChannelCreatorUserId
+      }]
+    });
+  });
+
+  test('channelDetails after invite success', () => {
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: globalOwnerUserId,
+    }, privateChannelCreatorToken);
+
+    const res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
+      channelId: privateChannelId
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      name: PRIVATE_CHANNEL_NAME,
+      isPublic: false,
+      ownerMembers: [{
+        email: PRIVATE_USER_EMAIL,
+        handleStr: expect.any(String),
+        nameFirst: PRIVATE_USER_NAME_FIRST,
+        nameLast: PRIVATE_USER_NAME_LAST,
+        uId: privateChannelCreatorUserId
+      }],
+      allMembers: [
+        {
+          email: PRIVATE_USER_EMAIL,
+          handleStr: expect.any(String),
+          nameFirst: PRIVATE_USER_NAME_FIRST,
+          nameLast: PRIVATE_USER_NAME_LAST,
+          uId: privateChannelCreatorUserId
+        },
+        {
+          email: GLOBAL_USER_EMAIL,
+          handleStr: expect.any(String),
+          nameFirst: GLOBAL_USER_NAME_FIRST,
+          nameLast: GLOBAL_USER_NAME_LAST,
+          uId: globalOwnerUserId
+        }
+      ]
     });
   });
 });
 
 describe('HTTP tests for channel/addowner', () => {
-  let privateChannelId: number;
-  let publicChannelId: number;
+  let normalUserId: number;
+
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
+
+  let publicChannelMemberId;
+  let privateChannelMemberId;
 
   beforeEach(() => {
-    const channel1CreateRes = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
-    });
-    publicChannelId = (parseJsonResponse(channel1CreateRes) as unknown as channelId).channelId;
+    publicChannelMemberId = privateChannelCreatorUserId;
+    privateChannelMemberId = publicChannelCreatorUserId;
 
-    const channel2CreateRes = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: false
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: NORMAL_USER_EMAIL,
+      password: NORMAL_USER_PW,
+      nameFirst: NORMAL_USER_NAME_FIRST,
+      nameLast: NORMAL_USER_NAME_LAST
     });
-    privateChannelId = (parseJsonResponse(channel2CreateRes) as unknown as channelId).channelId;
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    normalUserId = jsonResponse.authUserId;
 
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: token,
-      channelId: privateChannelId,
-      uId: uId2
-    });
-    sendPostRequestToEndpoint(CHANNEL_JOIN, {
-      token: token2,
       channelId: publicChannelId,
-    });
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: privateChannelMemberId
+    }, privateChannelCreatorToken);
   });
 
-  test('Add channel owner to public channel successful', () => {
+  test('channelAddOwner add member to public channel owner success', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
       channelId: publicChannelId,
-      uId: uId2
-    });
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
-  test('Add channel owner to private channel successful', () => {
+  test('channelAddOwner add member to private channel owner successful', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
       channelId: privateChannelId,
-      uId: uId2
-    });
+      uId: privateChannelMemberId
+    }, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
-  test('Add global owner to private channel successful', () => {
+  test('channelAddOwner add non-member global owner to private channel throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token3,
       channelId: privateChannelId,
-      uId: uId2
-    });
+      uId: globalOwnerUserId
+    }, privateChannelCreatorToken);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({});
+    expect(res.statusCode).toBe(400);
   });
 
-  test('Add global owner to public channel successful', () => {
+  test('channelAddOwner add non-member global owner to public channel throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token3,
       channelId: publicChannelId,
-      uId: uId2
-    });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({});
-  });
-  test('Add owner to invalid channel id returns fails', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
-      channelId: 5676879809,
-      uId: uId1
-    });
+      uId: globalOwnerUserId
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
   });
-  test('Add global owner to public with invalid channel id returns fails', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token3,
-      channelId: 5676879809,
-      uId: uId2
-    });
 
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-  test('Add owner to private channel with invalid channel id returns fails', () => {
+  test('channelAddOwner add non-member to private channel throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
-      channelId: 5676879809,
-      uId: uId1
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-  test('Add global owner to public with invalid channel id returns fails', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token3,
-      channelId: 5676879809,
-      uId: uId2
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-  test('Add owner to public channel with channel uId not a member returns fails', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
-      channelId: publicChannelId,
-      uId: 1234444
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-  test('Add owner to private channel with channel uId not a member returns fails', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
       channelId: privateChannelId,
-      uId: 2222222
-    });
+      uId: normalUserId
+    }, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
   });
-  test('Owner add new existing owner returns fails', () => {
-    const addNewOwner = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
-      channelId: publicChannelId,
-      uId: uId2
-    });
 
-    expect(addNewOwner.statusCode).toBe(OK);
-    expect(parseJsonResponse(addNewOwner)).toStrictEqual({});
-
+  test('channelAddOwner add non-member public channel throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
       channelId: publicChannelId,
-      uId: uId2
-    });
+      uId: normalUserId
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
   });
-  test('Non owner add new owner returns fails', () => {
+
+  test('channelAddOwner global owner as adder not a member throws forbidden', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token2,
-      channelId: privateChannelId,
-      uId: 2222222
-    });
+      channelId: publicChannelId,
+      uId: publicChannelMemberId
+    }, globalOwnerToken);
 
     expect(res.statusCode).toBe(403);
+  });
+
+  test('channelAddOwner invalid channel ID throws error', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
+      channelId: 5676879809,
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
       error: {
         message: expect.any(String)
       }
     });
   });
-  test('Add owner with invalid uId returns fails', () => {
+
+  test('channelAddOwner existing owner throws error', () => {
+    let res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
+      channelId: publicChannelId,
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+
+    res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
+      channelId: publicChannelId,
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
+    });
+  });
+
+  test('channelAddOwner invalid uId throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
       channelId: privateChannelId,
       uId: 2222222
-    });
+    }, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -641,21 +942,47 @@ describe('HTTP tests for channel/addowner', () => {
 });
 
 describe('HTTP tests for channel/leave', () => {
-  let channel1Id: number;
+  let normalUserToken: string;
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
+
+  let publicChannelMemberId;
+  let publicChannelMemberToken;
+
+  let privateChannelMemberId;
+  let privateChannelMemberToken;
   beforeEach(() => {
-    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
+    publicChannelMemberId = privateChannelCreatorUserId;
+    publicChannelMemberToken = privateChannelCreatorToken;
+
+    privateChannelMemberId = publicChannelCreatorUserId;
+    privateChannelMemberToken = publicChannelCreatorToken;
+
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: NORMAL_USER_EMAIL,
+      password: NORMAL_USER_PW,
+      nameFirst: NORMAL_USER_NAME_FIRST,
+      nameLast: NORMAL_USER_NAME_LAST
     });
-    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    normalUserToken = jsonResponse.token;
+
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: privateChannelId,
+      uId: privateChannelMemberId
+    }, privateChannelCreatorToken);
   });
 
-  test('channelId does not refer to a valid channel', () => {
+  test('channelLeave invalid channel ID throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_LEAVE, {
-      token: token,
       channelId: 99999999,
-    });
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -665,11 +992,10 @@ describe('HTTP tests for channel/leave', () => {
     });
   });
 
-  test('channelId is valid and the authorised user is not a member of the channel', () => {
+  test('channelLeave not a member of channel throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_LEAVE, {
-      token: token2,
-      channelId: channel1Id,
-    });
+      channelId: publicChannelId,
+    }, normalUserToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -679,11 +1005,10 @@ describe('HTTP tests for channel/leave', () => {
     });
   });
 
-  test('token is invalid', () => {
+  test('channelLeave invalid token throws forbidden', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_LEAVE, {
-      token: '99999999',
-      channelId: channel1Id,
-    });
+      channelId: publicChannelId,
+    }, 'bad token lol');
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -693,243 +1018,148 @@ describe('HTTP tests for channel/leave', () => {
     });
   });
 
-  test('correct input correct return ', () => {
+  test('channelLeave public channel member leave succesful', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_LEAVE, {
-      token: token,
-      channelId: channel1Id,
-    });
+      channelId: publicChannelId,
+    }, publicChannelMemberToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('channelLeave private channel member leave succesful', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_LEAVE, {
+      channelId: privateChannelId,
+    }, privateChannelMemberToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('channelLeave only owners leave channel remains', () => {
+    let res = sendPostRequestToEndpoint(CHANNEL_LEAVE, {
+      channelId: publicChannelId,
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+
+    res = sendGetRequestToEndpoint(CHANNEL_DETAILS, {
+      channelId: publicChannelId
+    }, publicChannelMemberToken);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      name: PUBLIC_CHANNEL_NAME,
+      isPublic: true,
+      ownerMembers: [],
+      allMembers: [{
+        email: expect.any(String),
+        handleStr: expect.any(String),
+        nameFirst: expect.any(String),
+        nameLast: expect.any(String),
+        uId: publicChannelMemberId
+      }]
+    });
   });
 });
 
 describe('HTTP tests for channel/removeowner', () => {
-  let privateChannelId: number;
-  let publicChannelId: number;
+  let normalUserId: number;
+  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+  const NORMAL_USER_PW = 'imnorm233';
+  const NORMAL_USER_NAME_FIRST = 'normalpers';
+  const NORMAL_USER_NAME_LAST = 'ffas';
 
+  let publicChannelMemberId;
+  let secondPublicChannelOwnerToken;
+
+  let privateChannelMemberId;
+  let privateChannelMemberToken;
   beforeEach(() => {
-    const channel1CreateRes = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
-    });
-    publicChannelId = (parseJsonResponse(channel1CreateRes) as unknown as channelId).channelId;
+    publicChannelMemberId = privateChannelCreatorUserId;
+    secondPublicChannelOwnerToken = privateChannelCreatorToken;
 
-    const channel2CreateRes = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      token: token,
-      name: TEST_CHANNEL_NAME,
-      isPublic: false
+    privateChannelMemberId = publicChannelCreatorUserId;
+    privateChannelMemberToken = publicChannelCreatorToken;
+
+    const res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: NORMAL_USER_EMAIL,
+      password: NORMAL_USER_PW,
+      nameFirst: NORMAL_USER_NAME_FIRST,
+      nameLast: NORMAL_USER_NAME_LAST
     });
-    privateChannelId = (parseJsonResponse(channel2CreateRes) as unknown as channelId).channelId;
+    const jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    normalUserId = jsonResponse.authUserId;
 
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      token: token,
-      channelId: privateChannelId,
-      uId: uId2
-    });
-    sendPostRequestToEndpoint(CHANNEL_JOIN, {
-      token: token2,
       channelId: publicChannelId,
-    });
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
     sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
-      token: token,
       channelId: publicChannelId,
-      uId: uId2
-    });
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelMemberId
+    }, privateChannelCreatorToken);
   });
 
-  test('Remove channel owner remove themselves successful', () => {
+  test('channelRemoveOwner self remove success', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
       channelId: publicChannelId,
-      uId: uId1
-    });
+      uId: publicChannelCreatorUserId
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
-  test('Remove channel owner remove other user successful', () => {
+  test('channelRemoveOwner remove another user success', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
       channelId: publicChannelId,
-      uId: uId2
-    });
+      uId: publicChannelCreatorUserId
+    }, secondPublicChannelOwnerToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
-  test('Global owner remove another channel owner successful', () => {
+  test('channelRemoveOwner non-member global owner remove another owner throws forbidden', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token3,
       channelId: publicChannelId,
-      uId: uId1
-    });
-
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({});
-  });
-
-  test('Remove channel owner using channelId refer to invalid channel remove themselves returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
-      channelId: 22222222,
-      uId: uId1
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Remove channel owner using channelId refer to invalid channel remove other user returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
-      channelId: 22222222,
-      uId: uId2
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Global owner using channelId refer to invalid channel remove other user returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token3,
-      channelId: 22222222,
-      uId: uId2
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Remove channel owner using invalid uId remove themselves returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
-      channelId: publicChannelId,
-      uId: 123123123
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Global owner using invalid uId remove other user returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token3,
-      channelId: publicChannelId,
-      uId: 123123123
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Channel owner using uId refer a user who is not an owner of the channel remove other user returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
-      channelId: privateChannelId,
-      uId: uId2
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Global owner using uId refer a user who is not an owner of the channel remove other user returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token3,
-      channelId: privateChannelId,
-      uId: uId2
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Channel owner using uId refer a user who is not an owner of the channel remove other user returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
-      channelId: privateChannelId,
-      uId: uId2
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Channel owner using uId refer a user who is currently the only owner of the channel returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token,
-      channelId: privateChannelId,
-      uId: uId1
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Channel owner using uId refer a user who is currently the only owner of the channel returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token3,
-      channelId: privateChannelId,
-      uId: uId3
-    });
-
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: expect.any(String)
-      }
-    });
-  });
-
-  test('Authorised user does not have owner permissions in the channel returns fail', () => {
-    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token2,
-      channelId: privateChannelId,
-      uId: uId1
-    });
+      uId: publicChannelCreatorToken
+    }, globalOwnerToken);
 
     expect(res.statusCode).toBe(403);
+  });
+
+  test('channelRemoveOwner owner global owner remove another owner success', () => {
+    sendPostRequestToEndpoint(CHANNEL_JOIN, {
+      channelId: publicChannelId
+    }, globalOwnerToken);
+    let res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
+      channelId: publicChannelId,
+      uId: globalOwnerUserId
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(200);
+
+    res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
+      channelId: publicChannelId,
+      uId: publicChannelCreatorUserId
+    }, globalOwnerToken);
+
+    expect(res.statusCode).toBe(200);
+  });
+
+  test('channelRemoveOwner invalid channel ID throws error', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
+      channelId: 22222222,
+      uId: publicChannelCreatorUserId
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
       error: {
         message: expect.any(String)
@@ -937,12 +1167,67 @@ describe('HTTP tests for channel/removeowner', () => {
     });
   });
 
-  test('Authorised user does not have owner permissions in the channel returns fail', () => {
+  test('channelRemoveOwner invalid uId throws error', () => {
     const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
-      token: token2,
-      channelId: privateChannelId,
-      uId: uId1
+      channelId: publicChannelId,
+      uId: 123123123
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
     });
+  });
+
+  test('channelRemoveOwner target not a member throws error', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
+      channelId: publicChannelId,
+      uId: normalUserId
+    }, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
+    });
+  });
+
+  test('channelRemoveOwner target not an owner throws error', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
+      channelId: privateChannelId,
+      uId: privateChannelMemberId
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
+    });
+  });
+
+  test('channelRemoveOwner only owner left throws error', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
+      channelId: privateChannelId,
+      uId: privateChannelCreatorUserId
+    }, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: expect.any(String)
+      }
+    });
+  });
+
+  test('channelOwner remover has no owner permission throws forbidden', () => {
+    const res = sendPostRequestToEndpoint(CHANNEL_REMOVE_OWNER, {
+      channelId: privateChannelId,
+      uId: privateChannelCreatorToken
+    }, privateChannelMemberToken);
 
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
