@@ -18,7 +18,7 @@ import {
   userProfileEmailChange,
   userProfileHandleChange,
   userProfileNameChange,
-  userProfileV1,
+  userProfile,
   listAllUsersV1
 } from './users';
 import {
@@ -259,7 +259,7 @@ app.get('/user/profile/v3', (req: Request, res: Response, next) => {
   try {
     const { uId } = req.query as unknown as userProfileRequest;
     const token = req.header('token');
-    const result = userProfileV1(token, Number(uId));
+    const result = userProfile(token, Number(uId));
     res.json(result);
   } catch (err) {
     next(err);
