@@ -119,22 +119,21 @@ export function dmMessages(
     throw HTTPError(403, 'user is not part of dm');
   }
 
-  const messages = dm.messages;
+  const messages = [...dm.messages].reverse();
   let slicedMessages: messages[];
   let end: number;
 
   if (start + 50 >= messages.length) {
     end = -1;
-    slicedMessages = messages.slice(start);
+    slicedMessages = messages.slice(start, messages.length);
   } else {
     end = start + 50;
     slicedMessages = messages.slice(start, end);
   }
-
   return {
     messages: slicedMessages,
-    start: start,
-    end: end
+    start,
+    end
   };
 }
 
