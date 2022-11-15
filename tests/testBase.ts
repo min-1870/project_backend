@@ -32,7 +32,7 @@ export const DM_LIST = '/dm/list/v2';
 export const DM_REMOVE = '/dm/remove/v2';
 export const DM_LEAVE = '/dm/leave/v2';
 export const DM_MESSGES = '/dm/messages/v2';
-export const DM_SEND = '/dm/senddm/v2';
+export const DM_SEND = '/message/senddm/v2';
 export const DM_DETAILS = '/dm/details/v2';
 
 export const MESSAGE_DM_SEND = '/message/senddm/v2';

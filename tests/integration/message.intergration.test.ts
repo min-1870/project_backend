@@ -1,5 +1,5 @@
-import { authResponse, channelId, channelMessagesOutput, dmId, messageId } from '../../src/types';
-import { AUTH_REGISTER, CHANNEL_MESSAGES, DM_CREATE, DM_MESSGES, MESSAGE_DM_SEND, MESSAGE_EDIT, MESSAGE_REMOVE, MESSAGE_SEND } from '../testBase';
+import { authResponse, channelId, channelMessagesOutput, dmId, messageId /** user */ } from '../../src/types';
+import { AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_INVITE, CHANNEL_JOIN, CHANNEL_MESSAGES, clearDataForTest, DM_CREATE, DM_MESSGES, DM_SEND, MESSAGE_DM_SEND, MESSAGE_EDIT, MESSAGE_REACT, MESSAGE_REMOVE, MESSAGE_SEND, USER_PROFILE } from '../testBase';
 import {
   OK,
   parseJsonResponse,
@@ -8,9 +8,6 @@ import {
   sendPostRequestToEndpoint,
   sendPutRequestToEndpoint
 } from './integrationTestUtils';
-
-const CHANNELS_CREATE = '/channels/create/v3';
-const CHANNEL_JOIN = '/channel/join/v3';
 
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
@@ -32,7 +29,7 @@ let authUserId: number; // token of test user 1
 let authUserId2: number; // token of test user 1
 
 beforeEach(() => {
-  sendDeleteRequestToEndpoint('/clear/v1', {});
+  clearDataForTest();
   const res1 = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: EMAIL,
     password: PASSWORD,
@@ -144,9 +141,17 @@ describe('HTTP tests for message/send', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
-      messages: [{ messageId: messageId, uId: authUserId, message: TEST_MESSAGE, timeSent: expect.any(Number) }],
+      messages: [
+        {
+          messageId: messageId,
+          uId: authUserId,
+          message: TEST_MESSAGE,
+          timeSent: expect.any(Number),
+          reacts: []
+        }
+      ],
       start: 0,
-      end: -1
+      end: -1,
     });
   });
 
@@ -338,9 +343,17 @@ describe('HTTP tests for message/edit', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
-      messages: [{ messageId: testMessageId, uId: authUserId, message: TEST_MESSAGE_2, timeSent: expect.any(Number) }],
+      messages: [
+        {
+          messageId: testMessageId,
+          uId: authUserId,
+          message: TEST_MESSAGE_2,
+          timeSent: expect.any(Number),
+          reacts: []
+        }
+      ],
       start: 0,
-      end: -1
+      end: -1,
     });
   });
 
@@ -368,9 +381,283 @@ describe('HTTP tests for message/edit', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
-      messages: [{ messageId: msgId, uId: authUserId, message: TEST_MESSAGE_2, timeSent: expect.any(Number) }],
+      messages: [
+        {
+          messageId: msgId,
+          uId: authUserId,
+          message: TEST_MESSAGE_2,
+          timeSent: expect.any(Number),
+          reacts: []
+        }],
       start: 0,
-      end: -1
+      end: -1,
     });
+  });
+});
+
+describe('HTTP tests for message react', () => {
+  const PUBLIC_USER_EMAIL = 'Bob123@gmail.com';
+  const PUBLIC_USER_PASSWORD = '11223344';
+  const PUBLIC_USER_NAME_FIRST = 'Barty';
+  const PUBLIC_USER_NAME_LAST = 'Potter';
+
+  const PRIVATE_USER_EMAIL = '1Bob123@gmail.com';
+  const PRIVATE_USER_PASSWORD = '1122334dd4';
+  const PRIVATE_USER_NAME_FIRST = 'Baoty';
+  const PRIVATE_USER_NAME_LAST = 'Pottter';
+
+  const GLOBAL_USER_EMAIL = '1Bobd123@gmail.com';
+  const GLOBAL_USER_PASSWORD = '11223d34dd4';
+  const GLOBAL_USER_NAME_FIRST = 'aBaoty';
+  const GLOBAL_USER_NAME_LAST = 'Pottster';
+
+  const PUBLIC_CHANNEL_NAME = 'Test public channel';
+  const PRIVATE_CHANNEL_NAME = 'Test private channel';
+
+  let privateChannelCreatorToken: string;
+  let publicChannelCreatorToken: string;
+  let globalOwnerToken: string;
+  let privateChannelCreatorUserId: number;
+  let publicChannelCreatorUserId: number;
+  let globalOwnerUserId: number;
+
+  // let publicChannelCreatorHandle: string;
+  // let privateChannelCreatorHandle: string;
+  // let globalOwnerHandle: string;
+
+  let publicChannelId: number;
+  // let privateChannelId: number;
+
+  let publicChannelMessageId: number;
+  let dmMessageId: number;
+
+  // let dmCreatorId: number;
+  let dmCreatorToken: string;
+  let testDmId: number;
+
+  beforeEach(() => {
+    clearDataForTest();
+
+    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: GLOBAL_USER_EMAIL,
+      password: GLOBAL_USER_PASSWORD,
+      nameFirst: GLOBAL_USER_NAME_FIRST,
+      nameLast: GLOBAL_USER_NAME_LAST
+    });
+    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    globalOwnerUserId = jsonResponse.authUserId;
+    globalOwnerToken = jsonResponse.token;
+
+    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: PUBLIC_USER_EMAIL,
+      password: PUBLIC_USER_PASSWORD,
+      nameFirst: PUBLIC_USER_NAME_FIRST,
+      nameLast: PUBLIC_USER_NAME_LAST
+    });
+    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    publicChannelCreatorUserId = jsonResponse.authUserId;
+    publicChannelCreatorToken = jsonResponse.token;
+
+    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+      email: PRIVATE_USER_EMAIL,
+      password: PRIVATE_USER_PASSWORD,
+      nameFirst: PRIVATE_USER_NAME_FIRST,
+      nameLast: PRIVATE_USER_NAME_LAST
+    });
+    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    privateChannelCreatorUserId = jsonResponse.authUserId;
+    privateChannelCreatorToken = jsonResponse.token;
+    // dmCreatorId = privateChannelCreatorUserId;
+    dmCreatorToken = privateChannelCreatorToken;
+
+    // let userProfile;
+    res = sendGetRequestToEndpoint(USER_PROFILE,
+      { uId: publicChannelCreatorUserId }, publicChannelCreatorToken);
+    // userProfile = (parseJsonResponse(res) as unknown as user);
+    // publicChannelCreatorHandle = userProfile.user.handleStr;
+    res = sendGetRequestToEndpoint(USER_PROFILE,
+      { uId: privateChannelCreatorUserId }, privateChannelCreatorToken);
+    // userProfile = (parseJsonResponse(res) as unknown as user);
+    // privateChannelCreatorHandle = userProfile.user.handleStr;
+    res = sendGetRequestToEndpoint(USER_PROFILE,
+      { uId: globalOwnerUserId }, globalOwnerToken);
+    // userProfile = (parseJsonResponse(res) as unknown as user);
+    // globalOwnerHandle = userProfile.user.handleStr;
+
+    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: PUBLIC_CHANNEL_NAME,
+      isPublic: true
+    }, publicChannelCreatorToken);
+    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: PRIVATE_CHANNEL_NAME,
+      isPublic: false
+    }, privateChannelCreatorToken);
+    // privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: 'Hello channel'
+    }, publicChannelCreatorToken);
+    publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+
+    res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'Hello DM',
+    }, dmCreatorToken);
+    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+  });
+
+  test('messageReact new react to channel message succeeds', () => {
+    let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+
+    console.log(parseJsonResponse(res));
+    expect(res.statusCode).toBe(200);
+
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+    console.log(parseJsonResponse(res));
+    expect(res.statusCode).toBe(200);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('messageReact new react to dm message succeeds', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: dmMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('messageReact react to channel message with existing reacts succeeds', () => {
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: globalOwnerUserId
+    }, publicChannelCreatorToken);
+
+    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      globalOwnerToken
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('messageReact react to dm message with existing reacts succeeds', () => {
+    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: dmMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: dmMessageId, reactId: 1 },
+      publicChannelCreatorToken
+    );
+
+    expect(res.statusCode).toBe(200);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('messageReact user already reacted to channel message throws error', () => {
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+
+    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('messageReact user already reacted to dm message throws error', () => {
+    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: dmMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: dmMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('messageReact invalid react ID throws error', () => {
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+
+    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 323 },
+      privateChannelCreatorToken
+    );
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('messageReact invalid token throws forbidden', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      '12312312'
+    );
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('messageReact user not a member in channel throws error', () => {
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+
+    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      globalOwnerToken
+    );
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('messageReact user not a member in dm throws error', () => {
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+
+    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: dmMessageId, reactId: 1 },
+      globalOwnerToken
+    );
+    expect(res.statusCode).toBe(400);
   });
 });
