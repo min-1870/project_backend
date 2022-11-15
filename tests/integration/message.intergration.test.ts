@@ -199,7 +199,7 @@ describe('HTTP tests for message/remove', () => {
     }, token2);
 
     const bodyObj = JSON.parse(res.body as string);
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(403);
     expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
   });
 
@@ -270,10 +270,7 @@ describe('HTTP tests for message/edit', () => {
       message: VERY_LONG_MESSAGE
     }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    expect(res.statusCode).toBe(400);
   });
 
   test('length of message is less than 1 characters', () => {
@@ -282,10 +279,7 @@ describe('HTTP tests for message/edit', () => {
       message: ''
     }, token);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'length of message is less than 1 or over 1000 characters'
-    });
+    expect(res.statusCode).toBe(400);
   });
 
   test('messageId does not refer to a valid message within a channel/DM that the authorised user has joined', () => {
@@ -294,10 +288,7 @@ describe('HTTP tests for message/edit', () => {
       message: TEST_MESSAGE_2
     }, token2);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined'
-    });
+    expect(res.statusCode).toBe(403);
   });
 
   test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
@@ -310,10 +301,7 @@ describe('HTTP tests for message/edit', () => {
       message: TEST_MESSAGE_2
     }, token2);
 
-    expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM'
-    });
+    expect(res.statusCode).toBe(403);
   });
 
   test('token is invalid', () => {

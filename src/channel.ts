@@ -8,6 +8,7 @@ import {
   toOutputChannelDetail,
 } from './utils';
 import HTTPError from 'http-errors';
+import { notificationTypes } from './notifications';
 
 /**
   * Given a channelId of a channel Given a channel with ID channelId
@@ -75,6 +76,8 @@ export function channelInvite(
     throw HTTPError(400, 'Invalid user ID.');
   }
   database.addUserToChannel(uId, channel.channelId);
+  database.addNotification(authUser.uId, uId,
+    notificationTypes.AddedToChannel, -1, -1, channel.channelId);
   return {};
 }
 

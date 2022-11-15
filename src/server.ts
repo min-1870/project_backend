@@ -18,7 +18,7 @@ import {
   userProfileEmailChange,
   userProfileHandleChange,
   userProfileNameChange,
-  userProfileV1,
+  userProfile,
   listAllUsersV1
 } from './users';
 import {
@@ -58,6 +58,7 @@ import {
 // import fs from 'fs';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messageRemove, messageSend } from './message';
+import { getNotification } from './notifications';
 // import HTTPError from 'http-errors';
 
 // Set up web app
@@ -259,7 +260,7 @@ app.get('/user/profile/v3', (req: Request, res: Response, next) => {
   try {
     const { uId } = req.query as unknown as userProfileRequest;
     const token = req.header('token');
-    const result = userProfileV1(token, Number(uId));
+    const result = userProfile(token, Number(uId));
     res.json(result);
   } catch (err) {
     next(err);
@@ -385,6 +386,16 @@ app.get('/dm/details/v2', (req: Request, res: Response, next) => {
     const { dmId } = req.query as unknown as dmDetailsRequest;
     const token = req.header('token');
     const result = dmDetails(token, Number(dmId));
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/notifications/get/v1', (req: Request, res: Response, next) => {
+  try {
+    const token = req.header('token');
+    const result = getNotification(token);
     res.json(result);
   } catch (err) {
     next(err);

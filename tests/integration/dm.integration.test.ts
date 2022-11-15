@@ -1,4 +1,5 @@
 import { authResponse, channelMessagesOutput, dmId, messageId } from '../../src/types';
+import { AUTH_REGISTER, clearDataForTest, DM_CREATE } from '../testBase';
 import {
   parseJsonResponse,
   OK,
@@ -24,8 +25,8 @@ let VERY_LONG_MESSAGE = ':(';
 for (let i = 0; i < 1000; i++) VERY_LONG_MESSAGE = VERY_LONG_MESSAGE + ':(';
 
 beforeEach(() => {
-  sendDeleteRequestToEndpoint('/clear/v1', {});
-  let res = sendPostRequestToEndpoint('/auth/register/v3', {
+  clearDataForTest();
+  let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: EMAIL,
     password: PASSWORD,
     nameFirst: NAME_FIRST,
@@ -36,7 +37,7 @@ beforeEach(() => {
   token = jsonResponse.token;
   uIdTwo = jsonResponse.authUserId;
 
-  res = sendPostRequestToEndpoint('/auth/register/v3', {
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: 'gomugomu@hotmail.com',
     password: PASSWORD,
     nameFirst: 'monkey',
@@ -47,7 +48,7 @@ beforeEach(() => {
   uId = jsonResponse.authUserId;
   tokenTwo = jsonResponse.token;
 
-  res = sendPostRequestToEndpoint('/auth/register/v3', {
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: 'gomugomu1@hotmail.com',
     password: PASSWORD,
     nameFirst: 'fake',
@@ -58,9 +59,9 @@ beforeEach(() => {
   tokenThree = jsonResponse.token;
 });
 
-describe('HTTP tests for /dm/create/v2', () => {
-  test('Successful /dm/create/v2', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+describe('HTTP tests for /dm/create', () => {
+  test('Successful /dm/create', () => {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, token);
 
@@ -71,7 +72,7 @@ describe('HTTP tests for /dm/create/v2', () => {
   });
 
   test('Successful /dm/create/v2 with only owner', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: []
     }, token);
 
@@ -82,7 +83,7 @@ describe('HTTP tests for /dm/create/v2', () => {
   });
 
   test('Failure due to invalid uId', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId + 99123123199]
     }, token);
 
@@ -92,7 +93,7 @@ describe('HTTP tests for /dm/create/v2', () => {
   });
 
   test('Failure due to duplicate uId', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId, uId]
     }, token);
 
@@ -102,7 +103,7 @@ describe('HTTP tests for /dm/create/v2', () => {
   });
 
   test('Failure due to invalid tokens', () => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, (token + 69));
 
@@ -112,10 +113,10 @@ describe('HTTP tests for /dm/create/v2', () => {
   });
 });
 
-describe('HTTP tests for /dm/list/v2', () => {
+describe('HTTP tests for /dm/list', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, token);
 
@@ -138,7 +139,7 @@ describe('HTTP tests for /dm/list/v2', () => {
   });
 
   test('dm list successful with multiple lists', () => {
-    sendPostRequestToEndpoint('/dm/create/v2', {
+    sendPostRequestToEndpoint(DM_CREATE, {
       uIds: []
     }, token);
 
@@ -171,7 +172,7 @@ describe('HTTP tests for /dm/list/v2', () => {
 describe('HTTP tests for /dm/remove/v2', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, token);
 
@@ -236,7 +237,7 @@ describe('HTTP tests for /dm/remove/v2', () => {
 describe('HTTP tests for /dm/leave/v2', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, token);
 
@@ -287,7 +288,7 @@ describe('HTTP tests for /dm/leave/v2', () => {
 describe('HTTP tests for /dm/messages/v2', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, token);
 
@@ -357,7 +358,7 @@ describe('HTTP tests for /dm/messages/v2', () => {
 describe('HTTP tests for message/senddm/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, token);
 
@@ -471,7 +472,7 @@ describe('HTTP tests for message/senddm/v1', () => {
 describe('HTTP tests for dm/details/v1', () => {
   let dmId: number;
   beforeEach(() => {
-    const res = sendPostRequestToEndpoint('/dm/create/v2', {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [uId]
     }, token);
 

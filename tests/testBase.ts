@@ -33,6 +33,7 @@ export const DM_REMOVE = '/dm/remove/v2';
 export const DM_LEAVE = '/dm/leave/v2';
 export const DM_MESSGES = '/dm/messages/v2';
 export const DM_SEND = '/dm/senddm/v2';
+export const DM_DETAILS = '/dm/details/v2';
 
 export const MESSAGE_DM_SEND = '/message/senddm/v2';
 
@@ -42,7 +43,7 @@ export const USER_PROFILE_SET_NAME = '/user/profile/setname/v2';
 export const USER_PROFILE_SET_EMAIL = '/user/profile/setemail/v2';
 export const USER_PROFILE_SET_HANDLE = '/user/profile/sethandle/v2';
 
-export const NOTIFICATION_GET = '/notifcations/get/v1';
+export const NOTIFICATION_GET = '/notifications/get/v1';
 
 export const SEARCH = '/serach/v1';
 

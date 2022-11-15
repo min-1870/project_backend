@@ -2,6 +2,7 @@ import { database } from './dataStore';
 import { dm, dms, error, messages } from './types';
 import { duplicateValueCheck, toOutputDms, toOutputDmDetails } from './utils';
 import HTTPError from 'http-errors';
+import { notificationTypes } from './notifications';
 
 /**
   * Creates the Dm from token user to users entered in uIds
@@ -24,6 +25,9 @@ export function dmCreation(token:string, uIds: number[]): ({dmId: number} | erro
 
   const name = dmNameGenerator(token, uIds);
   const newDm = database.addDm(authUser.uId, name, uIds);
+  uIds.forEach(uId => {
+    database.addNotification(authUser.uId, uId, notificationTypes.AddedToDm, newDm.dmId, -1, -1);
+  });
   return {
     dmId: newDm.dmId
   };
@@ -119,22 +123,21 @@ export function dmMessages(
     throw HTTPError(403, 'user is not part of dm');
   }
 
-  const messages = dm.messages;
+  const messages = [...dm.messages].reverse();
   let slicedMessages: messages[];
   let end: number;
 
   if (start + 50 >= messages.length) {
     end = -1;
-    slicedMessages = messages.slice(start);
+    slicedMessages = messages.slice(start, messages.length);
   } else {
     end = start + 50;
     slicedMessages = messages.slice(start, end);
   }
-
   return {
     messages: slicedMessages,
-    start: start,
-    end: end
+    start,
+    end
   };
 }
 

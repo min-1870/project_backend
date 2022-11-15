@@ -13,9 +13,8 @@ import HTTPError from 'http-errors';
  * * *
  * @returns {user} - Object containing uId, email, nameFirst, nameLast, handleStr
  */
-export function userProfileV1(token: string, uID: number): { user: user } | error {
+export function userProfile(token: string, uID: number): { user: user } | error {
   database.getUserByToken(token);
-
   return { user: dataStoreUserToUser(database.getUserById(uID)) };
 }
 

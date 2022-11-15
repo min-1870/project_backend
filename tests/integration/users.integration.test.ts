@@ -1,4 +1,5 @@
 import { authResponse } from '../../src/types';
+import { USER_PROFILE } from '../testBase';
 import {
   parseJsonResponse,
   OK,
@@ -41,10 +42,10 @@ beforeEach(() => {
   uId = jsonResponse.authUserId;
 });
 
-describe('HTTP tests for /user/profile/v3', () => {
+describe('HTTP tests for /user/profile', () => {
   // happy path
-  test('Successful /user/profile/v3', () => {
-    const res = sendGetRequestToEndpoint('/user/profile/v3', {
+  test('userProfile get successful', () => {
+    const res = sendGetRequestToEndpoint(USER_PROFILE, {
       uId: uId
     }, token);
 
@@ -61,8 +62,8 @@ describe('HTTP tests for /user/profile/v3', () => {
   });
 
   test('error passing invalid uId', () => {
-    const res = sendGetRequestToEndpoint('/user/profile/v3', {
-      uId: (uId + 12133)
+    const res = sendGetRequestToEndpoint(USER_PROFILE, {
+      uId: 3129083901222
     }, token);
 
     const bodyObj = JSON.parse(res.body as string);
@@ -71,7 +72,7 @@ describe('HTTP tests for /user/profile/v3', () => {
   });
 
   test('error passing invalid token', () => {
-    const res = sendGetRequestToEndpoint('/user/profile/v3', {
+    const res = sendGetRequestToEndpoint(USER_PROFILE, {
       uId: uId
     }, (token + 69));
 
