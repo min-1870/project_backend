@@ -1,5 +1,6 @@
 import { database } from './dataStore';
 import { notficationResponse } from './types';
+import HTTPError from 'http-errors';
 
 export class Notification {
   type: number;
@@ -10,6 +11,9 @@ export class Notification {
 
   constructor(type: number, dmId: number, channelId: number, senderId: number,
     messageId: number) {
+    if (dmId === -1 && channelId === -1) {
+      throw HTTPError(400, 'Both channel ID and dm ID cannot be -1.');
+    }
     this.type = type;
     this.dmId = dmId;
     this.channelId = channelId;
@@ -62,7 +66,7 @@ export const notificationTypes: NotificationTypes = {
   AddedToChannel: 2,
   AddedToDm: 3,
   ReactedToChannelMessage: 4,
-  ReactedToDmMessage: 4
+  ReactedToDmMessage: 5
 };
 
 export interface dataStoreNotification {

@@ -713,6 +713,7 @@ class DataStore {
         type === notificationTypes.ReactedToChannelMessage) {
       notification = new Notification(type, -1, channelId, senderId, messageId);
     } else {
+      console.log('add ing with ', dmId);
       notification = new Notification(type, dmId, -1, senderId, messageId);
     }
     const notifToStore: dataStoreNotification = {

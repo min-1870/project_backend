@@ -1,5 +1,5 @@
 import { authResponse, channelId, dmDetailResponse, dmId, messageId, notficationResponse, user } from '../../src/types';
-import { AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_INVITE, clearDataForTest, DM_CREATE, DM_DETAILS, MESSAGE_SEND, NOTIFICATION_GET, USER_PROFILE } from '../testBase';
+import { AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_INVITE, clearDataForTest, DM_CREATE, DM_DETAILS, DM_SEND, MESSAGE_REACT, MESSAGE_SEND, NOTIFICATION_GET, USER_PROFILE } from '../testBase';
 import { parseJsonResponse, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const PUBLIC_USER_EMAIL = 'Bob123@gmail.com';
@@ -142,9 +142,9 @@ describe('HTTP tests for /notifications/get', () => {
       uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
     }, dmCreatorToken);
     testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
-
     res = sendGetRequestToEndpoint(DM_DETAILS, { dmId: testDmId }, dmCreatorToken);
     const dmName = (parseJsonResponse(res) as unknown as dmDetailResponse).name;
+
     res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(200);
@@ -157,12 +157,64 @@ describe('HTTP tests for /notifications/get', () => {
     });
   });
 
+  test('notificationsGet channel message react notifications', () => {
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+    sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: publicChannelMessageId, reactId: 1 },
+      privateChannelCreatorToken
+    );
+
+    const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+    const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    console.log(notifResponse);
+    expect(notifResponse.notifications[0]).toStrictEqual({
+      channelId: publicChannelId,
+      dmId: -1,
+      notificationMessage: `${privateChannelCreatorHandle} reacted to your message in ${PUBLIC_CHANNEL_NAME}`
+    });
+  });
+
+  test('notificationGet dm message react notification', () => {
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+    res = sendGetRequestToEndpoint(DM_DETAILS, { dmId: testDmId }, dmCreatorToken);
+    const dmName = (parseJsonResponse(res) as unknown as dmDetailResponse).name;
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: '0'.repeat(30),
+    }, dmCreatorToken);
+    expect(res.statusCode).toBe(200);
+    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
+      { messageId: dmMessageId, reactId: 1 },
+      publicChannelCreatorToken
+    );
+    expect(res.statusCode).toBe(200);
+
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, dmCreatorToken);
+
+    console.log(parseJsonResponse(res));
+    expect(res.statusCode).toBe(200);
+    const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    expect(notifResponse.notifications[0]).toStrictEqual({
+      channelId: -1,
+      dmId: testDmId,
+      notificationMessage: `${publicChannelCreatorHandle} reacted to your message in ${dmName}`
+    });
+  });
+
   test('notificationsGet more than 20 notifications only most recent 20 and order from recent to least recent', () => {
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: publicChannelCreatorUserId
     }, privateChannelCreatorToken);
-
     for (let i = 1; i < 31; i++) {
       const name = `This is channel ${i}.`;
       const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
@@ -177,10 +229,7 @@ describe('HTTP tests for /notifications/get', () => {
     }
 
     const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
-    console.log(publicChannelCreatorHandle);
     console.log(globalOwnerHandle);
-    console.log(publicChannelMessageId);
-    console.log(dmMessageId);
     console.log(dmCreatorId);
 
     expect(res.statusCode).toBe(200);
