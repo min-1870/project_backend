@@ -1,5 +1,5 @@
 import { database } from './dataStore';
-import { error } from './types';
+import { error, reactOutput } from './types';
 import HTTPError from 'http-errors';
 
 /** Send a message from the authorised user to the channel specified by channelId.
@@ -114,4 +114,68 @@ export function dmMessageSend(
   }
   const newMessage = database.addMessageToDm(message, user.uId, dm.dmId);
   return { messageId: newMessage.messageId };
+}
+
+/**
+ * Given a message within a channel or DM the authorised user is part of,
+ * adds a "react" to that particular message.
+ *
+ * @param token - token of the authroised user.
+ * @param messageId - message ID of the message to react to.
+ * @param reactId - react ID of the reaction user is making.
+ */
+export function messageReact(
+  token: string,
+  messageId: number,
+  reactId: number
+): (Record<string, never> | error) {
+  const user = database.getUserByToken(token);
+  const message = database.getDataStoreMessageByMessageId(messageId);
+
+  if (database.isMessageInChannels(message.messageId)) {
+    const channel = database.getDataStoreChannelByMessageId(messageId);
+    if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(400, 'User is not part of the channel where this message is.');
+    }
+  } else {
+    const dm = database.getDmByMessageId(messageId);
+    if (!database.isUserInDm(user.uId, dm.dmId)) {
+      throw HTTPError(400, 'User is not part of the channel where this message is.');
+    }
+  }
+
+  if (message.reacts.some(react => react.reactId === reactId)) {
+    database.getDataStoreMessageByMessageId(messageId).reacts.find(r => r.reactId === reactId).addUserToReact(user.uId);
+  } else {
+    database.addReact(reactId, message.messageId, user.uId);
+  }
+  return {};
+}
+
+export class React {
+  reactId: number;
+  uIds: number[];
+
+  constructor(reactId: number, uIds: number[]) {
+    if (reactId !== 1) {
+      throw HTTPError(400, 'Invalid react ID');
+    }
+    this.reactId = reactId;
+    this.uIds = uIds;
+  }
+
+  toMessageOutput(callerId: number): reactOutput {
+    return {
+      reactId: this.reactId,
+      uIds: this.uIds,
+      isThisUserReacted: this.uIds.includes(callerId)
+    };
+  }
+
+  addUserToReact(uId: number) {
+    if (this.uIds.includes(uId)) {
+      throw HTTPError(400, 'Already contains this user in this react.');
+    }
+    this.uIds.push(uId);
+  }
 }

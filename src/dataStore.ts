@@ -5,13 +5,14 @@ import {
   dataStorePassReset,
   dataStoreUser,
   messages,
-  notificationsOutput
+  notificationsOutput,
 } from './types';
 import fs from 'fs';
 import HTTPError from 'http-errors';
 import { getHashOf, hashToken } from './hash';
 import { generateAuthUserId, generateChannelId, generateDmId, generateMessageId, generateToken } from './ids';
 import { dataStoreNotification, Notification, notificationTypes } from './notifications';
+import { React } from './message';
 
 class DataStore {
   users: dataStoreUser[];
@@ -728,8 +729,7 @@ class DataStore {
     userId: number
   ): notificationsOutput[] {
     const user = database.getUserById(userId);
-    console.log(user);
-    return this.notifications.filter(notif => notif.receiverId === userId)
+    return this.notifications.filter(notif => notif.receiverId === user.uId)
       .map(notif => {
         return {
           channelId: notif.notification.channelId,
@@ -737,6 +737,18 @@ class DataStore {
           notificationMessage: notif.notification.getNotificationMessage()
         };
       });
+  }
+
+  addReact(
+    reactId: number,
+    messageId: number,
+    userId: number
+  ) {
+    const user = this.getUserById(userId);
+    if (!this.getDataStoreMessageByMessageId(messageId).reacts.some(r => r.reactId === reactId)) {
+      const newReact = new React(reactId, [user.uId]);
+      this.getDataStoreMessageByMessageId(messageId).reacts.push(newReact);
+    }
   }
 
   /**
@@ -767,7 +779,8 @@ function createNewMessage(uId, message): messages {
     messageId: generateMessageId(),
     uId,
     message,
-    timeSent: Date.now()
+    timeSent: Date.now(),
+    reacts: []
   };
 }
 

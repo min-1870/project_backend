@@ -6,7 +6,9 @@ import {
   dataStoreUser,
   user,
   dms,
-  dataStoreDm
+  dataStoreDm,
+  messages,
+  messageOutput
 } from './types';
 
 export function dataStoreUserToUser(dataStoreUser: dataStoreUser): user {
@@ -65,4 +67,14 @@ export function toOutputDmDetails(dm: dataStoreDm) {
 
 export function duplicateValueCheck(array) {
   return array.length !== new Set(array).size;
+}
+
+export function toOutputMessages(dataStoreMessage: messages, authUserId: number): messageOutput {
+  return {
+    messageId: dataStoreMessage.messageId,
+    message: dataStoreMessage.message,
+    uId: dataStoreMessage.uId,
+    timeSent: dataStoreMessage.timeSent,
+    reacts: dataStoreMessage.reacts.map(r => r.toMessageOutput(authUserId))
+  };
 }

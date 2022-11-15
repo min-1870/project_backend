@@ -1,6 +1,6 @@
 import { database } from './dataStore';
-import { dm, dms, error, messages } from './types';
-import { duplicateValueCheck, toOutputDms, toOutputDmDetails } from './utils';
+import { dm, dms, error, messageOutput, messages } from './types';
+import { duplicateValueCheck, toOutputDms, toOutputDmDetails, toOutputMessages } from './utils';
 import HTTPError from 'http-errors';
 import { notificationTypes } from './notifications';
 
@@ -112,7 +112,7 @@ export function dmLeave(token:string, dmId:number): (Record<string, never> | err
 export function dmMessages(
   token: string,
   dmId: number,
-  start: number): ({ messages: messages[], start: number, end: number } | error) {
+  start: number): ({ messages: messageOutput[], start: number, end: number } | error) {
   const user = database.getUserByToken(token);
   const dm = database.getDmById(dmId);
 
@@ -135,7 +135,7 @@ export function dmMessages(
     slicedMessages = messages.slice(start, end);
   }
   return {
-    messages: slicedMessages,
+    messages: slicedMessages.map(m => toOutputMessages(m, user.uId)),
     start,
     end
   };
