@@ -520,14 +520,12 @@ describe('HTTP tests for message react', () => {
       uId: privateChannelCreatorUserId
     }, publicChannelCreatorToken);
 
-    console.log(parseJsonResponse(res));
     expect(res.statusCode).toBe(200);
 
     res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: publicChannelMessageId, reactId: 1 },
       privateChannelCreatorToken
     );
-    console.log(parseJsonResponse(res));
     expect(res.statusCode).toBe(200);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
