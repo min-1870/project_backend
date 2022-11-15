@@ -14,9 +14,8 @@ import HTTPError from 'http-errors';
  * @returns {user} - Object containing uId, email, nameFirst, nameLast, handleStr
  */
 export function userProfile(token: string, uID: number): { user: user } | error {
-  const user = database.getUserByToken(token);
-
-  return { user: dataStoreUserToUser(user) };
+  database.getUserByToken(token);
+  return { user: dataStoreUserToUser(database.getUserById(uID)) };
 }
 
 /**

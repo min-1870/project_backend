@@ -1,3 +1,5 @@
+import {dataStoreNotification} from "./notifications";
+
 // The user output type.
 export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
 export type users = { users: user[] };
@@ -83,7 +85,8 @@ export type dataStore = {
   users: dataStoreUser[],
   channels: dataStoreChannel[],
   dms: dataStoreDm[],
-  passwordResets: dataStorePassReset[]
+  passwordResets: dataStorePassReset[],
+  notifications: dataStoreNotification[]
 }
 
 export type authResponse = {
@@ -223,4 +226,19 @@ export type passwordResetRequest = {
 
 export type listResetCodeResponse = {
   codes: [string]
+}
+
+export type notificationsOutput = {
+  channelId: number,
+  dmId: number,
+  notificationMessage: string
+}
+
+export type notficationResponse = {
+  notifications: notificationsOutput[]
+}
+
+export type dmDetailResponse = {
+  name: string,
+  members: user[]
 }
