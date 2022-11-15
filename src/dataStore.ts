@@ -80,9 +80,9 @@ class DataStore {
   }
 
   getUserByHandle(handle: string) {
-    const user = this.users.find(user => user.handleStr === handle)
+    const user = this.users.find(user => user.handleStr === handle);
     if (!user) {
-      throw HTTPError(400, 'Invalid user handle')
+      throw HTTPError(400, 'Invalid user handle');
     }
     return user;
   }
@@ -721,7 +721,6 @@ class DataStore {
         type === notificationTypes.ReactedToChannelMessage) {
       notification = new Notification(type, -1, channelId, senderId, messageId);
     } else {
-      console.log('add ing with ', dmId);
       notification = new Notification(type, dmId, -1, senderId, messageId);
     }
     const notifToStore: dataStoreNotification = {
