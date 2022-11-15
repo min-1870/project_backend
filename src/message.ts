@@ -1,7 +1,7 @@
 import { database } from './dataStore';
 import { error, reactOutput } from './types';
 import HTTPError from 'http-errors';
-import {notificationTypes} from './notifications';
+import { notificationTypes } from './notifications';
 
 /** Send a message from the authorised user to the channel specified by channelId.
  * Note: Each message should have its own unique ID, i.e. no messages should share
@@ -159,14 +159,14 @@ export function messageReact(
       notificationTypes.ReactedToChannelMessage,
       -1,
       message.messageId,
-      database.getDataStoreChannelByMessageId(messageId).channelId)
+      database.getDataStoreChannelByMessageId(messageId).channelId);
   } else {
     database.addNotification(user.uId,
       message.uId,
       notificationTypes.ReactedToDmMessage,
       database.getDmByMessageId(messageId).dmId,
       message.messageId,
-      -1)
+      -1);
   }
   return {};
 }

@@ -171,12 +171,12 @@ describe('HTTP tests for /notifications/get', () => {
 
     expect(res.statusCode).toBe(200);
     const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
-    console.log(notifResponse)
+    console.log(notifResponse);
     expect(notifResponse.notifications[0]).toStrictEqual({
-        channelId: publicChannelId,
-        dmId: -1,
-        notificationMessage: `${privateChannelCreatorHandle} reacted to your message in ${PUBLIC_CHANNEL_NAME}`
-    })
+      channelId: publicChannelId,
+      dmId: -1,
+      notificationMessage: `${privateChannelCreatorHandle} reacted to your message in ${PUBLIC_CHANNEL_NAME}`
+    });
   });
 
   test('notificationGet dm message react notification', () => {
@@ -200,14 +200,14 @@ describe('HTTP tests for /notifications/get', () => {
 
     res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, dmCreatorToken);
 
-    console.log(parseJsonResponse(res))
+    console.log(parseJsonResponse(res));
     expect(res.statusCode).toBe(200);
     const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
     expect(notifResponse.notifications[0]).toStrictEqual({
-        channelId: -1,
-        dmId: testDmId,
-        notificationMessage: `${publicChannelCreatorHandle} reacted to your message in ${dmName}`
-    })
+      channelId: -1,
+      dmId: testDmId,
+      notificationMessage: `${publicChannelCreatorHandle} reacted to your message in ${dmName}`
+    });
   });
 
   test('notificationsGet more than 20 notifications only most recent 20 and order from recent to least recent', () => {
@@ -229,9 +229,7 @@ describe('HTTP tests for /notifications/get', () => {
     }
 
     const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
-    console.log(publicChannelCreatorHandle);
     console.log(globalOwnerHandle);
-    console.log(publicChannelMessageId);
     console.log(dmCreatorId);
 
     expect(res.statusCode).toBe(200);
