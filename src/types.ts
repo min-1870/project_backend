@@ -11,7 +11,8 @@ export type messages = {
   uId: number,
   message: string,
   timeSent: number,
-  reacts: React[]
+  reacts: React[],
+  isPinned: boolean
 };
 
 export interface reactOutput {

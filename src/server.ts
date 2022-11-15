@@ -58,7 +58,7 @@ import {
 } from './channel';
 // import fs from 'fs';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
-import { dmMessageSend, messageEdit, messageReact, messageRemove, messageSend } from './message';
+import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend } from './message';
 import { getNotification } from './notifications';
 // import HTTPError from 'http-errors';
 
@@ -408,6 +408,16 @@ app.post('/message/react/v1', (req: Request, res: Response, next) => {
     const { messageId, reactId } = req.body as reactMessageRequest;
     const token = req.header('token');
     res.json(messageReact(token, Number(messageId), Number(reactId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/message/pin/v1', (req: Request, res: Response, next) => {
+  try {
+    const { messageId } = req.body as reactMessageRequest;
+    const token = req.header('token');
+    res.json(messagePin(token, Number(messageId)));
   } catch (err) {
     next(err);
   }

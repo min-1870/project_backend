@@ -781,7 +781,8 @@ function createNewMessage(uId, message): messages {
     uId,
     message,
     timeSent: Date.now(),
-    reacts: []
+    reacts: [],
+    isPinned: false
   };
 }
 
