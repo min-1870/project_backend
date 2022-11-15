@@ -1,6 +1,7 @@
 import { database } from './dataStore';
 import { error, reactOutput } from './types';
 import HTTPError from 'http-errors';
+import {processMessageTagsAndSendNotifications} from './utils';
 
 /** Send a message from the authorised user to the channel specified by channelId.
  * Note: Each message should have its own unique ID, i.e. no messages should share
@@ -24,6 +25,7 @@ export function messageSend (
     throw HTTPError(403, 'channelId is valid and the authorised user is not a member of the channel');
   }
   const newMessage = database.addMessageToChannel(message, user.uId, channel.channelId);
+  processMessageTagsAndSendNotifications(newMessage.messageId, message, user.uId)
   return { messageId: newMessage.messageId };
 }
 
@@ -88,6 +90,7 @@ export function messageEdit (token: string, messageId: number, message: string):
     }
     database.editDmMessage(messageId, message);
   }
+  processMessageTagsAndSendNotifications(messageId, message, user.uId)
   return {};
 }
 
@@ -113,6 +116,7 @@ export function dmMessageSend(
     throw HTTPError(403, 'user is not part of dm');
   }
   const newMessage = database.addMessageToDm(message, user.uId, dm.dmId);
+  processMessageTagsAndSendNotifications(newMessage.messageId, message, user.uId)
   return { messageId: newMessage.messageId };
 }
 

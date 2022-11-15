@@ -79,6 +79,14 @@ class DataStore {
     }
   }
 
+  getUserByHandle(handle: string) {
+    const user = this.users.find(user => user.handleStr === handle)
+    if (!user) {
+      throw HTTPError(400, 'Invalid user handle')
+    }
+    return user;
+  }
+
   /**
    * Get a user by token
    *
