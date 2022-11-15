@@ -8,7 +8,7 @@ import {
   toOutputChannelDetail,
 } from './utils';
 import HTTPError from 'http-errors';
-import {notificationTypes} from './notifications';
+import { notificationTypes } from './notifications';
 
 /**
   * Given a channelId of a channel Given a channel with ID channelId

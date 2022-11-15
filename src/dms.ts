@@ -2,7 +2,7 @@ import { database } from './dataStore';
 import { dm, dms, error, messages } from './types';
 import { duplicateValueCheck, toOutputDms, toOutputDmDetails } from './utils';
 import HTTPError from 'http-errors';
-import {notificationTypes} from './notifications';
+import { notificationTypes } from './notifications';
 
 /**
   * Creates the Dm from token user to users entered in uIds
@@ -27,7 +27,7 @@ export function dmCreation(token:string, uIds: number[]): ({dmId: number} | erro
   const newDm = database.addDm(authUser.uId, name, uIds);
   uIds.forEach(uId => {
     database.addNotification(authUser.uId, uId, notificationTypes.AddedToDm, newDm.dmId, -1, -1);
-  })
+  });
   return {
     dmId: newDm.dmId
   };

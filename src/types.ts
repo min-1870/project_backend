@@ -1,4 +1,4 @@
-import {dataStoreNotification} from "./notifications";
+import { dataStoreNotification } from './notifications';
 
 // The user output type.
 export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };

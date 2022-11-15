@@ -1,6 +1,6 @@
-import {authResponse, channelId, dmDetailResponse, dmId, messageId, notficationResponse, user} from "../../src/types";
-import {AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_INVITE, clearDataForTest, DM_CREATE, DM_DETAILS, MESSAGE_DM_SEND, MESSAGE_SEND, NOTIFICATION_GET, USER_PROFILE} from "../testBase";
-import {parseJsonResponse, sendGetRequestToEndpoint, sendPostRequestToEndpoint} from "./integrationTestUtils";
+import { authResponse, channelId, dmDetailResponse, dmId, messageId, notficationResponse, user } from '../../src/types';
+import { AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_INVITE, clearDataForTest, DM_CREATE, DM_DETAILS, MESSAGE_SEND, NOTIFICATION_GET, USER_PROFILE } from '../testBase';
+import { parseJsonResponse, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const PUBLIC_USER_EMAIL = 'Bob123@gmail.com';
 const PUBLIC_USER_PASSWORD = '11223344';
@@ -34,12 +34,12 @@ let globalOwnerHandle: string;
 let publicChannelId: number;
 let privateChannelId: number;
 
-let publicChannelMessageId: number
-let dmMessageId: number
+let publicChannelMessageId: number;
+let dmMessageId: number;
 
-let dmCreatorId: number
-let dmCreatorToken: string
-let testDmId: number
+let dmCreatorId: number;
+let dmCreatorToken: string;
+let testDmId: number;
 
 beforeEach(() => {
   clearDataForTest();
@@ -78,17 +78,17 @@ beforeEach(() => {
 
   let userProfile;
   res = sendGetRequestToEndpoint(USER_PROFILE,
-    {uId: publicChannelCreatorUserId}, publicChannelCreatorToken)
-  userProfile = (parseJsonResponse(res) as unknown as user)
-  publicChannelCreatorHandle = userProfile.user.handleStr
+    { uId: publicChannelCreatorUserId }, publicChannelCreatorToken);
+  userProfile = (parseJsonResponse(res) as unknown as user);
+  publicChannelCreatorHandle = userProfile.user.handleStr;
   res = sendGetRequestToEndpoint(USER_PROFILE,
-    {uId: privateChannelCreatorUserId}, privateChannelCreatorToken)
-  userProfile = (parseJsonResponse(res) as unknown as user)
-  privateChannelCreatorHandle = userProfile.user.handleStr
+    { uId: privateChannelCreatorUserId }, privateChannelCreatorToken);
+  userProfile = (parseJsonResponse(res) as unknown as user);
+  privateChannelCreatorHandle = userProfile.user.handleStr;
   res = sendGetRequestToEndpoint(USER_PROFILE,
-    {uId: globalOwnerUserId}, globalOwnerToken)
-  userProfile = (parseJsonResponse(res) as unknown as user)
-  globalOwnerHandle = userProfile.user.handleStr
+    { uId: globalOwnerUserId }, globalOwnerToken);
+  userProfile = (parseJsonResponse(res) as unknown as user);
+  globalOwnerHandle = userProfile.user.handleStr;
 
   res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
     name: PUBLIC_CHANNEL_NAME,
@@ -105,27 +105,27 @@ beforeEach(() => {
   res = sendPostRequestToEndpoint(MESSAGE_SEND, {
     channelId: publicChannelId,
     message: 'Hello world'
-  }, publicChannelCreatorToken)
-  publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId
+  }, publicChannelCreatorToken);
+  publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
 });
 
 describe('HTTP tests for /notifications/get', () => {
   test('notificationsGet no notifications for user succeeds', () => {
-    const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken)
+    const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(200);
     expect(parseJsonResponse(res)).toStrictEqual({
       notifications: []
-    })
+    });
   });
 
   test('notificationsGet invited to channel notifications', () => {
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: publicChannelCreatorUserId
-    }, privateChannelCreatorToken)
+    }, privateChannelCreatorToken);
 
-    const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken)
+    const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(200);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -134,19 +134,18 @@ describe('HTTP tests for /notifications/get', () => {
         dmId: -1,
         notificationMessage: `${privateChannelCreatorHandle} added you to ${PRIVATE_CHANNEL_NAME}`
       }]
-    })
+    });
   });
 
   test('notificationGet create dm notification', () => {
     let res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
-    }, dmCreatorToken)
-    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
 
-    res = sendGetRequestToEndpoint(DM_DETAILS, {dmId: testDmId}, dmCreatorToken)
-    const dmName = (parseJsonResponse(res) as unknown as dmDetailResponse).name
-    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, privateChannelCreatorToken)
-
+    res = sendGetRequestToEndpoint(DM_DETAILS, { dmId: testDmId }, dmCreatorToken);
+    const dmName = (parseJsonResponse(res) as unknown as dmDetailResponse).name;
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, privateChannelCreatorToken);
 
     expect(res.statusCode).toBe(200);
     expect(parseJsonResponse(res)).toStrictEqual({
@@ -155,17 +154,17 @@ describe('HTTP tests for /notifications/get', () => {
         dmId: testDmId,
         notificationMessage: `${privateChannelCreatorHandle} added you to ${dmName}`
       }]
-    })
-  })
+    });
+  });
 
   test('notificationsGet more than 20 notifications only most recent 20 and order from recent to least recent', () => {
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: publicChannelCreatorUserId
-    }, privateChannelCreatorToken)
+    }, privateChannelCreatorToken);
 
-    for(let i = 1; i < 31; i++) {
-      const name = `This is channel ${i}.`
+    for (let i = 1; i < 31; i++) {
+      const name = `This is channel ${i}.`;
       const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
         name,
         isPublic: false
@@ -174,15 +173,20 @@ describe('HTTP tests for /notifications/get', () => {
       sendPostRequestToEndpoint(CHANNEL_INVITE, {
         channelId,
         uId: publicChannelCreatorUserId
-      }, privateChannelCreatorToken)
+      }, privateChannelCreatorToken);
     }
 
-    const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken)
+    const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
+    console.log(publicChannelCreatorHandle);
+    console.log(globalOwnerHandle);
+    console.log(publicChannelMessageId);
+    console.log(dmMessageId);
+    console.log(dmCreatorId);
 
     expect(res.statusCode).toBe(200);
-    let notifResponse = parseJsonResponse(res) as unknown as notficationResponse
+    const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
     expect(notifResponse.notifications.length).toBe(20);
-    expect(notifResponse.notifications[0].notificationMessage).toBe(`${privateChannelCreatorHandle} added you to This is channel 30.`)
-    expect(notifResponse.notifications[notifResponse.notifications.length - 1].notificationMessage).toBe(`${privateChannelCreatorHandle} added you to This is channel 11.`)
+    expect(notifResponse.notifications[0].notificationMessage).toBe(`${privateChannelCreatorHandle} added you to This is channel 30.`);
+    expect(notifResponse.notifications[notifResponse.notifications.length - 1].notificationMessage).toBe(`${privateChannelCreatorHandle} added you to This is channel 11.`);
   });
 });

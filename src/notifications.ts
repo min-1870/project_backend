@@ -1,30 +1,28 @@
-import {token} from "morgan"
-import {database} from "./dataStore"
-import {notficationResponse} from "./types"
-
+import { database } from './dataStore';
+import { notficationResponse } from './types';
 
 export class Notification {
-  type: number
-  dmId: number
-  channelId: number
-  senderId: number
-  messageId: number
+  type: number;
+  dmId: number;
+  channelId: number;
+  senderId: number;
+  messageId: number;
 
   constructor(type: number, dmId: number, channelId: number, senderId: number,
     messageId: number) {
-    this.type = type
-    this.dmId = dmId
-    this.channelId = channelId
-    this.senderId = senderId
-    this.messageId = messageId
+    this.type = type;
+    this.dmId = dmId;
+    this.channelId = channelId;
+    this.senderId = senderId;
+    this.messageId = messageId;
   }
 
   getNotificationMessage() {
     if (this.type === notificationTypes.TaggedToChannel || this.type === notificationTypes.TaggedToDm) {
       if (this.channelId !== -1) {
-        return `${database.getUserById(this.senderId).handleStr} tagged you in ${database.getDataStoreChannelByChannelId(this.channelId).name}: ${database.getDataStoreMessageByMessageId(this.messageId).message.substring(0, 20)}`
+        return `${database.getUserById(this.senderId).handleStr} tagged you in ${database.getDataStoreChannelByChannelId(this.channelId).name}: ${database.getDataStoreMessageByMessageId(this.messageId).message.substring(0, 20)}`;
       } else {
-        return `${database.getUserById(this.senderId).handleStr} tagged you in ${database.getDmById(this.dmId).name}: ${database.getDataStoreMessageByMessageId(this.messageId).message.substring(0, 20)}`
+        return `${database.getUserById(this.senderId).handleStr} tagged you in ${database.getDmById(this.dmId).name}: ${database.getDataStoreMessageByMessageId(this.messageId).message.substring(0, 20)}`;
       }
     } else if (this.type === notificationTypes.AddedToChannel || this.type === notificationTypes.AddedToDm) {
       if (this.channelId !== -1) {
@@ -65,7 +63,7 @@ export const notificationTypes: NotificationTypes = {
   AddedToDm: 3,
   ReactedToChannelMessage: 4,
   ReactedToDmMessage: 4
-}
+};
 
 export interface dataStoreNotification {
   receiverId: number,

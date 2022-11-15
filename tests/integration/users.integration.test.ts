@@ -1,5 +1,5 @@
 import { authResponse } from '../../src/types';
-import {USER_PROFILE} from '../testBase';
+import { USER_PROFILE } from '../testBase';
 import {
   parseJsonResponse,
   OK,

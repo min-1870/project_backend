@@ -58,7 +58,7 @@ import {
 // import fs from 'fs';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messageRemove, messageSend } from './message';
-import {getNotification} from './notifications';
+import { getNotification } from './notifications';
 // import HTTPError from 'http-errors';
 
 // Set up web app

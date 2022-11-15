@@ -11,8 +11,7 @@ import fs from 'fs';
 import HTTPError from 'http-errors';
 import { getHashOf, hashToken } from './hash';
 import { generateAuthUserId, generateChannelId, generateDmId, generateMessageId, generateToken } from './ids';
-import {dataStoreNotification, Notification, notificationTypes, NotificationTypes} from './notifications';
-import e from 'express';
+import { dataStoreNotification, Notification, notificationTypes } from './notifications';
 
 class DataStore {
   users: dataStoreUser[];
@@ -30,7 +29,7 @@ class DataStore {
       this.channels = data.channels;
       this.dms = data.dms;
       this.passwordResets = data.passwordResets;
-      this.notifications = data.notifications
+      this.notifications = data.notifications;
     } else {
       this.users = [];
       this.channels = [];
@@ -260,7 +259,7 @@ class DataStore {
    * @returns {dataStoreChannel} dataStoreChannel with that ID.
    */
   getDataStoreChannelByChannelId(channelId: number): dataStoreChannel {
-    console.log(channelId)
+    console.log(channelId);
     const channel = this.channels.find(c => c.channelId === channelId);
     if (!channel) {
       throw HTTPError(400, 'Invalid channel ID.');
@@ -711,15 +710,15 @@ class DataStore {
     if (type === notificationTypes.AddedToChannel ||
         type === notificationTypes.TaggedToChannel ||
         type === notificationTypes.ReactedToChannelMessage) {
-          notification = new Notification(type, -1, channelId, senderId, messageId)
+      notification = new Notification(type, -1, channelId, senderId, messageId);
     } else {
-      notification = new Notification(type, dmId, -1, senderId, messageId)
+      notification = new Notification(type, dmId, -1, senderId, messageId);
     }
     const notifToStore: dataStoreNotification = {
       receiverId,
       senderId,
       notification
-    }
+    };
     this.notifications.push(notifToStore);
 
     this.saveDataStore();
@@ -729,15 +728,15 @@ class DataStore {
     userId: number
   ): notificationsOutput[] {
     const user = database.getUserById(userId);
-    console.log(user)
+    console.log(user);
     return this.notifications.filter(notif => notif.receiverId === userId)
-    .map(notif => {
-      return {
-        channelId: notif.notification.channelId,
-        dmId: notif.notification.dmId,
-        notificationMessage: notif.notification.getNotificationMessage()
-      }
-    })
+      .map(notif => {
+        return {
+          channelId: notif.notification.channelId,
+          dmId: notif.notification.dmId,
+          notificationMessage: notif.notification.getNotificationMessage()
+        };
+      });
   }
 
   /**
@@ -758,7 +757,7 @@ class DataStore {
     this.channels = [];
     this.dms = [];
     this.passwordResets = [];
-    this.notifications = []
+    this.notifications = [];
     this.saveDataStore();
   }
 }
