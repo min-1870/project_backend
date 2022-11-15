@@ -1,5 +1,5 @@
 import { authResponse, channelMessagesOutput, dmId, messageId } from '../../src/types';
-import { AUTH_REGISTER, clearDataForTest, DM_CREATE } from '../testBase';
+import { AUTH_REGISTER, clearDataForTest, DM_CREATE, DM_SEND } from '../testBase';
 import {
   parseJsonResponse,
   OK,
@@ -367,7 +367,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('message/senddm with invalid dmId', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: (dmId + 104340),
       message: TEST_MESSAGE
     }, token);
@@ -378,7 +378,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('length of message is less than 1 characters', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: dmId,
       message: ''
     }, token);
@@ -389,7 +389,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('length of message is over 1000 characters', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: dmId,
       message: VERY_LONG_MESSAGE
     }, token);
@@ -400,7 +400,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('failure, user not part of dm', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: dmId,
       message: TEST_MESSAGE
     }, tokenThree);
@@ -411,7 +411,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('token is invalid', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: dmId,
       message: TEST_MESSAGE,
     }, (token + 99999));
@@ -422,7 +422,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('correct input correct return', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: dmId,
       message: TEST_MESSAGE,
     }, token);
@@ -434,7 +434,7 @@ describe('HTTP tests for message/senddm/v1', () => {
   });
 
   test('correct input correct message', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: dmId,
       message: TEST_MESSAGE,
     }, token);
@@ -448,14 +448,22 @@ describe('HTTP tests for message/senddm/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
-      messages: [{ messageId: messageId, uId: uIdTwo, message: TEST_MESSAGE, timeSent: expect.any(Number) }],
+      messages: [
+        {
+          messageId: messageId,
+          uId: uIdTwo,
+          message: TEST_MESSAGE,
+          timeSent: expect.any(Number),
+          reacts: []
+        }
+      ],
       start: 0,
-      end: -1
+      end: -1,
     });
   });
 
   test('correct input correct timeSent', () => {
-    const res = sendPostRequestToEndpoint('/message/senddm/v2', {
+    const res = sendPostRequestToEndpoint(DM_SEND, {
       dmId: dmId,
       message: TEST_MESSAGE,
     }, token);

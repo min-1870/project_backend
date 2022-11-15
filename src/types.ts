@@ -1,3 +1,4 @@
+import { React } from './message';
 import { dataStoreNotification } from './notifications';
 
 // The user output type.
@@ -5,11 +6,32 @@ export type user = { uId: number, email: string, nameFirst: string, nameLast: st
 export type users = { users: user[] };
 
 // Messages output type.
-export type messages = { messageId: number, uId: number, message: string, timeSent: number };
+export type messages = {
+  messageId: number,
+  uId: number,
+  message: string,
+  timeSent: number,
+  reacts: React[]
+};
+
+export interface reactOutput {
+  reactId: number,
+  uIds: number[],
+  isThisUserReacted: boolean
+}
+
+export interface messageOutput {
+  messageId: number,
+  uId: number,
+  message: string,
+  timeSent: number,
+  reacts: reactOutput[]
+}
+
 export type messageId = { messageId: number };
 
 export type channelMessagesOutput = {
-  messages: messages[],
+  messages: messageOutput[],
   start: number,
   end: number
 };
@@ -34,6 +56,11 @@ export type dataStoreUser = {
   handleStr: string,
   isGlobalOwner: boolean,
   sessionTokens: string[]
+}
+
+export type reactMessageRequest = {
+  messageId: number,
+  reactId: number
 }
 
 // The dm type that is stored in the data store
@@ -153,7 +180,6 @@ export type messageRemoveRequest = {
 }
 
 export type messageSendDmRequest = {
-  token: string,
   dmId: number,
   message: string
 }

@@ -2,10 +2,11 @@ import { database } from './dataStore';
 import {
   error,
   messages,
-  channel
+  channel,
+  messageOutput
 } from './types';
 import {
-  toOutputChannelDetail,
+  toOutputChannelDetail, toOutputMessages,
 } from './utils';
 import HTTPError from 'http-errors';
 import { notificationTypes } from './notifications';
@@ -101,7 +102,7 @@ export function channelInvite(
 export function channelMessages(
   token: string,
   channelId: number,
-  start: number): ({ messages: messages[], start: number, end: number } | error) {
+  start: number): ({ messages: messageOutput[], start: number, end: number } | error) {
   const authUser = database.getUserByToken(token);
   const channel = database.getDataStoreChannelByChannelId(channelId);
   if (start < 0 || start > channel.messages.length) {
@@ -123,7 +124,7 @@ export function channelMessages(
     slicedMessages = messages.slice(start, end);
   }
   return {
-    messages: slicedMessages,
+    messages: slicedMessages.map(m => toOutputMessages(m, authUser.uId)),
     start,
     end
   };

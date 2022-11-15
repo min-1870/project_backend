@@ -45,6 +45,7 @@ import {
   channelRemoveownerRequest,
   dmDetailsRequest,
   passwordResetRequest,
+  reactMessageRequest,
 } from './types';
 import {
   channelMessages,
@@ -57,7 +58,7 @@ import {
 } from './channel';
 // import fs from 'fs';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
-import { dmMessageSend, messageEdit, messageRemove, messageSend } from './message';
+import { dmMessageSend, messageEdit, messageReact, messageRemove, messageSend } from './message';
 import { getNotification } from './notifications';
 // import HTTPError from 'http-errors';
 
@@ -397,6 +398,16 @@ app.get('/notifications/get/v1', (req: Request, res: Response, next) => {
     const token = req.header('token');
     const result = getNotification(token);
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/message/react/v1', (req: Request, res: Response, next) => {
+  try {
+    const { messageId, reactId } = req.body as reactMessageRequest;
+    const token = req.header('token');
+    res.json(messageReact(token, Number(messageId), Number(reactId)));
   } catch (err) {
     next(err);
   }
