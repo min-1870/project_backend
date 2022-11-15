@@ -2,6 +2,7 @@ import { database } from './dataStore';
 import { error, reactOutput } from './types';
 import HTTPError from 'http-errors';
 import {processMessageTagsAndSendNotifications} from './utils';
+import { notificationTypes } from './notifications';
 
 /** Send a message from the authorised user to the channel specified by channelId.
  * Note: Each message should have its own unique ID, i.e. no messages should share
@@ -136,6 +137,7 @@ export function messageReact(
   const user = database.getUserByToken(token);
   const message = database.getDataStoreMessageByMessageId(messageId);
 
+  let isChannelMessage = true;
   if (database.isMessageInChannels(message.messageId)) {
     const channel = database.getDataStoreChannelByMessageId(messageId);
     if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
@@ -146,12 +148,29 @@ export function messageReact(
     if (!database.isUserInDm(user.uId, dm.dmId)) {
       throw HTTPError(400, 'User is not part of the channel where this message is.');
     }
+    isChannelMessage = false;
   }
 
   if (message.reacts.some(react => react.reactId === reactId)) {
     database.getDataStoreMessageByMessageId(messageId).reacts.find(r => r.reactId === reactId).addUserToReact(user.uId);
   } else {
     database.addReact(reactId, message.messageId, user.uId);
+  }
+
+  if (isChannelMessage) {
+    database.addNotification(user.uId,
+      message.uId,
+      notificationTypes.ReactedToChannelMessage,
+      -1,
+      message.messageId,
+      database.getDataStoreChannelByMessageId(messageId).channelId);
+  } else {
+    database.addNotification(user.uId,
+      message.uId,
+      notificationTypes.ReactedToDmMessage,
+      database.getDmByMessageId(messageId).dmId,
+      message.messageId,
+      -1);
   }
   return {};
 }
