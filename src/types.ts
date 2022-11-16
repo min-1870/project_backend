@@ -273,3 +273,8 @@ export type dmDetailResponse = {
   name: string,
   members: user[]
 }
+
+export type standupStartRequest = {
+  channelId: number,
+  length: number
+}

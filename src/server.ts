@@ -47,6 +47,7 @@ import {
   passwordResetRequest,
   reactMessageRequest,
   pinMessageRequest,
+  standupStartRequest,
 } from './types';
 import {
   channelMessages,
@@ -61,6 +62,7 @@ import {
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
+import { standupStart } from './standup';
 // import HTTPError from 'http-errors';
 
 // Set up web app
@@ -429,6 +431,16 @@ app.post('/message/unpin/v1', (req: Request, res: Response, next) => {
     const { messageId } = req.body as pinMessageRequest;
     const token = req.header('token');
     res.json(messageUnpin(token, Number(messageId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/standup/start/v1', (req: Request, res: Response, next) => {
+  try {
+    const { channelId, length } = req.body as standupStartRequest;
+    const token = req.header('token');
+    res.json(standupStart(token, Number(channelId), Number(length)));
   } catch (err) {
     next(err);
   }
