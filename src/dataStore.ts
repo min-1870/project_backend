@@ -758,6 +758,12 @@ class DataStore {
     this.getDataStoreMessageByMessageId(messageId).isPinned = true;
   }
 
+  removePin(
+    messageId: number
+  ) {
+    this.getDataStoreMessageByMessageId(messageId).isPinned = false;
+  }
+
   /**
    * Persist data store.
    */
