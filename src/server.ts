@@ -61,6 +61,7 @@ import {
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
+import { deleteUser } from './admins';
 // import HTTPError from 'http-errors';
 
 // Set up web app
@@ -429,6 +430,17 @@ app.post('/message/unpin/v1', (req: Request, res: Response, next) => {
     const { messageId } = req.body as pinMessageRequest;
     const token = req.header('token');
     res.json(messageUnpin(token, Number(messageId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete('/admin/user/remove/v1', (req: Request, res: Response, next) => {
+  try {
+    const { uId } = req.query;
+    const token = req.header('token');
+    const result = deleteUser(token, Number(uId));
+    res.json(result);
   } catch (err) {
     next(err);
   }

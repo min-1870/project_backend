@@ -1,6 +1,6 @@
 import { authResponse } from '../../src/types';
 import { ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest } from '../testBase';
-import { parseJsonResponse, sendDeleteRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
+import { OK, parseJsonResponse, sendDeleteRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
@@ -71,18 +71,7 @@ describe('HTTP tests for admin/user/remove/v1', () => {
       }
     });
   });
-  test('token is not globval owner', () => {
-    const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {
-      uId: authUserId2,
-    }, token2);
 
-    expect(res.statusCode).toBe(400);
-    expect(parseJsonResponse(res)).toStrictEqual({
-      error: {
-        message: 'authorised user is not global owner'
-      }
-    });
-  });
   test('token is not global owner', () => {
     const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {
       uId: authUserId2,
@@ -103,8 +92,16 @@ describe('HTTP tests for admin/user/remove/v1', () => {
     expect(res.statusCode).toBe(403);
     expect(parseJsonResponse(res)).toStrictEqual({
       error: {
-        message: 'Token is invalid.'
+        message: 'Invalid token.'
       }
     });
+  });
+  test('successful', () => {
+    const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {
+      uId: authUserId2,
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });

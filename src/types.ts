@@ -123,7 +123,6 @@ export type dataStore = {
   dms: dataStoreDm[],
   passwordResets: dataStorePassReset[],
   notifications: dataStoreNotification[],
-  globalOwners: number[]
 }
 
 export type authResponse = {

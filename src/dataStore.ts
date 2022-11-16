@@ -20,7 +20,6 @@ class DataStore {
   dms: dataStoreDm[];
   passwordResets: dataStorePassReset[];
   notifications: dataStoreNotification[];
-  globalOwners: number[];
   dataSournceFile = './database.json';
 
   constructor() {
@@ -32,14 +31,12 @@ class DataStore {
       this.dms = data.dms;
       this.passwordResets = data.passwordResets;
       this.notifications = data.notifications;
-      this.globalOwners = data.globalOwners;
     } else {
       this.users = [];
       this.channels = [];
       this.dms = [];
       this.passwordResets = [];
       this.notifications = [];
-      this.globalOwners = [];
     }
   }
 
@@ -182,6 +179,22 @@ class DataStore {
       throw HTTPError(400, 'Invalid user ID');
     }
     return user.isGlobalOwner;
+  }
+
+  /**
+   * Checks how many users are globalowners.
+   *
+   *
+   * @returns number of global owners
+   */
+  howManyGlobalOwners(): number {
+    let counter = 0;
+    for (const item of this.users) {
+      if (item.isGlobalOwner === true) {
+        counter++;
+      }
+    }
+    return counter;
   }
 
   /**
@@ -333,6 +346,27 @@ class DataStore {
     this.channels.find(c =>
       c.channelId === channel.channelId).messages.splice(
       channel.messages.findIndex(m => m.messageId === message.messageId), 1);
+    this.saveDataStore();
+  }
+
+  removeUserChannelMessage(messageId: number) {
+    const message = this.getDataStoreMessageByMessageId(messageId);
+    message.message = 'Removed user';
+    this.saveDataStore();
+  }
+
+  removeUserDmMessage(messageId: number) {
+    const message = this.getDataStoreMessageByMessageId(messageId);
+    message.message = 'Removed user';
+    this.saveDataStore();
+  }
+
+  removeUserName(uId: number) {
+    const user = this.getUserById(uId);
+    user.nameFirst = 'Removed';
+    user.nameLast = 'user';
+    user.handleStr = '';
+    user.email = '';
     this.saveDataStore();
   }
 
