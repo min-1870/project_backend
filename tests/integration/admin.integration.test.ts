@@ -1,5 +1,5 @@
 import { authResponse } from '../../src/types';
-import { ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest } from '../testBase';
+import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest } from '../testBase';
 import { OK, parseJsonResponse, sendDeleteRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -99,6 +99,95 @@ describe('HTTP tests for admin/user/remove/v1', () => {
   test('successful', () => {
     const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {
       uId: authUserId2,
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+});
+
+
+describe('HTTP tests for admin/userpermission/change/v1', () => {
+  // let channel1Id: number;
+  beforeEach(() => {
+    sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    }, token);
+    // channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+  });
+  test('invalid uID', () => {
+    const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: 99999999,
+      permissionId: 1
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: 'uId is not valid'
+      }
+    });
+  });
+  test('uId is only global owner', () => {
+    const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId,
+      permissionId: 1
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: 'uId is only global owner'
+      }
+    });
+  });
+
+  test('token is not global owner', () => {
+    const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId2,
+      permissionId: 1
+    }, token2);
+
+    expect(res.statusCode).toBe(403);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: 'authorised user is not global owner'
+      }
+    });
+  });
+  test('token is not valid', () => {
+    const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId2,
+      permissionId: 1
+    }, '999999');
+
+    expect(res.statusCode).toBe(403);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: 'Invalid token.'
+      }
+    });
+  });
+
+  test('invalid permission id', () => {
+    const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId2,
+      permissionId: 3
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: 'invalid permission id'
+      }
+    });
+  });
+
+  test('successful', () => {
+    const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId2,
+      permissionId: 1
     }, token);
 
     expect(res.statusCode).toBe(OK);
