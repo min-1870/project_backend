@@ -83,6 +83,10 @@ export type dataStorePassReset = {
   resetCode: string
 }
 
+// export type dataStoreGlobalOwners = {
+//   uid:
+// }
+
 export type dm = {
   name: string,
   members: user[]
@@ -118,7 +122,8 @@ export type dataStore = {
   channels: dataStoreChannel[],
   dms: dataStoreDm[],
   passwordResets: dataStorePassReset[],
-  notifications: dataStoreNotification[]
+  notifications: dataStoreNotification[],
+  globalOwners: number[]
 }
 
 export type authResponse = {
