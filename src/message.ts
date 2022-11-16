@@ -249,3 +249,54 @@ export function messagePin(
   }
   return {};
 }
+
+export function messageUnpin(
+  token: string,
+  messageId: number
+): (Record<string, never> | error) {
+  const user = database.getUserByToken(token);
+  const message = database.getDataStoreMessageByMessageId(messageId);
+
+  let isChannelMessage = true;
+  if (database.isMessageInChannels(message.messageId)) {
+    const channel = database.getDataStoreChannelByMessageId(messageId);
+    if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(400, 'User is not part of the channel where this message is.');
+    }
+    if (!database.isUserOwnerMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(403, 'user does not have owner permissions in the channel/DM.');
+    }
+  } else {
+    const dm = database.getDmByMessageId(messageId);
+    if (!database.isUserInDm(user.uId, dm.dmId)) {
+      throw HTTPError(400, 'User is not part of the channel where this message is.');
+    }
+    if (!database.isUserCreatorOfDm(user.uId, dm.dmId)) {
+      throw HTTPError(403, 'user does not have owner permissions in the channel/DM.');
+    }
+    isChannelMessage = false;
+  }
+
+  if (message.isPinned === true) {
+    database.removePin(message.messageId);
+  } else {
+    throw HTTPError(400, 'Message is not pinned.');
+  }
+
+  if (isChannelMessage) {
+    database.addNotification(user.uId,
+      message.uId,
+      notificationTypes.ReactedToChannelMessage,
+      -1,
+      message.messageId,
+      database.getDataStoreChannelByMessageId(messageId).channelId);
+  } else {
+    database.addNotification(user.uId,
+      message.uId,
+      notificationTypes.ReactedToDmMessage,
+      database.getDmByMessageId(messageId).dmId,
+      message.messageId,
+      -1);
+  }
+  return {};
+}
