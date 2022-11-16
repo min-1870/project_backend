@@ -260,7 +260,7 @@ class DataStore {
    * @returns {dataStoreChannel} dataStoreChannel with that ID.
    */
   getDataStoreChannelByChannelId(channelId: number): dataStoreChannel {
-    console.log(channelId);
+    // console.log(channelId);
     const channel = this.channels.find(c => c.channelId === channelId);
     if (!channel) {
       throw HTTPError(400, 'Invalid channel ID.');
@@ -713,7 +713,7 @@ class DataStore {
         type === notificationTypes.ReactedToChannelMessage) {
       notification = new Notification(type, -1, channelId, senderId, messageId);
     } else {
-      console.log('add ing with ', dmId);
+      // console.log('add ing with ', dmId);
       notification = new Notification(type, dmId, -1, senderId, messageId);
     }
     const notifToStore: dataStoreNotification = {
@@ -752,6 +752,12 @@ class DataStore {
     }
   }
 
+  addPin(
+    messageId: number
+  ) {
+    this.getDataStoreMessageByMessageId(messageId).isPinned = true;
+  }
+
   /**
    * Persist data store.
    */
@@ -781,7 +787,8 @@ function createNewMessage(uId, message): messages {
     uId,
     message,
     timeSent: Date.now(),
-    reacts: []
+    reacts: [],
+    isPinned: false
   };
 }
 

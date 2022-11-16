@@ -11,7 +11,8 @@ export type messages = {
   uId: number,
   message: string,
   timeSent: number,
-  reacts: React[]
+  reacts: React[],
+  isPinned: boolean
 };
 
 export interface reactOutput {
@@ -61,6 +62,10 @@ export type dataStoreUser = {
 export type reactMessageRequest = {
   messageId: number,
   reactId: number
+}
+
+export type pinMessageRequest = {
+  messageId: number
 }
 
 // The dm type that is stored in the data store
