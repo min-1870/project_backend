@@ -801,6 +801,18 @@ class DataStore {
     this.getDataStoreMessageByMessageId(messageId).isPinned = false;
   }
 
+  changePermOwner(uId: number) {
+    const user = this.getUserById(uId);
+    user.isGlobalOwner = false;
+    this.saveDataStore();
+  }
+
+  changePermUser(uId: number) {
+    const user = this.getUserById(uId);
+    user.isGlobalOwner = true;
+    this.saveDataStore();
+  }
+
   /**
    * Persist data store.
    */

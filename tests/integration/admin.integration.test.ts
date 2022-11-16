@@ -97,6 +97,11 @@ describe('HTTP tests for admin/user/remove/v1', () => {
     });
   });
   test('successful', () => {
+    sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId2,
+      permissionId: 1
+    }, token);
+
     const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {
       uId: authUserId2,
     }, token);
@@ -105,7 +110,6 @@ describe('HTTP tests for admin/user/remove/v1', () => {
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 });
-
 
 describe('HTTP tests for admin/userpermission/change/v1', () => {
   // let channel1Id: number;
@@ -132,7 +136,7 @@ describe('HTTP tests for admin/userpermission/change/v1', () => {
   test('uId is only global owner', () => {
     const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
       uId: authUserId,
-      permissionId: 1
+      permissionId: 2
     }, token);
 
     expect(res.statusCode).toBe(400);
@@ -180,6 +184,20 @@ describe('HTTP tests for admin/userpermission/change/v1', () => {
     expect(parseJsonResponse(res)).toStrictEqual({
       error: {
         message: 'invalid permission id'
+      }
+    });
+  });
+
+  test('user already at permission level', () => {
+    const res = sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId2,
+      permissionId: 2
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      error: {
+        message: 'user already at permission level'
       }
     });
   });

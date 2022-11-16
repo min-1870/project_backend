@@ -61,7 +61,7 @@ import {
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
-import { deleteUser } from './admins';
+import { changePerms, deleteUser } from './admins';
 // import HTTPError from 'http-errors';
 
 // Set up web app
@@ -441,6 +441,16 @@ app.delete('/admin/user/remove/v1', (req: Request, res: Response, next) => {
     const token = req.header('token');
     const result = deleteUser(token, Number(uId));
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/admin/userpermission/change/v1', (req: Request, res: Response, next) => {
+  try {
+    const { uId, permissionId } = req.body;
+    const token = req.header('token');
+    res.json(changePerms(token, Number(uId), Number(permissionId)));
   } catch (err) {
     next(err);
   }
