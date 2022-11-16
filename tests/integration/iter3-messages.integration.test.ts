@@ -45,18 +45,16 @@ describe('HTTP tests for message/pin/v1', () => {
   let testChannelId: number;
   let testMessageId: number;
   beforeEach(() => {
-    const channel = sendPostRequestToEndpoint('/channels/create/v2', {
-      token: token,
+    const channel = sendPostRequestToEndpoint('/channels/create/v3', {
       name: TEST_CHANNEL_NAME,
       isPublic: true
-    });
+    }, token);
     testChannelId = (parseJsonResponse(channel) as unknown as channelId).channelId;
 
-    const res2 = sendPostRequestToEndpoint('/message/send/v1', {
-      token: token,
+    const res2 = sendPostRequestToEndpoint('/message/send/v2', {
       channelId: testChannelId,
       message: TEST_MESSAGE,
-    });
+    }, token);
     testMessageId = (parseJsonResponse(res2) as unknown as messageId).messageId;
   });
 
@@ -67,7 +65,7 @@ describe('HTTP tests for message/pin/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'token is invalid' });
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid token.' });
   });
 
   test('messageId does not refer to a valid message within a channel/DM that the authorised user has joined', () => {
@@ -77,11 +75,11 @@ describe('HTTP tests for message/pin/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(400);
-    expect(bodyObj.error).toStrictEqual({ message: 'messageId does not refer to a valid message within a channel/DM that the authorised user has joined' });
+    expect(bodyObj.error).toStrictEqual({ message: 'User is not part of the channel where this message is.' });
   });
 
-  test('the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM', () => {
-    const joinRes = sendPostRequestToEndpoint('/channel/join/v2', {
+  test('user does not have owner permissions in the channel/DM', () => {
+    const joinRes = sendPostRequestToEndpoint('/channel/join/v3', {
       channelId: testChannelId
     }, token2);
 
@@ -93,13 +91,13 @@ describe('HTTP tests for message/pin/v1', () => {
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
-    expect(bodyObj.error).toStrictEqual({ message: 'the message was not sent by the authorised user making this request and the user does not have owner permissions in the channel/DM' });
+    expect(bodyObj.error).toStrictEqual({ message: 'user does not have owner permissions in the channel/DM.' });
   });
 
   test('correct input correct return', () => {
     const res = sendPostRequestToEndpoint('/message/pin/v1', {
       messageId: testMessageId
-    }, token2);
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});

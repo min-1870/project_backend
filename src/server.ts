@@ -46,6 +46,7 @@ import {
   dmDetailsRequest,
   passwordResetRequest,
   reactMessageRequest,
+  pinMessageRequest,
 } from './types';
 import {
   channelMessages,
@@ -415,7 +416,7 @@ app.post('/message/react/v1', (req: Request, res: Response, next) => {
 
 app.post('/message/pin/v1', (req: Request, res: Response, next) => {
   try {
-    const { messageId } = req.body as reactMessageRequest;
+    const { messageId } = req.body as pinMessageRequest;
     const token = req.header('token');
     res.json(messagePin(token, Number(messageId)));
   } catch (err) {

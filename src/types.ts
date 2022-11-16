@@ -64,6 +64,10 @@ export type reactMessageRequest = {
   reactId: number
 }
 
+export type pinMessageRequest = {
+  messageId: number
+}
+
 // The dm type that is stored in the data store
 export type dataStoreDm = {
   dmId: number,
