@@ -17,14 +17,17 @@ export function standupStart (token: string, channelId: number, length: number):
     throw HTTPError(403, 'channelId is valid and the authorised user is not a member of the channel');
   }
 
+  const timeFinish = { timeFinish: (new Date()).getTime() / 1000 + length };
+
   activeStandup.push({
     channelId: channelId,
-    message: ''
+    message: '',
+    timeFinish: timeFinish.timeFinish
   });
 
   standupEnd(uId, channelId, length);
 
-  return { timeFinish: (new Date()).getTime() / 1000 + length };
+  return timeFinish;
 }
 
 function standupEnd(uId: number, channelId: number, length: number) {
@@ -62,4 +65,28 @@ export function standupSend (token: string, channelId: number, message: string):
   }
 
   return {};
+}
+
+export function standupActive (token: string, channelId: number): error|{isActive: boolean, timeFinish: number|null} {
+  const uId = database.getUserByToken(token).uId;
+
+  if (database.isChannelIdValid(channelId) === false) {
+    throw HTTPError(400, 'channelId does not refer to a valid channel');
+  } else if (database.isUserMemberInChannel(uId, channelId) === false) {
+    throw HTTPError(403, 'channelId is valid and the authorised user is not a member of the channel');
+  }
+
+  const result = {
+    isActive: null,
+    timeFinish: null
+  };
+
+  if (activeStandup.find(i => i.channelId === channelId)) {
+    result.isActive = true;
+    result.timeFinish = activeStandup.find(i => i.channelId === channelId).timeFinish;
+  } else {
+    result.isActive = false;
+  }
+
+  return result;
 }
