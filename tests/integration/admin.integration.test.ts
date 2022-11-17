@@ -1,4 +1,4 @@
-import { authResponse } from '../../src/types';
+import { authResponse, channelId } from '../../src/types';
 import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, MESSAGE_SEND, SEARCH } from '../testBase';
 import { OK, parseJsonResponse, sendDeleteRequestToEndpoint, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
@@ -259,8 +259,8 @@ describe('HTTP tests for /search/v1', () => {
         messageId: expect.any(Number),
         uId: expect.any(Number),
         message: 'hi',
-        timeSet: expect.any(Number),
-        reacts: expect.any(Number),
+        timeSent: expect.any(Number),
+        reacts: [],
         isPinned: false
       }
     ]});

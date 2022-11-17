@@ -48,6 +48,7 @@ import {
   reactMessageRequest,
   pinMessageRequest,
   standupStartRequest,
+  searchRequest,
 } from './types';
 import {
   channelMessages,
@@ -62,7 +63,7 @@ import {
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
-import { changePerms, deleteUser } from './admins';
+import { changePerms, deleteUser, searchMessage } from './admins';
 import { standupStart } from './standup';
 
 // import HTTPError from 'http-errors';
@@ -454,6 +455,17 @@ app.post('/admin/userpermission/change/v1', (req: Request, res: Response, next) 
     const { uId, permissionId } = req.body;
     const token = req.header('token');
     res.json(changePerms(token, Number(uId), Number(permissionId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/search/v1', (req: Request, res: Response, next) => {
+  try {
+    const { queryStr } = req.query as unknown as searchRequest;
+    const token = req.header('token');
+    const result = searchMessage(token, queryStr);
+    res.json(result);
   } catch (err) {
     next(err);
   }

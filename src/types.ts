@@ -282,3 +282,7 @@ export type standupStartRequest = {
   channelId: number,
   length: number
 }
+
+export type searchRequest = {
+  queryStr: string
+}
