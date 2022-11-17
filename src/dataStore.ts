@@ -284,6 +284,15 @@ class DataStore {
     return channel;
   }
 
+  getDataStoreDmByDmId(dmId: number): dataStoreDm {
+    // console.log(channelId);
+    const dm = this.dms.find(c => c.dmId === dmId);
+    if (!dm) {
+      throw HTTPError(400, 'Invalid channel ID.');
+    }
+    return dm;
+  }
+
   /**
    * Get data store channel by message ID.
    *
@@ -300,6 +309,16 @@ class DataStore {
     return channelWithMessage;
   }
 
+  getDataStoreDmByMessageId(messageId: number): dataStoreDm {
+    const channelWithMessage = this.dms.find(channel =>
+      channel.messages.some(m => m.messageId === messageId));
+
+    if (!channelWithMessage) {
+      throw HTTPError(400, 'Invalid message ID.');
+    }
+    return channelWithMessage;
+  }
+
   /**
    * Checks if a message is in any channels.
    *
@@ -308,6 +327,11 @@ class DataStore {
    */
   isMessageInChannels(messageId: number): boolean {
     return this.channels
+      .some(c => c.messages.some(m => m.messageId === messageId));
+  }
+
+  isMessageInDms(messageId: number): boolean {
+    return this.dms
       .some(c => c.messages.some(m => m.messageId === messageId));
   }
 

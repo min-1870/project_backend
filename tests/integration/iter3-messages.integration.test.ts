@@ -1,5 +1,5 @@
 import { authResponse, channelId, dmId, messageId } from '../../src/types';
-import { DM_CREATE, DM_SEND } from '../testBase';
+import { DM_CREATE } from '../testBase';
 import {
   OK,
   parseJsonResponse,
@@ -13,7 +13,6 @@ const NAME_FIRST = 'Barty';
 const NAME_LAST = 'Potter';
 const TEST_CHANNEL_NAME = 'Test channel';
 const TEST_MESSAGE = 'hello world :)';
-
 const TEST_INVALID_TOKEN = '999999';
 
 // over 1000 characters
@@ -205,11 +204,9 @@ describe('HTTP tests for message/unpin/v1', () => {
   });
 });
 
-
 describe('HTTP tests for message/share/v1', () => {
   let testChannelId: number;
   let testMessageId: number;
-  let dmMessageId: number;
   let testDmId: number;
   beforeEach(() => {
     const channel = sendPostRequestToEndpoint('/channels/create/v3', {
@@ -224,16 +221,10 @@ describe('HTTP tests for message/share/v1', () => {
     }, token);
     testMessageId = (parseJsonResponse(res2) as unknown as messageId).messageId;
 
-    let res = sendPostRequestToEndpoint(DM_CREATE, {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
       uIds: [token2]
     }, token);
     testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
-
-    res = sendPostRequestToEndpoint(DM_SEND, {
-      dmId: testDmId,
-      message: 'Hello DM',
-    }, token);
-    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
   });
 
   test('token is invalid', () => {
@@ -267,7 +258,7 @@ describe('HTTP tests for message/share/v1', () => {
       ogMessageId: testMessageId,
       message: '',
       channelId: 23,
-      dmId: 23
+      dmId: -1
     }, token);
 
     const bodyObj = JSON.parse(res.body as string);
@@ -277,7 +268,7 @@ describe('HTTP tests for message/share/v1', () => {
 
   test('ogMessageId isnt valid', () => {
     const res = sendPostRequestToEndpoint('/message/share/v1', {
-      ogMessageId: '6996',
+      ogMessageId: 8867868768,
       message: '',
       channelId: testChannelId,
       dmId: -1
@@ -304,19 +295,24 @@ describe('HTTP tests for message/share/v1', () => {
   });
 
   test('user is not part of channel/dm', () => {
+    const channelTwo = sendPostRequestToEndpoint('/channels/create/v3', {
+      name: 'haha',
+      isPublic: true
+    }, token2);
+    const testChannelId2 = (parseJsonResponse(channelTwo) as unknown as channelId).channelId;
     const res = sendPostRequestToEndpoint('/message/share/v1', {
       ogMessageId: testMessageId,
       message: '',
-      channelId: testChannelId,
+      channelId: testChannelId2,
       dmId: -1
-    }, token2);
+    }, token);
 
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
     expect(bodyObj.error).toStrictEqual({ message: 'user is not part of channel/dm' });
   });
 
-  test('user is not part of channel/dm', () => {
+  test('success', () => {
     const res = sendPostRequestToEndpoint('/message/share/v1', {
       ogMessageId: testMessageId,
       message: '',
@@ -329,5 +325,4 @@ describe('HTTP tests for message/share/v1', () => {
       sharedMessageId: expect.any(Number)
     });
   });
-  
 });
