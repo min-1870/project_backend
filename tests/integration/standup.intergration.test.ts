@@ -1,5 +1,5 @@
 import { authResponse, channelId /** user */ } from '../../src/types';
-import { AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, STANDUP_SEND, STANDUP_START, CHANNEL_MESSAGES } from '../testBase';
+import { AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, STANDUP_SEND, STANDUP_START, CHANNEL_MESSAGES, STANDUP_ACTIVE } from '../testBase';
 import {
   parseJsonResponse,
   sendDeleteRequestToEndpoint,
@@ -247,5 +247,68 @@ describe('HTTP tests for standup/send', () => {
     expect(result.statusCode).toBe(403);
     expect(result.return.error).toStrictEqual({ message: 'channelId is valid and the authorised user is not a member of the channel' });
     sleep(2000);
+  });
+});
+
+describe('HTTP tests for standup/active', () => {
+  test('correct input correct return (true)', () => {    
+    input = {
+      channelId: CHANNELID,
+      length: 1
+    };
+    result = sendReqParseRes('post', STANDUP_START, input, TOKEN1);
+    const timeFinish = Math.round((new Date()).getTime() / 1000) + input.length - 3;
+
+    sleep(500)
+
+    input = {
+      channelId: CHANNELID
+    };
+    result = sendReqParseRes('get', STANDUP_ACTIVE, input, TOKEN1);    
+
+    expect(result.statusCode).toBe(200);
+    expect(result.return).toStrictEqual({
+      isActive: true,
+      timeFinish: expect.any(Number)
+    });
+    expect(result.return.timeFinish).toBeGreaterThanOrEqual(timeFinish);
+    sleep(500)
+  });
+
+  test('correct input correct return (false)', () => {    
+    input = {
+      channelId: CHANNELID
+    };
+    result = sendReqParseRes('get', STANDUP_ACTIVE, input, TOKEN1);    
+
+    expect(result.statusCode).toBe(200);
+    expect(result.return).toStrictEqual({
+      isActive: false,
+      timeFinish: null
+    });
+  });
+
+  test('channelId does not refer to a valid channel', () => { 
+
+    input = {
+      channelId: TEST_INVALID_CHANNELID
+    };
+    result = sendReqParseRes('get', STANDUP_ACTIVE, input, TOKEN1);
+    
+    expect(result.statusCode).toBe(400);
+    expect(result.return.error).toStrictEqual({ message: 'channelId does not refer to a valid channel'})    
+
+  });
+
+  test('channelId is valid and the authorised user is not a member of the channel', () => { 
+
+    input = {
+      channelId: CHANNELID
+    };
+    result = sendReqParseRes('get', STANDUP_ACTIVE, input, TOKEN2);
+    
+    expect(result.statusCode).toBe(403);
+    expect(result.return.error).toStrictEqual({ message: 'channelId is valid and the authorised user is not a member of the channel'})    
+
   });
 });
