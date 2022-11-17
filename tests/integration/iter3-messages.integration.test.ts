@@ -1,4 +1,5 @@
-import { authResponse, channelId, messageId } from '../../src/types';
+import { authResponse, channelId, dmId, messageId } from '../../src/types';
+import { DM_CREATE, DM_SEND } from '../testBase';
 import {
   OK,
   parseJsonResponse,
@@ -202,4 +203,131 @@ describe('HTTP tests for message/unpin/v1', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
+});
+
+
+describe('HTTP tests for message/share/v1', () => {
+  let testChannelId: number;
+  let testMessageId: number;
+  let dmMessageId: number;
+  let testDmId: number;
+  beforeEach(() => {
+    const channel = sendPostRequestToEndpoint('/channels/create/v3', {
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    }, token);
+    testChannelId = (parseJsonResponse(channel) as unknown as channelId).channelId;
+
+    const res2 = sendPostRequestToEndpoint('/message/send/v2', {
+      channelId: testChannelId,
+      message: TEST_MESSAGE,
+    }, token);
+    testMessageId = (parseJsonResponse(res2) as unknown as messageId).messageId;
+
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [token2]
+    }, token);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'Hello DM',
+    }, token);
+    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+  });
+
+  test('token is invalid', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: '',
+      channelId: testChannelId,
+      dmId: -1
+    }, TEST_INVALID_TOKEN);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'Invalid token.' });
+  });
+
+  test('neither channelId or dmId are -1', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: '',
+      channelId: testChannelId,
+      dmId: testDmId
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'neither channelId or dmId are -1' });
+  });
+
+  test('both channelId or dmId are invalid', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: '',
+      channelId: 23,
+      dmId: 23
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'both channelId or dmId are invalid' });
+  });
+
+  test('ogMessageId isnt valid', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: '6996',
+      message: '',
+      channelId: testChannelId,
+      dmId: -1
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'ogMessageId isnt valid' });
+  });
+
+  test('message too long', () => {
+    let temp = 'ha';
+    temp = temp.repeat(501);
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: temp,
+      channelId: testChannelId,
+      dmId: -1
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'message too long' });
+  });
+
+  test('user is not part of channel/dm', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: '',
+      channelId: testChannelId,
+      dmId: -1
+    }, token2);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: 'user is not part of channel/dm' });
+  });
+
+  test('user is not part of channel/dm', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: '',
+      channelId: testChannelId,
+      dmId: -1
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      sharedMessageId: expect.any(Number)
+    });
+  });
+  
 });
