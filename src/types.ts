@@ -278,3 +278,8 @@ export type standupStartRequest = {
   channelId: number,
   length: number
 }
+
+export type standupSendRequest = {
+  channelId: number,
+  message: string
+}

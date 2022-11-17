@@ -1,5 +1,5 @@
 import { authResponse, channelId /** user */ } from '../../src/types';
-import { AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, STANDUP_SEND, STANDUP_START } from '../testBase';
+import { AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, STANDUP_SEND, STANDUP_START, CHANNEL_MESSAGES } from '../testBase';
 import {
   parseJsonResponse,
   sendDeleteRequestToEndpoint,
@@ -24,8 +24,11 @@ for (let i = 0; i < 1000; i++) VERY_LONG_MESSAGE = VERY_LONG_MESSAGE + ':(';
 
 let TOKEN1: string; // token of test user 1
 let TOKEN2: string; // token of test user 2
-// let UID1: number; // token of test user 1
-// let UID2: number; // token of test user 1
+
+
+let CHANNELID: number;
+let input: any;
+let result: any;
 
 beforeEach(() => {
   clearDataForTest();
@@ -36,8 +39,7 @@ beforeEach(() => {
     nameLast: NAME_LAST
   });
   TOKEN1 = (parseJsonResponse(res1) as unknown as authResponse).token;
-  // UID1 = (parseJsonResponse(res1) as unknown as authResponse).authUserId;
-
+  
   const res2 = sendPostRequestToEndpoint(AUTH_REGISTER, {
     email: '2' + EMAIL,
     password: '2' + PASSWORD,
@@ -45,7 +47,13 @@ beforeEach(() => {
     nameLast: 'b' + NAME_LAST
   });
   TOKEN2 = (parseJsonResponse(res2) as unknown as authResponse).token;
-  // UID2 = (parseJsonResponse(res2) as unknown as authResponse).authUserId;
+  
+  const res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    name: TEST_CHANNEL_NAME,
+    isPublic: true
+  }, TOKEN1);
+  
+  CHANNELID = (parseJsonResponse(res) as unknown as channelId).channelId
 });
 
 function sendReqParseRes(TYPE: string, FUNC: any, input1: any, input2: any) {
@@ -75,22 +83,17 @@ function sendReqParseRes(TYPE: string, FUNC: any, input1: any, input2: any) {
   };
 }
 
+function sleep(ms: number) {
+  const wakeUpTime = Date.now() + ms;
+  while (Date.now() < wakeUpTime) {}
+}
+
 describe('HTTP tests for standup/start', () => {
-  let CHANNELID: number;
-  let input: any;
-  let result: any;
-  beforeEach(() => {
-    const input = {
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
-    };
-    CHANNELID = ((sendReqParseRes('post', CHANNELS_CREATE, input, TOKEN1).return) as unknown as channelId).channelId;
-  });
 
   test('correct input correct output', () => {
     input = {
       channelId: CHANNELID,
-      length: 0
+      length: 1
     };
     const timeFinish = Math.round((new Date()).getTime() / 1000) + input.length - 3;
     result = sendReqParseRes('post', STANDUP_START, input, TOKEN1);
@@ -98,22 +101,28 @@ describe('HTTP tests for standup/start', () => {
     expect(result.statusCode).toBe(200);
     expect(result.return.timeFinish).toBeGreaterThanOrEqual(timeFinish);
 
-    // add test set after implement the standup send
+    input = {
+      channelId: CHANNELID,
+      message: TEST_MESSAGE
+    }
+    sendReqParseRes('post', STANDUP_SEND, input, TOKEN1)
 
-    // input = {
-    //   channelId: CHANNELID,
-    //   message: TEST_MESSAGE
-    // }
-    // sendReqParseRes('post', STANDUP_SEND, input, TOKEN1)
+    input = {
+      channelId: CHANNELID,
+      message: TEST_MESSAGE_2
+    }
+    sendReqParseRes('post', STANDUP_SEND, input, TOKEN1)
 
-    // input = {
-    //   channelId: CHANNELID,
-    //   start: 0
-    // }
-    // result = sendReqParseRes('get', CHANNEL_MESSAGES, input, TOKEN1)
+    sleep(1000)
 
-    // expect(result.statusCode).toBe(OK);
-    // expect(result.return.messages[0].message).toStrictEqual(NAME_FIRST+NAME_LAST+': '+TEST_MESSAGE);
+    input = {
+      channelId: CHANNELID,
+      start: 0
+    }
+    result = sendReqParseRes('get', CHANNEL_MESSAGES, input, TOKEN1)
+
+    expect(result.statusCode).toBe(200);
+    expect(result.return.messages[0].message).toStrictEqual(NAME_FIRST.toLowerCase()+NAME_LAST.toLowerCase()+': '+TEST_MESSAGE + "\n" + NAME_FIRST.toLowerCase()+NAME_LAST.toLowerCase()+': '+TEST_MESSAGE_2);
   });
 
   test('channelId does not refer to a valid channel', () => {
@@ -168,65 +177,45 @@ describe('HTTP tests for standup/start', () => {
 });
 
 describe('HTTP tests for standup/send', () => {
-  let CHANNELID: number;
-  let input: any;
-  let result: any;
-  beforeEach(() => {
-    input = {
-      name: TEST_CHANNEL_NAME,
-      isPublic: true
-    };
-    CHANNELID = ((sendReqParseRes('post', CHANNELS_CREATE, input, TOKEN1).return) as unknown as channelId).channelId;
-  });
-
-  test('correct input and corrent return', () => {
+  test('correct input correct output', () => {
     input = {
       channelId: CHANNELID,
-      length: 1
+      length: 2
     };
     result = sendReqParseRes('post', STANDUP_START, input, TOKEN1);
-
+    
+    //sleep(500)
+    
     input = {
       channelId: CHANNELID,
       message: TEST_MESSAGE
     };
+    
     result = sendReqParseRes('post', STANDUP_SEND, input, TOKEN1);
-
+    
     expect(result.statusCode).toBe(200);
     expect(result.return).toStrictEqual({});
-
+    sleep(2000)
   });
 
   test('channelId does not refer to a valid channel', () => {
-    input = {
-      channelId: CHANNELID,
-      length: 1
-    };
-    result = sendReqParseRes('post', STANDUP_START, input, TOKEN1);
-    
     input = {
       channelId: TEST_INVALID_CHANNELID,
       message: TEST_MESSAGE
     };
     result = sendReqParseRes('post', STANDUP_SEND, input, TOKEN1);
-
+  
     expect(result.statusCode).toBe(400);
     expect(result.return.error).toStrictEqual({ message: 'channelId does not refer to a valid channel' });
   });
-
+  
   test('length of message is over 1000 characters', () => {
-    input = {
-      channelId: CHANNELID,
-      length: 1
-    };
-    result = sendReqParseRes('post', STANDUP_START, input, TOKEN1);
-    
     input = {
       channelId: CHANNELID,
       message: VERY_LONG_MESSAGE
     };
     result = sendReqParseRes('post', STANDUP_SEND, input, TOKEN1);
-
+  
     expect(result.statusCode).toBe(400);
     expect(result.return.error).toStrictEqual({ message: 'length of message is over 1000 characters' });
   });
@@ -237,26 +226,28 @@ describe('HTTP tests for standup/send', () => {
       message: TEST_MESSAGE
     };
     result = sendReqParseRes('post', STANDUP_SEND, input, TOKEN1);
-
+  
     expect(result.statusCode).toBe(400);
     expect(result.return.error).toStrictEqual({ message: 'an active standup is not currently running in the channel' });
   });
-
+  
   test('channelId is valid and the authorised user is not a member of the channel', () => {
     input = {
       channelId: CHANNELID,
       length: 1
     };
     result = sendReqParseRes('post', STANDUP_START, input, TOKEN1);
-
+  
+    //sleep(500)
+  
     input = {
       channelId: CHANNELID,
       message: TEST_MESSAGE
     };
     result = sendReqParseRes('post', STANDUP_SEND, input, TOKEN2);
-
+  
     expect(result.statusCode).toBe(403);
     expect(result.return.error).toStrictEqual({ message: 'channelId is valid and the authorised user is not a member of the channel'});
+    sleep(2000)
   });
-
 });

@@ -23,18 +23,45 @@ export function standupStart (token: string, channelId: number, length: number):
     message: ''
   });
 
-  standupEnd(token, channelId, length);
+  standupEnd(uId, channelId, length);
 
   return { timeFinish: (new Date()).getTime() / 1000 + length };
 }
 
-function standupEnd(token: string, channelId: number, length: number) {
+function standupEnd(uId: number, channelId: number, length: number) {
   setTimeout(function() {
+    
     const standup = activeStandup.find(i => i.channelId === channelId);
+    
     if (standup.message !== '') {
-      messageSend(token, channelId, standup.message);
+      database.addMessageToChannel(standup.message, uId, channelId);
     }
 
     activeStandup = activeStandup.filter(i => i.channelId !== channelId);
   }, length * 1000);
 }
+
+export function standupSend (token: string, channelId: number, message: string): error|{} {
+  const uId = database.getUserByToken(token).uId;
+
+  if (database.isChannelIdValid(channelId) === false) {
+    throw HTTPError(400, 'channelId does not refer to a valid channel');
+  } else if (message.length > 1000) {
+    throw HTTPError(400, 'length of message is over 1000 characters');
+  } else if (!activeStandup.find(i => i.channelId === channelId)) {
+    throw HTTPError(400, 'an active standup is not currently running in the channel');
+  } else if (database.isUserMemberInChannel(uId, channelId) === false) {
+    throw HTTPError(403, 'channelId is valid and the authorised user is not a member of the channel');
+  }
+
+  const standup = activeStandup.find(i => i.channelId === channelId);
+  let handleStr = database.getUserByToken(token).handleStr;
+
+  if (standup.message !== ''){
+    standup.message = standup.message + "\n" + handleStr + ": " + message
+  }else {
+    standup.message = handleStr + ": " + message
+  }
+
+  return {}
+} 
