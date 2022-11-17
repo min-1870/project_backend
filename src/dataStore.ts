@@ -182,6 +182,22 @@ class DataStore {
   }
 
   /**
+   * Checks how many users are globalowners.
+   *
+   *
+   * @returns number of global owners
+   */
+  howManyGlobalOwners(): number {
+    let counter = 0;
+    for (const item of this.users) {
+      if (item.isGlobalOwner === true) {
+        counter++;
+      }
+    }
+    return counter;
+  }
+
+  /**
    * Add user to the database and return the created user.
    *
    * @param email - email of the user.
@@ -330,6 +346,27 @@ class DataStore {
     this.channels.find(c =>
       c.channelId === channel.channelId).messages.splice(
       channel.messages.findIndex(m => m.messageId === message.messageId), 1);
+    this.saveDataStore();
+  }
+
+  removeUserChannelMessage(messageId: number) {
+    const message = this.getDataStoreMessageByMessageId(messageId);
+    message.message = 'Removed user';
+    this.saveDataStore();
+  }
+
+  removeUserDmMessage(messageId: number) {
+    const message = this.getDataStoreMessageByMessageId(messageId);
+    message.message = 'Removed user';
+    this.saveDataStore();
+  }
+
+  removeUserName(uId: number) {
+    const user = this.getUserById(uId);
+    user.nameFirst = 'Removed';
+    user.nameLast = 'user';
+    user.handleStr = '';
+    user.email = '';
     this.saveDataStore();
   }
 
@@ -762,6 +799,18 @@ class DataStore {
     messageId: number
   ) {
     this.getDataStoreMessageByMessageId(messageId).isPinned = false;
+  }
+
+  changePermOwner(uId: number) {
+    const user = this.getUserById(uId);
+    user.isGlobalOwner = false;
+    this.saveDataStore();
+  }
+
+  changePermUser(uId: number) {
+    const user = this.getUserById(uId);
+    user.isGlobalOwner = true;
+    this.saveDataStore();
   }
 
   /**
