@@ -470,52 +470,44 @@ describe('HTTP tests for message react', () => {
     // dmCreatorId = privateChannelCreatorUserId;
     dmCreatorToken = privateChannelCreatorToken;
 
-    // let userProfile;
-    res = sendGetRequestToEndpoint(USER_PROFILE,
-      { uId: publicChannelCreatorUserId }, publicChannelCreatorToken);
-    // userProfile = (parseJsonResponse(res) as unknown as user);
-    // publicChannelCreatorHandle = userProfile.user.handleStr;
-    res = sendGetRequestToEndpoint(USER_PROFILE,
-      { uId: privateChannelCreatorUserId }, privateChannelCreatorToken);
-    // userProfile = (parseJsonResponse(res) as unknown as user);
-    // privateChannelCreatorHandle = userProfile.user.handleStr;
-    res = sendGetRequestToEndpoint(USER_PROFILE,
-      { uId: globalOwnerUserId }, globalOwnerToken);
-    // userProfile = (parseJsonResponse(res) as unknown as user);
-    // globalOwnerHandle = userProfile.user.handleStr;
+    // // let userProfile;
+    // res = sendGetRequestToEndpoint(USER_PROFILE,
+    //   { uId: publicChannelCreatorUserId }, publicChannelCreatorToken);
+    // // userProfile = (parseJsonResponse(res) as unknown as user);
+    // // publicChannelCreatorHandle = userProfile.user.handleStr;
+    // res = sendGetRequestToEndpoint(USER_PROFILE,
+    //   { uId: privateChannelCreatorUserId }, privateChannelCreatorToken);
+    // // userProfile = (parseJsonResponse(res) as unknown as user);
+    // // privateChannelCreatorHandle = userProfile.user.handleStr;
+    // res = sendGetRequestToEndpoint(USER_PROFILE,
+    //   { uId: globalOwnerUserId }, globalOwnerToken);
+    // // userProfile = (parseJsonResponse(res) as unknown as user);
+    // // globalOwnerHandle = userProfile.user.handleStr;
 
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+  
+    // res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    //   name: PRIVATE_CHANNEL_NAME,
+    //   isPublic: false
+    // }, privateChannelCreatorToken);
+    // privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+   
+  });
+
+  test('messageReact new react to channel message succeeds', () => {
+    let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PRIVATE_CHANNEL_NAME,
-      isPublic: false
-    }, privateChannelCreatorToken);
-    // privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
 
     res = sendPostRequestToEndpoint(MESSAGE_SEND, {
       channelId: publicChannelId,
       message: 'Hello channel'
     }, publicChannelCreatorToken);
     publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
-
-    res = sendPostRequestToEndpoint(DM_CREATE, {
-      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
-    }, dmCreatorToken);
-    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
-
-    res = sendPostRequestToEndpoint(DM_SEND, {
-      dmId: testDmId,
-      message: 'Hello DM',
-    }, dmCreatorToken);
-    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
-  });
-
-  test('messageReact new react to channel message succeeds', () => {
-    let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
+    
+    res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId
     }, publicChannelCreatorToken);
@@ -531,7 +523,18 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact new react to dm message succeeds', () => {
-    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'Hello DM',
+    }, dmCreatorToken);
+    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+    
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: dmMessageId, reactId: 1 },
       privateChannelCreatorToken
     );
@@ -541,6 +544,18 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact react to channel message with existing reacts succeeds', () => {
+    let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: PUBLIC_CHANNEL_NAME,
+      isPublic: true
+    }, publicChannelCreatorToken);
+    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: 'Hello channel'
+    }, publicChannelCreatorToken);
+    publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+    
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId
@@ -550,7 +565,7 @@ describe('HTTP tests for message react', () => {
       uId: globalOwnerUserId
     }, publicChannelCreatorToken);
 
-    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: publicChannelMessageId, reactId: 1 },
       privateChannelCreatorToken
     );
@@ -565,7 +580,18 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact react to dm message with existing reacts succeeds', () => {
-    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'Hello DM',
+    }, dmCreatorToken);
+    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+    
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: dmMessageId, reactId: 1 },
       privateChannelCreatorToken
     );
@@ -580,12 +606,24 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact user already reacted to channel message throws error', () => {
+    let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: PUBLIC_CHANNEL_NAME,
+      isPublic: true
+    }, publicChannelCreatorToken);
+    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: 'Hello channel'
+    }, publicChannelCreatorToken);
+    publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId
     }, publicChannelCreatorToken);
 
-    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: publicChannelMessageId, reactId: 1 },
       privateChannelCreatorToken
     );
@@ -599,7 +637,18 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact user already reacted to dm message throws error', () => {
-    let res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'Hello DM',
+    }, dmCreatorToken);
+    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId; 
+
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: dmMessageId, reactId: 1 },
       privateChannelCreatorToken
     );
@@ -613,12 +662,24 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact invalid react ID throws error', () => {
+    let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: PUBLIC_CHANNEL_NAME,
+      isPublic: true
+    }, publicChannelCreatorToken);
+    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: 'Hello channel'
+    }, publicChannelCreatorToken);
+    publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId
     }, publicChannelCreatorToken);
 
-    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: publicChannelMessageId, reactId: 323 },
       privateChannelCreatorToken
     );
@@ -626,7 +687,19 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact invalid token throws forbidden', () => {
-    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: PUBLIC_CHANNEL_NAME,
+      isPublic: true
+    }, publicChannelCreatorToken);
+    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: 'Hello channel'
+    }, publicChannelCreatorToken);
+    publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: publicChannelMessageId, reactId: 1 },
       '12312312'
     );
@@ -634,12 +707,24 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact user not a member in channel throws error', () => {
+    let res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: PUBLIC_CHANNEL_NAME,
+      isPublic: true
+    }, publicChannelCreatorToken);
+    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: 'Hello channel'
+    }, publicChannelCreatorToken);
+    publicChannelMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId
     }, publicChannelCreatorToken);
 
-    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: publicChannelMessageId, reactId: 1 },
       globalOwnerToken
     );
@@ -647,12 +732,23 @@ describe('HTTP tests for message react', () => {
   });
 
   test('messageReact user not a member in dm throws error', () => {
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'Hello DM',
+    }, dmCreatorToken);
+    dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId
     }, publicChannelCreatorToken);
 
-    const res = sendPostRequestToEndpoint(MESSAGE_REACT,
+    res = sendPostRequestToEndpoint(MESSAGE_REACT,
       { messageId: dmMessageId, reactId: 1 },
       globalOwnerToken
     );
