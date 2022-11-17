@@ -1,7 +1,7 @@
 {
     "scripts": {
         "test": "jest --coverage --testMatch '**/?(*.)+(test).ts'",
-        "haha": "jest tests/integration/notification.integration.test.ts",
+        "haha": "jest",
         "tsc": "tsc --noImplicitAny",
         "lint": "eslint \"src/**/*.{ts,js}\" \"tests/**/*.{ts,js}\"",
         "lint-fix": "eslint --fix \"src/**/*.{ts,js}\" \"tests/**/*.{ts,js}\"",

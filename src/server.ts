@@ -46,6 +46,8 @@ import {
   dmDetailsRequest,
   passwordResetRequest,
   reactMessageRequest,
+  pinMessageRequest,
+  standupStartRequest,
 } from './types';
 import {
   channelMessages,
@@ -58,8 +60,11 @@ import {
 } from './channel';
 // import fs from 'fs';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
-import { dmMessageSend, messageEdit, messageReact, messageRemove, messageSend } from './message';
+import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
+import { changePerms, deleteUser } from './admins';
+import { standupStart } from './standup';
+
 // import HTTPError from 'http-errors';
 
 // Set up web app
@@ -409,6 +414,58 @@ app.post('/message/react/v1', (req: Request, res: Response, next) => {
     const token = req.header('token');
     res.json(messageReact(token, Number(messageId), Number(reactId)));
   } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/message/pin/v1', (req: Request, res: Response, next) => {
+  try {
+    const { messageId } = req.body as pinMessageRequest;
+    const token = req.header('token');
+    res.json(messagePin(token, Number(messageId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/message/unpin/v1', (req: Request, res: Response, next) => {
+  try {
+    const { messageId } = req.body as pinMessageRequest;
+    const token = req.header('token');
+    res.json(messageUnpin(token, Number(messageId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+app.delete('/admin/user/remove/v1', (req: Request, res: Response, next) => {
+  try {
+    const { uId } = req.query;
+    const token = req.header('token');
+    const result = deleteUser(token, Number(uId));
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/admin/userpermission/change/v1', (req: Request, res: Response, next) => {
+  try {
+    const { uId, permissionId } = req.body;
+    const token = req.header('token');
+    res.json(changePerms(token, Number(uId), Number(permissionId)));
+    } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/standup/start/v1', (req: Request, res: Response, next) => {
+  try {
+    const { channelId, length } = req.body as standupStartRequest;
+    const token = req.header('token');
+    res.json(standupStart(token, Number(channelId), Number(length)));
+    } catch (err) {
     next(err);
   }
 });

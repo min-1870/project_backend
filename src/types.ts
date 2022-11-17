@@ -11,7 +11,8 @@ export type messages = {
   uId: number,
   message: string,
   timeSent: number,
-  reacts: React[]
+  reacts: React[],
+  isPinned: boolean
 };
 
 export interface reactOutput {
@@ -63,6 +64,10 @@ export type reactMessageRequest = {
   reactId: number
 }
 
+export type pinMessageRequest = {
+  messageId: number
+}
+
 // The dm type that is stored in the data store
 export type dataStoreDm = {
   dmId: number,
@@ -77,6 +82,10 @@ export type dataStorePassReset = {
   uId: number,
   resetCode: string
 }
+
+// export type dataStoreGlobalOwners = {
+//   uid:
+// }
 
 export type dm = {
   name: string,
@@ -113,7 +122,7 @@ export type dataStore = {
   channels: dataStoreChannel[],
   dms: dataStoreDm[],
   passwordResets: dataStorePassReset[],
-  notifications: dataStoreNotification[]
+  notifications: dataStoreNotification[],
 }
 
 export type authResponse = {
@@ -267,4 +276,9 @@ export type notficationResponse = {
 export type dmDetailResponse = {
   name: string,
   members: user[]
+}
+
+export type standupStartRequest = {
+  channelId: number,
+  length: number
 }
