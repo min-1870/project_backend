@@ -49,6 +49,7 @@ import {
   pinMessageRequest,
   standupStartRequest,
   searchRequest,
+  msgShareRequest,
 } from './types';
 import {
   channelMessages,
@@ -63,7 +64,7 @@ import {
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
-import { changePerms, deleteUser, searchMessage } from './admins';
+import { changePerms, deleteUser, msgShare, searchMessage } from './admins';
 import { standupStart } from './standup';
 
 // import HTTPError from 'http-errors';
@@ -466,6 +467,16 @@ app.get('/search/v1', (req: Request, res: Response, next) => {
     const token = req.header('token');
     const result = searchMessage(token, queryStr);
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/message/share/v1', (req: Request, res: Response, next) => {
+  try {
+    const { ogMessageId, message, channelId, dmId } = req.body as msgShareRequest;
+    const token = req.header('token');
+    res.json(msgShare(token, Number(ogMessageId), message, Number(channelId), Number(dmId)));
   } catch (err) {
     next(err);
   }
