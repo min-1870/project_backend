@@ -225,9 +225,8 @@ describe('HTTP tests for /search/v1', () => {
     expect(bodyObj.error).toStrictEqual({ message: 'queryStr is incorrect size' });
   });
 
-
   test('querystr too long', () => {
-    let temp = "ha";
+    let temp = 'ha';
     temp = temp.repeat(501);
 
     const res = sendGetRequestToEndpoint(SEARCH, {
@@ -254,16 +253,17 @@ describe('HTTP tests for /search/v1', () => {
     }, token);
 
     expect(res.statusCode).toBe(OK);
-    expect(parseJsonResponse(res)).toStrictEqual({messages: [
-      {
-        messageId: expect.any(Number),
-        uId: expect.any(Number),
-        message: 'hi',
-        timeSent: expect.any(Number),
-        reacts: [],
-        isPinned: false
-      }
-    ]});
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: [
+        {
+          messageId: expect.any(Number),
+          uId: expect.any(Number),
+          message: 'hi',
+          timeSent: expect.any(Number),
+          reacts: [],
+          isPinned: false
+        }
+      ]
+    });
   });
-
 });

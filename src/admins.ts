@@ -91,23 +91,25 @@ export function searchMessage(token: string, queryStr: string) {
   if (queryStr.length < 1 || queryStr.length > 1000) {
     throw HTTPError(400, 'queryStr is incorrect size');
   }
-  let arr: messages[] = [];
+  const arr: messages[] = [];
   for (const item of database.dms) {
     if (item.allMembers.includes(authUser.uId)) {
-      for (const itemTwo of item.messages)
+      for (const itemTwo of item.messages) {
         if (itemTwo.message === queryStr) {
           arr.push(itemTwo);
         }
+      }
     }
   }
   for (const item of database.channels) {
     if (item.allMembers.includes(authUser.uId)) {
-      for (const itemTwo of item.messages)
+      for (const itemTwo of item.messages) {
         if (itemTwo.message === queryStr) {
           arr.push(itemTwo);
         }
+      }
     }
   }
 
-  return {messages: arr};
+  return { messages: arr };
 }
