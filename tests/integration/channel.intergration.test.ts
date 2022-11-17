@@ -1,4 +1,4 @@
-import { authResponse, channelId, channelMessagesOutput } from '../../src/types';
+import { authResponse, channelId } from '../../src/types';
 import {
   AUTH_REGISTER,
   CHANNELS_CREATE,
@@ -9,7 +9,6 @@ import {
   CHANNEL_LEAVE, CHANNEL_MESSAGES,
   CHANNEL_REMOVE_OWNER,
   clearDataForTest,
-  MESSAGE_SEND
 } from '../testBase';
 import {
   OK,
@@ -61,7 +60,7 @@ describe('HTTP tests for channel/messages', () => {
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     globalOwnerUserId = jsonResponse.authUserId;
     globalOwnerToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
       password: PUBLIC_USER_PASSWORD,
@@ -71,7 +70,7 @@ describe('HTTP tests for channel/messages', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     publicChannelCreatorUserId = jsonResponse.authUserId;
     publicChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PRIVATE_USER_EMAIL,
       password: PRIVATE_USER_PASSWORD,
@@ -81,13 +80,13 @@ describe('HTTP tests for channel/messages', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PRIVATE_CHANNEL_NAME,
       isPublic: false
@@ -271,59 +270,59 @@ describe('HTTP tests for channel/messages', () => {
   //   expect(expectedMessages).toStrictEqual(actualMessages);
   // });
 
-//   test('channelMessages start from middle more than 50 messages success', () => {
-//     let expectedMessages = [];
-//     for (let i = 0; i < 100; i++) {
-//       const msg = `hello ${i}`;
-//       expectedMessages.push(msg);
-//       const res = sendPostRequestToEndpoint(
-//         MESSAGE_SEND,
-//         {
-//           channelId: publicChannelId,
-//           message: msg
-//         },
-//         publicChannelCreatorToken);
+  //   test('channelMessages start from middle more than 50 messages success', () => {
+  //     let expectedMessages = [];
+  //     for (let i = 0; i < 100; i++) {
+  //       const msg = `hello ${i}`;
+  //       expectedMessages.push(msg);
+  //       const res = sendPostRequestToEndpoint(
+  //         MESSAGE_SEND,
+  //         {
+  //           channelId: publicChannelId,
+  //           message: msg
+  //         },
+  //         publicChannelCreatorToken);
 
-//       expect(res.statusCode).toBe(OK);
-//     }
+  //       expect(res.statusCode).toBe(OK);
+  //     }
 
-//     const start = 11;
-//     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-//       channelId: publicChannelId,
-//       start
-//     },
-//     publicChannelCreatorToken);
+  //     const start = 11;
+  //     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+  //       channelId: publicChannelId,
+  //       start
+  //     },
+  //     publicChannelCreatorToken);
 
-//     expect(res.statusCode).toBe(OK);
-//     expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
-//     expect(parseJsonResponse(res)).toStrictEqual({
-//       messages: expect.any(Array),
-//       start,
-//       end: start + 50
-//     });
-//     const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
-//     const actualMessages = resBody.messages.map(m => m.message);
-//     expect(expectedMessages).toStrictEqual(actualMessages);
-//   });
+  //     expect(res.statusCode).toBe(OK);
+  //     expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
+  //     expect(parseJsonResponse(res)).toStrictEqual({
+  //       messages: expect.any(Array),
+  //       start,
+  //       end: start + 50
+  //     });
+  //     const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+  //     const actualMessages = resBody.messages.map(m => m.message);
+  //     expect(expectedMessages).toStrictEqual(actualMessages);
+  //   });
 
-//   test('channelMessages start from middle less than 50 messages success', () => {
-//     let expectedMessages = [];
-//     for (let i = 0; i < 11; i++) {
-//       expectedMessages.push(`hello ${i}`);
-//       const res = sendPostRequestToEndpoint(MESSAGE_SEND,
-//         {
-//           channelId: publicChannelId,
-//           message: `hello ${i}`
-//         },
-//         publicChannelCreatorToken);
-//       expect(res.statusCode).toBe(OK);
-//     }
+  //   test('channelMessages start from middle less than 50 messages success', () => {
+  //     let expectedMessages = [];
+  //     for (let i = 0; i < 11; i++) {
+  //       expectedMessages.push(`hello ${i}`);
+  //       const res = sendPostRequestToEndpoint(MESSAGE_SEND,
+  //         {
+  //           channelId: publicChannelId,
+  //           message: `hello ${i}`
+  //         },
+  //         publicChannelCreatorToken);
+  //       expect(res.statusCode).toBe(OK);
+  //     }
 
-//     const start = 3;
-//     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-//       channelId: publicChannelId,
-//       start
-//     }, publicChannelCreatorToken);
+  //     const start = 3;
+  //     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+  //       channelId: publicChannelId,
+  //       start
+  //     }, publicChannelCreatorToken);
 
 //     expect(res.statusCode).toBe(OK);
 //     expect(parseJsonResponse(res)).toStrictEqual({
@@ -336,7 +335,7 @@ describe('HTTP tests for channel/messages', () => {
 //     const actualMessages = resBody.messages.map(m => m.message);
 //     expect(expectedMessages).toStrictEqual(actualMessages);
 //   });
-  });
+});
 
 describe('HTTP tests for channel/join', () => {
   beforeEach(() => {
@@ -349,7 +348,7 @@ describe('HTTP tests for channel/join', () => {
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     globalOwnerUserId = jsonResponse.authUserId;
     globalOwnerToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
       password: PUBLIC_USER_PASSWORD,
@@ -359,7 +358,7 @@ describe('HTTP tests for channel/join', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     publicChannelCreatorUserId = jsonResponse.authUserId;
     publicChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PRIVATE_USER_EMAIL,
       password: PRIVATE_USER_PASSWORD,
@@ -369,13 +368,13 @@ describe('HTTP tests for channel/join', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PRIVATE_CHANNEL_NAME,
       isPublic: false
@@ -481,7 +480,7 @@ describe('HTTP tests for channel/invite', () => {
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     globalOwnerUserId = jsonResponse.authUserId;
     globalOwnerToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
       password: PUBLIC_USER_PASSWORD,
@@ -491,7 +490,7 @@ describe('HTTP tests for channel/invite', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     publicChannelCreatorUserId = jsonResponse.authUserId;
     publicChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PRIVATE_USER_EMAIL,
       password: PRIVATE_USER_PASSWORD,
@@ -501,13 +500,13 @@ describe('HTTP tests for channel/invite', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PRIVATE_CHANNEL_NAME,
       isPublic: false
@@ -758,7 +757,7 @@ describe('HTTP tests for channel/details', () => {
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     globalOwnerUserId = jsonResponse.authUserId;
     globalOwnerToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
       password: PUBLIC_USER_PASSWORD,
@@ -768,7 +767,7 @@ describe('HTTP tests for channel/details', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     publicChannelCreatorUserId = jsonResponse.authUserId;
     publicChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PRIVATE_USER_EMAIL,
       password: PRIVATE_USER_PASSWORD,
@@ -778,13 +777,13 @@ describe('HTTP tests for channel/details', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PRIVATE_CHANNEL_NAME,
       isPublic: false
@@ -945,7 +944,7 @@ describe('HTTP tests for channel/addowner', () => {
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     globalOwnerUserId = jsonResponse.authUserId;
     globalOwnerToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
       password: PUBLIC_USER_PASSWORD,
@@ -955,7 +954,7 @@ describe('HTTP tests for channel/addowner', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     publicChannelCreatorUserId = jsonResponse.authUserId;
     publicChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PRIVATE_USER_EMAIL,
       password: PRIVATE_USER_PASSWORD,
@@ -965,13 +964,13 @@ describe('HTTP tests for channel/addowner', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PRIVATE_CHANNEL_NAME,
       isPublic: false
@@ -1136,7 +1135,7 @@ describe('HTTP tests for channel/leave', () => {
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     globalOwnerUserId = jsonResponse.authUserId;
     globalOwnerToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
       password: PUBLIC_USER_PASSWORD,
@@ -1146,7 +1145,7 @@ describe('HTTP tests for channel/leave', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     publicChannelCreatorUserId = jsonResponse.authUserId;
     publicChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PRIVATE_USER_EMAIL,
       password: PRIVATE_USER_PASSWORD,
@@ -1156,13 +1155,13 @@ describe('HTTP tests for channel/leave', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PRIVATE_CHANNEL_NAME,
       isPublic: false
@@ -1299,7 +1298,7 @@ describe('HTTP tests for channel/removeowner', () => {
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     globalOwnerUserId = jsonResponse.authUserId;
     globalOwnerToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
       password: PUBLIC_USER_PASSWORD,
@@ -1309,7 +1308,7 @@ describe('HTTP tests for channel/removeowner', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     publicChannelCreatorUserId = jsonResponse.authUserId;
     publicChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PRIVATE_USER_EMAIL,
       password: PRIVATE_USER_PASSWORD,
@@ -1319,13 +1318,13 @@ describe('HTTP tests for channel/removeowner', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PUBLIC_CHANNEL_NAME,
       isPublic: true
     }, publicChannelCreatorToken);
     publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-  
+
     res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: PRIVATE_CHANNEL_NAME,
       isPublic: false
