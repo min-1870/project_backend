@@ -1,4 +1,5 @@
 import { database } from './dataStore';
+import { notificationTypes } from './notifications';
 import {
   channel,
   channels,
@@ -77,4 +78,40 @@ export function toOutputMessages(dataStoreMessage: messages, authUserId: number)
     timeSent: dataStoreMessage.timeSent,
     reacts: dataStoreMessage.reacts.map(r => r.toMessageOutput(authUserId))
   };
+}
+
+export function parseTags(message: string): string[] {
+  const regex = /@[a-z0-9]+/gi;
+  const matches = Array.from(message.matchAll(regex));
+  let res = [];
+  for (const match of matches) {
+    const temp = match.map(tag => tag.slice(1));
+    res = res.concat(temp.flatMap(e => e));
+  }
+  return res;
+}
+
+export function processMessageTagsAndSendNotifications(
+  messageId: number, message: string, senderId: number) {
+  const taggedUserHandles = new Set(parseTags(message));
+  database.getDataStoreMessageByMessageId(messageId);
+  taggedUserHandles.forEach(handle => {
+    if (database.isHandleStrUsed(handle)) {
+      const receiverId = database.getUserByHandle(handle).uId;
+      if (database.isMessageInChannels(messageId)) {
+        if (database.isUserMemberInChannel(receiverId,
+          database.getDataStoreChannelByMessageId(messageId).channelId)) {
+          database.addNotification(senderId,
+            receiverId, notificationTypes.TaggedToChannel, -1,
+            messageId, database.getDataStoreChannelByMessageId(messageId).channelId);
+        }
+      } else {
+        const dm = database.getDmByMessageId(messageId);
+        if (database.isUserInDm(receiverId, dm.dmId)) {
+          database.addNotification(senderId,
+            receiverId, notificationTypes.TaggedToDm, dm.dmId, messageId, -1);
+        }
+      }
+    }
+  });
 }

@@ -171,7 +171,6 @@ describe('HTTP tests for /notifications/get', () => {
 
     expect(res.statusCode).toBe(200);
     const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
-    console.log(notifResponse);
     expect(notifResponse.notifications[0]).toStrictEqual({
       channelId: publicChannelId,
       dmId: -1,
@@ -200,7 +199,6 @@ describe('HTTP tests for /notifications/get', () => {
 
     res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, dmCreatorToken);
 
-    console.log(parseJsonResponse(res));
     expect(res.statusCode).toBe(200);
     const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
     expect(notifResponse.notifications[0]).toStrictEqual({
@@ -229,13 +227,119 @@ describe('HTTP tests for /notifications/get', () => {
     }
 
     const res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
-    console.log(globalOwnerHandle);
-    console.log(dmCreatorId);
 
     expect(res.statusCode).toBe(200);
     const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
     expect(notifResponse.notifications.length).toBe(20);
     expect(notifResponse.notifications[0].notificationMessage).toBe(`${privateChannelCreatorHandle} added you to This is channel 30.`);
     expect(notifResponse.notifications[notifResponse.notifications.length - 1].notificationMessage).toBe(`${privateChannelCreatorHandle} added you to This is channel 11.`);
+  });
+
+  test('notificationsGet channel message tag single user notifications', () => {
+    const messageWithTag = `How are you @${privateChannelCreatorHandle}?`.repeat(20);
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+    let res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: messageWithTag
+    }, publicChannelCreatorToken);
+
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+    const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    expect(notifResponse.notifications[0]).toStrictEqual({
+      channelId: publicChannelId,
+      dmId: -1,
+      notificationMessage: `${publicChannelCreatorHandle} tagged you in ${PUBLIC_CHANNEL_NAME}: ${messageWithTag.substring(0, 20)}`
+    });
+  });
+
+  test('notificationsGet channel message tag multipe user notifications, global not in channel and self tag.', () => {
+    const messageWithTag = `How are @@you @1234@${privateChannelCreatorHandle}@${globalOwnerHandle} 432@${publicChannelCreatorHandle}?`.repeat(2);
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+    let res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: messageWithTag
+    }, publicChannelCreatorToken);
+
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+    let notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    expect(notifResponse.notifications[0]).toStrictEqual({
+      channelId: publicChannelId,
+      dmId: -1,
+      notificationMessage: `${publicChannelCreatorHandle} tagged you in ${PUBLIC_CHANNEL_NAME}: ${messageWithTag.substring(0, 20)}`
+    });
+
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, globalOwnerToken);
+
+    expect(res.statusCode).toBe(200);
+    notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    expect(notifResponse.notifications.length).toBe(0);
+
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+    notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    expect(notifResponse.notifications[0]).toStrictEqual({
+      channelId: publicChannelId,
+      dmId: -1,
+      notificationMessage: `${publicChannelCreatorHandle} tagged you in ${PUBLIC_CHANNEL_NAME}: ${messageWithTag.substring(0, 20)}`
+    });
+  });
+
+  test('notificationsGet dm message tag single user notifications', () => {
+    console.log(dmCreatorId);
+    const messageWithTag = `How are you @${privateChannelCreatorHandle}?`.repeat(20);
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: privateChannelCreatorUserId
+    }, publicChannelCreatorToken);
+    let res = sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: publicChannelId,
+      message: messageWithTag
+    }, publicChannelCreatorToken);
+
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, privateChannelCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+    const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    expect(notifResponse.notifications[0]).toStrictEqual({
+      channelId: publicChannelId,
+      dmId: -1,
+      notificationMessage: `${publicChannelCreatorHandle} tagged you in ${PUBLIC_CHANNEL_NAME}: ${messageWithTag.substring(0, 20)}`
+    });
+  });
+
+  test('notificationsGet dm message tag users notifications', () => {
+    const messageWithTag = `How are you@@@ @${privateChannelCreatorHandle}?@abcd@global@{}`.repeat(10);
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [privateChannelCreatorUserId, publicChannelCreatorUserId]
+    }, dmCreatorToken);
+    testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+    res = sendGetRequestToEndpoint(DM_DETAILS, { dmId: testDmId }, dmCreatorToken);
+    const dmName = (parseJsonResponse(res) as unknown as dmDetailResponse).name;
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: messageWithTag,
+    }, dmCreatorToken);
+    expect(res.statusCode).toBe(200);
+
+    res = sendGetRequestToEndpoint(NOTIFICATION_GET, {}, dmCreatorToken);
+
+    expect(res.statusCode).toBe(200);
+    const notifResponse = parseJsonResponse(res) as unknown as notficationResponse;
+    expect(notifResponse.notifications[0]).toStrictEqual({
+      channelId: -1,
+      dmId: testDmId,
+      notificationMessage: `${privateChannelCreatorHandle} tagged you in ${dmName}: ${messageWithTag.substring(0, 20)}`
+    });
   });
 });
