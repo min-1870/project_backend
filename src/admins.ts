@@ -167,17 +167,16 @@ export function msgShare(token: string, ogMessageId: number, message: string, ch
       throw HTTPError(403, 'user is not part of channel/dm');
     }
   }
-  const ogMessage =  database.getDataStoreMessageByMessageId(ogMessageId).message;
+  const ogMessage = database.getDataStoreMessageByMessageId(ogMessageId).message;
   const combinedMessage = ogMessage.concat(message);
   let retValue;
   if (channelId === -1) {
     retValue = dmMessageSend(token, dmId, combinedMessage);
-    return {sharedMessageId: retValue.messageId}
-  };
+    return { sharedMessageId: retValue.messageId };
+  }
 
   if (dmId === -1) {
     retValue = messageSend(token, channelId, combinedMessage);
-    return {sharedMessageId: retValue.messageId}
-  };
-
+    return { sharedMessageId: retValue.messageId };
+  }
 }
