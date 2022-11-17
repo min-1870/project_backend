@@ -63,6 +63,7 @@ import {
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
 import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
+import { changePerms, deleteUser } from './admins';
 import { standupSend, standupStart } from './standup';
 // import HTTPError from 'http-errors';
 
@@ -437,12 +438,34 @@ app.post('/message/unpin/v1', (req: Request, res: Response, next) => {
   }
 });
 
+
+app.delete('/admin/user/remove/v1', (req: Request, res: Response, next) => {
+  try {
+    const { uId } = req.query;
+    const token = req.header('token');
+    const result = deleteUser(token, Number(uId));
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/admin/userpermission/change/v1', (req: Request, res: Response, next) => {
+  try {
+    const { uId, permissionId } = req.body;
+    const token = req.header('token');
+    res.json(changePerms(token, Number(uId), Number(permissionId)));
+    } catch (err) {
+    next(err);
+  }
+});
+
 app.post('/standup/start/v1', (req: Request, res: Response, next) => {
   try {
     const { channelId, length } = req.body as standupStartRequest;
     const token = req.header('token');
     res.json(standupStart(token, Number(channelId), Number(length)));
-  } catch (err) {
+    } catch (err) {
     next(err);
   }
 });

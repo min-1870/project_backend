@@ -68,7 +68,7 @@ export const USER_STATS = '/user/stats/v1';
 export const USERS_STATS = '/users/stats/v1';
 
 export const ADMIN_USER_REMOVE = '/admin/user/remove/v1';
-export const ADMIN_USER_PERMISSION_CHANGE = '/admin/userpremission/change/v1';
+export const ADMIN_USER_PERMISSION_CHANGE = '/admin/userpermission/change/v1';
 
 export function clearDataForTest() {
   sendDeleteRequestToEndpoint(CLEAR, {});
