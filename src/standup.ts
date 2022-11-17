@@ -1,7 +1,6 @@
 import { error } from './types';
 import { database } from './dataStore';
 import HTTPError from 'http-errors';
-import { messageSend } from './message';
 
 let activeStandup = [];
 
@@ -30,9 +29,8 @@ export function standupStart (token: string, channelId: number, length: number):
 
 function standupEnd(uId: number, channelId: number, length: number) {
   setTimeout(function() {
-    
     const standup = activeStandup.find(i => i.channelId === channelId);
-    
+
     if (standup.message !== '') {
       database.addMessageToChannel(standup.message, uId, channelId);
     }
@@ -41,7 +39,7 @@ function standupEnd(uId: number, channelId: number, length: number) {
   }, length * 1000);
 }
 
-export function standupSend (token: string, channelId: number, message: string): error|{} {
+export function standupSend (token: string, channelId: number, message: string): error|Record<string, never> {
   const uId = database.getUserByToken(token).uId;
 
   if (database.isChannelIdValid(channelId) === false) {
@@ -55,13 +53,13 @@ export function standupSend (token: string, channelId: number, message: string):
   }
 
   const standup = activeStandup.find(i => i.channelId === channelId);
-  let handleStr = database.getUserByToken(token).handleStr;
+  const handleStr = database.getUserByToken(token).handleStr;
 
-  if (standup.message !== ''){
-    standup.message = standup.message + "\n" + handleStr + ": " + message
-  }else {
-    standup.message = handleStr + ": " + message
+  if (standup.message !== '') {
+    standup.message = standup.message + '\n' + handleStr + ': ' + message;
+  } else {
+    standup.message = handleStr + ': ' + message;
   }
 
-  return {}
-} 
+  return {};
+}

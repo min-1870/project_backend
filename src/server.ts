@@ -448,10 +448,10 @@ app.post('/standup/start/v1', (req: Request, res: Response, next) => {
 });
 
 app.post('/standup/send/v1', (req: Request, res: Response, next) => {
-  const { channelId, message } = req.body as standupSendRequest;
-  const token = req.header('token');
-  res.json(standupSend(token, Number(channelId), message));
   try {
+    const { channelId, message } = req.body as standupSendRequest;
+    const token = req.header('token');
+    res.json(standupSend(token, Number(channelId), message));
   } catch (err) {
     next(err);
   }
