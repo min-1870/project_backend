@@ -51,6 +51,7 @@ import {
   standupSendRequest,
   searchRequest,
   msgShareRequest,
+  standupActiveRequest,
 } from './types';
 import {
   channelMessages,
@@ -66,7 +67,7 @@ import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './
 import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
 import { getNotification } from './notifications';
 import { changePerms, deleteUser, msgShare, searchMessage } from './admins';
-import { standupSend, standupStart } from './standup';
+import { standupActive, standupSend, standupStart } from './standup';
 
 // import HTTPError from 'http-errors';
 
@@ -498,6 +499,16 @@ app.post('/standup/send/v1', (req: Request, res: Response, next) => {
     const { channelId, message } = req.body as standupSendRequest;
     const token = req.header('token');
     res.json(standupSend(token, Number(channelId), message));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/standup/active/v1', (req: Request, res: Response, next) => {
+  try {
+    const { channelId } = req.query as unknown as standupActiveRequest;
+    const token = req.header('token');
+    res.json(standupActive(token, Number(channelId)));
   } catch (err) {
     next(err);
   }

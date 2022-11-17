@@ -288,6 +288,10 @@ export type standupSendRequest = {
   message: string
 }
 
+export type standupActiveRequest = {
+  channelId: number
+}
+
 export type searchRequest = {
   queryStr: string
 }
