@@ -45,7 +45,7 @@ export const USER_PROFILE_SET_HANDLE = '/user/profile/sethandle/v2';
 
 export const NOTIFICATION_GET = '/notifications/get/v1';
 
-export const SEARCH = '/serach/v1';
+export const SEARCH = '/search/v1';
 
 export const MESSAGE_SHARE = '/message/share/v1';
 export const MESSAGE_REACT = '/message/react/v1';

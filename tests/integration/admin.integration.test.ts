@@ -1,6 +1,6 @@
-import { authResponse } from '../../src/types';
-import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest } from '../testBase';
-import { OK, parseJsonResponse, sendDeleteRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
+import { authResponse, channelId } from '../../src/types';
+import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, MESSAGE_SEND, SEARCH } from '../testBase';
+import { OK, parseJsonResponse, sendDeleteRequestToEndpoint, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
 const PASSWORD = '11223344';
@@ -210,5 +210,60 @@ describe('HTTP tests for admin/userpermission/change/v1', () => {
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+});
+
+describe('HTTP tests for /search/v1', () => {
+  // happy path
+  test('querystring too short', () => {
+    const res = sendGetRequestToEndpoint(SEARCH, {
+      queryStr: ''
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'queryStr is incorrect size' });
+  });
+
+  test('querystr too long', () => {
+    let temp = 'ha';
+    temp = temp.repeat(501);
+
+    const res = sendGetRequestToEndpoint(SEARCH, {
+      queryStr: temp
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: 'queryStr is incorrect size' });
+  });
+
+  test('successful search', () => {
+    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    }, token);
+    const channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: channel1Id,
+      message: 'hi',
+    }, token);
+    const res = sendGetRequestToEndpoint(SEARCH, {
+      queryStr: 'hi'
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: [
+        {
+          messageId: expect.any(Number),
+          uId: expect.any(Number),
+          message: 'hi',
+          timeSent: expect.any(Number),
+          reacts: [],
+          isPinned: false
+        }
+      ]
+    });
   });
 });

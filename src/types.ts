@@ -287,3 +287,7 @@ export type standupSendRequest = {
   channelId: number,
   message: string
 }
+
+export type searchRequest = {
+  queryStr: string
+}
