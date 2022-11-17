@@ -438,7 +438,7 @@ app.post('/message/unpin/v1', (req: Request, res: Response, next) => {
   }
 });
 
-<<<<<<< src/server.ts
+
 app.delete('/admin/user/remove/v1', (req: Request, res: Response, next) => {
   try {
     const { uId } = req.query;
@@ -455,14 +455,17 @@ app.post('/admin/userpermission/change/v1', (req: Request, res: Response, next) 
     const { uId, permissionId } = req.body;
     const token = req.header('token');
     res.json(changePerms(token, Number(uId), Number(permissionId)));
-=======
+    } catch (err) {
+    next(err);
+  }
+});
+
 app.post('/standup/start/v1', (req: Request, res: Response, next) => {
   try {
     const { channelId, length } = req.body as standupStartRequest;
     const token = req.header('token');
     res.json(standupStart(token, Number(channelId), Number(length)));
->>>>>>> src/server.ts
-  } catch (err) {
+    } catch (err) {
     next(err);
   }
 });
