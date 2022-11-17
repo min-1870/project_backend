@@ -291,3 +291,10 @@ export type standupSendRequest = {
 export type searchRequest = {
   queryStr: string
 }
+
+export type msgShareRequest = {
+  ogMessageId: number,
+  message: string,
+  channelId: number,
+  dmId: number
+}

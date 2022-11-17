@@ -1,6 +1,7 @@
 import { database } from './dataStore';
 import HTTPError from 'http-errors';
 import { messages } from './types';
+import { dmMessageSend, messageSend } from './message';
 
 export function deleteUser(token:string, uId: number) {
   const authUser = database.getUserByToken(token);
@@ -110,6 +111,72 @@ export function searchMessage(token: string, queryStr: string) {
       }
     }
   }
-
   return { messages: arr };
+}
+
+export function msgShare(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
+  const authUser = database.getUserByToken(token);
+  if (message.length > 1000) {
+    throw HTTPError(400, 'message too long');
+  }
+
+  if (channelId !== -1 && dmId !== -1) {
+    throw HTTPError(400, 'neither channelId or dmId are -1');
+  }
+
+  if ((database.dms.find(d => d.dmId === dmId) === undefined) && (dmId !== -1)) {
+    throw HTTPError(400, 'both channelId or dmId are invalid');
+  }
+
+  if ((database.channels.find(d => d.channelId === channelId) === undefined) && (channelId !== -1)) {
+    throw HTTPError(400, 'both channelId or dmId are invalid');
+  }
+
+  if ((dmId === -1) && database.isMessageInChannels(ogMessageId) === false) {
+    console.log(1);
+    throw HTTPError(400, 'ogMessageId isnt valid');
+  }
+
+  if ((channelId === -1) && database.isMessageInDms(ogMessageId) === false) {
+    console.log(2);
+    throw HTTPError(400, 'ogMessageId isnt valid');
+  }
+
+  if ((dmId === -1) && database.isMessageInChannels(ogMessageId) === true) {
+    if (database.getDataStoreChannelByMessageId(ogMessageId).allMembers.includes(authUser.uId) === false) {
+      console.log(3);
+      throw HTTPError(400, 'ogMessageId isnt valid');
+    }
+  }
+
+  if ((channelId === -1) && database.isMessageInDms(ogMessageId) === true) {
+    if (database.getDataStoreDmByMessageId(ogMessageId).allMembers.includes(authUser.uId) === false) {
+      console.log(4);
+      throw HTTPError(400, 'ogMessageId isnt valid');
+    }
+  }
+
+  if ((dmId === -1)) {
+    if (database.getDataStoreChannelByChannelId(channelId).allMembers.includes(authUser.uId) === false) {
+      throw HTTPError(403, 'user is not part of channel/dm');
+    }
+  }
+
+  if ((channelId === -1)) {
+    if (database.getDataStoreDmByDmId(dmId).allMembers.includes(authUser.uId) === false) {
+      throw HTTPError(403, 'user is not part of channel/dm');
+    }
+  }
+  const ogMessage = database.getDataStoreMessageByMessageId(ogMessageId).message;
+  const combinedMessage = ogMessage.concat(message);
+  let retValue;
+  if (channelId === -1) {
+    retValue = dmMessageSend(token, dmId, combinedMessage);
+    return { sharedMessageId: retValue.messageId };
+  }
+
+  if (dmId === -1) {
+    retValue = messageSend(token, channelId, combinedMessage);
+    return { sharedMessageId: retValue.messageId };
+  }
 }
