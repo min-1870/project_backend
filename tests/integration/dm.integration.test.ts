@@ -454,7 +454,8 @@ describe('HTTP tests for message/senddm/v1', () => {
           uId: uIdTwo,
           message: TEST_MESSAGE,
           timeSent: expect.any(Number),
-          reacts: []
+          reacts: [],
+          isPinned: false
         }
       ],
       start: 0,

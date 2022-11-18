@@ -2,6 +2,7 @@ import { database } from './dataStore';
 import HTTPError from 'http-errors';
 import { messages } from './types';
 import { dmMessageSend, messageSend } from './message';
+import { toOutputMessages } from './utils';
 
 export function deleteUser(token:string, uId: number) {
   const authUser = database.getUserByToken(token);
@@ -111,7 +112,7 @@ export function searchMessage(token: string, queryStr: string) {
       }
     }
   }
-  return { messages: arr };
+  return { messages: arr.map(msg => toOutputMessages(msg, authUser.uId)) };
 }
 
 export function msgShare(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {

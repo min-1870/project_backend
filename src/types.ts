@@ -26,7 +26,8 @@ export interface messageOutput {
   uId: number,
   message: string,
   timeSent: number,
-  reacts: reactOutput[]
+  reacts: reactOutput[],
+  isPinned: boolean
 }
 
 export type messageId = { messageId: number };

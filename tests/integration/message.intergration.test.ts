@@ -147,7 +147,8 @@ describe('HTTP tests for message/send', () => {
           uId: authUserId,
           message: TEST_MESSAGE,
           timeSent: expect.any(Number),
-          reacts: []
+          reacts: [],
+          isPinned: false
         }
       ],
       start: 0,
@@ -349,7 +350,8 @@ describe('HTTP tests for message/edit', () => {
           uId: authUserId,
           message: TEST_MESSAGE_2,
           timeSent: expect.any(Number),
-          reacts: []
+          reacts: [],
+          isPinned: false
         }
       ],
       start: 0,
@@ -387,7 +389,8 @@ describe('HTTP tests for message/edit', () => {
           uId: authUserId,
           message: TEST_MESSAGE_2,
           timeSent: expect.any(Number),
-          reacts: []
+          reacts: [],
+          isPinned: false
         }],
       start: 0,
       end: -1,
