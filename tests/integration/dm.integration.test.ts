@@ -565,7 +565,7 @@ describe('HTTP tests for message/sendlaterdm', () => {
       start: 0,
     }, token);
 
-    console.log(parseJsonResponse(res));
+    // console.log(parseJsonResponse(res));
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res2)).toStrictEqual({
       messages: [
