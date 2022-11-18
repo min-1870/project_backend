@@ -1,6 +1,6 @@
 import { dataStoreUserToUser } from './utils';
 import { database } from './dataStore';
-import { error, user } from './types';
+import { error, user, userStats, workspaceStats } from './types';
 import validator from 'validator';
 import HTTPError from 'http-errors';
 
@@ -70,4 +70,125 @@ export function userProfileNameChange(token: string, nameFirst: string, nameLast
 export function listAllUsersV1(token: string): ({ users: user[] } | error) {
   database.getUserByToken(token);
   return { users: database.users.map(user => dataStoreUserToUser(user)) };
+}
+
+/**
+  * Returns a the user's involvement rate with UNSW Beans as well as number of messages sent, number of channels joined and number of dms joined.
+  *
+  * @param {string} token - an object that represents the right to perform certain actions
+  *
+  * @returns {userStats} - array of objects contatining number of channels and dms joined, number of messages sent, and involvement rate.
+*/
+export function getUserStats(token: string): (userStats | error) {
+  const user = database.getUserByToken(token);
+  const userDms = [];
+  for (const item of database.dms) {
+    if (item.allMembers.includes(user.uId)) {
+      for (const itemTwo of item.name) {
+        userDms.push(itemTwo);
+      }
+    }
+  }
+  const numDmsJoined = userDms.length;
+
+  const userChannels = [];
+  for (const item of database.channels) {
+    if (item.allMembers.includes(user.uId)) {
+      for (const itemTwo of item.name) {
+        userChannels.push(itemTwo);
+      }
+    }
+  }
+  const numChannelsJoined = userChannels.length;
+  const userMessages = [];
+  for (const item of database.dms) {
+    if (item.allMembers.includes(user.uId)) {
+      for (const itemTwo of item.messages) {
+        userMessages.push(itemTwo);
+      }
+    }
+  }
+  for (const item of database.channels) {
+    if (item.allMembers.includes(user.uId)) {
+      for (const itemTwo of item.messages) {
+        userMessages.push(itemTwo);
+      }
+    }
+  }
+  const numMessagesSent = userMessages.length;
+  const totalMessages = [];
+  for (const item of database.dms) {
+    for (const itemTwo of item.messages) {
+      totalMessages.push(itemTwo);
+    }
+  }
+  for (const item of database.channels) {
+    for (const itemTwo of item.messages) {
+      totalMessages.push(itemTwo);
+    }
+  }
+  const numMsgs = totalMessages.length;
+  const numChannels = database.getAllChannels().length;
+  const numDms = database.getAllDms().length;
+  const sumUser = [numChannelsJoined, numDmsJoined, numMessagesSent];
+  let sum1 = 0;
+  for (let index = 0; index < sumUser.length; index++) {
+    sum1 += sumUser[index];
+  }
+  const sumTotal = [numChannels, numDms, numMsgs];
+  let sum2 = 0;
+  for (let index = 0; index < sumTotal.length; index++) {
+    sum2 += sumUser[index];
+  }
+  const involvementRate = sum1 / sum2;
+  const timeStamp = (Date.now() / 1000);
+  return { userStats: { channelsJoined: [{ numChannelsJoined, timeStamp }], dmsJoined: [{ numDmsJoined, timeStamp }], messagesSent: [{ numMessagesSent, timeStamp }], involvementRate } };
+}
+
+/**
+  * Returns a list of total number of channels, dms, and messages and utilizaation rate of UNSW Beans.
+  *
+  * @param {string} token - an object that represents the right to perform certain actions
+  *
+  * @returns {workspaceStats} - array of objects containing total number of channels, dms, and messages and utilizaation rate of UNSW Beans.
+*/
+
+export function getWorkspaceStats(token: string): (workspaceStats | error) {
+  database.getUserByToken(token);
+  const totalMessages = [];
+  for (const item of database.dms) {
+    for (const itemTwo of item.messages) {
+      totalMessages.push(itemTwo);
+    }
+  }
+  for (const item of database.channels) {
+    for (const itemTwo of item.messages) {
+      totalMessages.push(itemTwo);
+    }
+  }
+  const numMessagesExist = totalMessages.length;
+  const numChannelsExist = database.getAllChannels().length;
+  const numDmsExist = database.getAllDms().length;
+  const timeStamp = (Date.now() / 1000);
+
+  const usersInChannelsOrDms = [];
+  for (const item of database.channels) {
+    for (const itemTwo of item.allMembers) {
+      usersInChannelsOrDms.push(itemTwo);
+    }
+  }
+  for (const item of database.dms) {
+    for (const itemTwo of item.allMembers) {
+      usersInChannelsOrDms.push(itemTwo);
+    }
+  }
+  const set = new Set(usersInChannelsOrDms);
+  const numUsersWhoHaveJoinedAtLeastOneChannelOrDm = set.size;
+  const numberOfUsers = [];
+  for (const item of database.users) {
+    numberOfUsers.push(item);
+  }
+  const numOfUsers = numberOfUsers.length;
+  const utilizationRate = (numUsersWhoHaveJoinedAtLeastOneChannelOrDm / numOfUsers);
+  return { workspaceStats: { channelsExist: [{ numChannelsExist, timeStamp }], dmsExist: [{ numDmsExist, timeStamp }], messagesExist: [{ numMessagesExist, timeStamp }], utilizationRate } };
 }

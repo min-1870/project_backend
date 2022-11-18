@@ -19,7 +19,9 @@ import {
   userProfileHandleChange,
   userProfileNameChange,
   userProfile,
-  listAllUsersV1
+  listAllUsersV1,
+  getUserStats,
+  getWorkspaceStats
 } from './users';
 import {
   authRegisterRequest,
@@ -537,6 +539,26 @@ app.get('/standup/active/v1', (req: Request, res: Response, next) => {
     const { channelId } = req.query as unknown as standupActiveRequest;
     const token = req.header('token');
     res.json(standupActive(token, Number(channelId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/user/stats/v1', (req: Request, res: Response, next) => {
+  try {
+    const token = req.header('token');
+    const result = getUserStats(token);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/users/stats/v1', (req: Request, res: Response, next) => {
+  try {
+    const token = req.header('token');
+    const result = getWorkspaceStats(token);
+    res.json(result);
   } catch (err) {
     next(err);
   }
