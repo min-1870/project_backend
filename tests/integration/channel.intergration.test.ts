@@ -46,56 +46,79 @@ let globalOwnerUserId: number;
 let publicChannelId: number;
 let privateChannelId: number;
 
+let publicChannelMemberId;
+let privateChannelMemberId;
+
+let res;
+
+let jsonResponse;
+
+function createGlobalUser() {
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    email: GLOBAL_USER_EMAIL,
+    password: GLOBAL_USER_PASSWORD,
+    nameFirst: GLOBAL_USER_NAME_FIRST,
+    nameLast: GLOBAL_USER_NAME_LAST
+  });
+  jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+  globalOwnerUserId = jsonResponse.authUserId;
+  globalOwnerToken = jsonResponse.token;
+}
+function createPublicUser() {
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    email: PUBLIC_USER_EMAIL,
+    password: PUBLIC_USER_PASSWORD,
+    nameFirst: PUBLIC_USER_NAME_FIRST,
+    nameLast: PUBLIC_USER_NAME_LAST
+  });
+  jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+  publicChannelCreatorUserId = jsonResponse.authUserId;
+  publicChannelCreatorToken = jsonResponse.token;
+  privateChannelMemberId = publicChannelCreatorUserId;
+}
+function createPrivateUser() {
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    email: PRIVATE_USER_EMAIL,
+    password: PRIVATE_USER_PASSWORD,
+    nameFirst: PRIVATE_USER_NAME_FIRST,
+    nameLast: PRIVATE_USER_NAME_LAST
+  });
+  jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+  privateChannelCreatorUserId = jsonResponse.authUserId;
+  privateChannelCreatorToken = jsonResponse.token;
+  publicChannelMemberId = privateChannelCreatorUserId;
+}
+function createPublicChannelUser() {
+  createPublicUser();
+  res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    name: PUBLIC_CHANNEL_NAME,
+    isPublic: true
+  }, publicChannelCreatorToken);
+  publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+}
+function createPrivateChannelUser() {
+  createPrivateUser();
+  res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    name: PRIVATE_CHANNEL_NAME,
+    isPublic: false
+  }, privateChannelCreatorToken);
+  privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+}
+
 beforeEach(() => {
   clearDataForTest();
 });
 
 describe('HTTP tests for channel/messages', () => {
   beforeEach(() => {
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: GLOBAL_USER_EMAIL,
-      password: GLOBAL_USER_PASSWORD,
-      nameFirst: GLOBAL_USER_NAME_FIRST,
-      nameLast: GLOBAL_USER_NAME_LAST
-    });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    globalOwnerUserId = jsonResponse.authUserId;
-    globalOwnerToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PUBLIC_USER_EMAIL,
-      password: PUBLIC_USER_PASSWORD,
-      nameFirst: PUBLIC_USER_NAME_FIRST,
-      nameLast: PUBLIC_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    publicChannelCreatorUserId = jsonResponse.authUserId;
-    publicChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PRIVATE_USER_EMAIL,
-      password: PRIVATE_USER_PASSWORD,
-      nameFirst: PRIVATE_USER_NAME_FIRST,
-      nameLast: PRIVATE_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    privateChannelCreatorUserId = jsonResponse.authUserId;
-    privateChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PUBLIC_CHANNEL_NAME,
-      isPublic: true
-    }, publicChannelCreatorToken);
-    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PRIVATE_CHANNEL_NAME,
-      isPublic: false
-    }, privateChannelCreatorToken);
-    privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+    clearDataForTest();
+    createGlobalUser();
+    // createPublicChannelUser()
+    // createPrivateChannelUser()
   });
 
   test('channelMessages invalid channelId throws error', () => {
+    createPublicUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: 99999999,
       start: 0,
@@ -110,6 +133,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages start is greater than the total messages number in channel throws error', () => {
+    createPublicChannelUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: publicChannelId,
       start: 99999999,
@@ -124,6 +148,8 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages not a member of private channel throws forbidden', () => {
+    createPrivateChannelUser();
+    createPublicUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: privateChannelId,
       start: 0,
@@ -138,6 +164,8 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages not a member of public channel throws forbidden', () => {
+    createPrivateUser();
+    createPublicChannelUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: publicChannelId,
       start: 0,
@@ -152,6 +180,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages with invalid token throws forbidden', () => {
+    createPublicChannelUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: publicChannelId,
       start: 0,
@@ -166,6 +195,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages public channel success', () => {
+    createPublicChannelUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: publicChannelId,
       start: 0,
@@ -180,6 +210,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages private channel success', () => {
+    createPrivateChannelUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: privateChannelId,
       start: 0,
@@ -194,6 +225,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages global owner not a member of public channel throws forbidden', () => {
+    createPublicChannelUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: publicChannelId,
       start: 0,
@@ -203,6 +235,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages global owner not a member of private channel throws forbidden', () => {
+    createPrivateChannelUser();
     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
       channelId: privateChannelId,
       start: 0,
@@ -340,50 +373,12 @@ describe('HTTP tests for channel/messages', () => {
 
 describe('HTTP tests for channel/join', () => {
   beforeEach(() => {
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: GLOBAL_USER_EMAIL,
-      password: GLOBAL_USER_PASSWORD,
-      nameFirst: GLOBAL_USER_NAME_FIRST,
-      nameLast: GLOBAL_USER_NAME_LAST
-    });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    globalOwnerUserId = jsonResponse.authUserId;
-    globalOwnerToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PUBLIC_USER_EMAIL,
-      password: PUBLIC_USER_PASSWORD,
-      nameFirst: PUBLIC_USER_NAME_FIRST,
-      nameLast: PUBLIC_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    publicChannelCreatorUserId = jsonResponse.authUserId;
-    publicChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PRIVATE_USER_EMAIL,
-      password: PRIVATE_USER_PASSWORD,
-      nameFirst: PRIVATE_USER_NAME_FIRST,
-      nameLast: PRIVATE_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    privateChannelCreatorUserId = jsonResponse.authUserId;
-    privateChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PUBLIC_CHANNEL_NAME,
-      isPublic: true
-    }, publicChannelCreatorToken);
-    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PRIVATE_CHANNEL_NAME,
-      isPublic: false
-    }, privateChannelCreatorToken);
-    privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+    clearDataForTest();
+    createGlobalUser();
   });
 
   test('channelJoin invalid channel ID throws error', () => {
+    createPrivateUser();
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: 99999999,
     },
@@ -398,6 +393,7 @@ describe('HTTP tests for channel/join', () => {
   });
 
   test('channelJoin already a memeber throws error', () => {
+    createPublicChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: publicChannelId,
     }, publicChannelCreatorToken);
@@ -411,6 +407,8 @@ describe('HTTP tests for channel/join', () => {
   });
 
   test('channelJoin non-global owner join private channel throws forbidden', () => {
+    createPublicUser();
+    createPrivateChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: privateChannelId,
     }, publicChannelCreatorToken);
@@ -424,6 +422,7 @@ describe('HTTP tests for channel/join', () => {
   });
 
   test('channelJoin invalid token throws forbidden', () => {
+    createPublicChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: publicChannelId,
     }, 'some bad token');
@@ -437,6 +436,8 @@ describe('HTTP tests for channel/join', () => {
   });
 
   test('channelJoin non-global owner join public channel success', () => {
+    createPublicChannelUser();
+    createPrivateUser();
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: publicChannelId,
     }, privateChannelCreatorToken);
@@ -446,6 +447,7 @@ describe('HTTP tests for channel/join', () => {
   });
 
   test('channelJoin global owner join public channel success', () => {
+    createPublicChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: publicChannelId,
     }, globalOwnerToken);
@@ -455,6 +457,7 @@ describe('HTTP tests for channel/join', () => {
   });
 
   test('channelJoin global owner join private channel success', () => {
+    createPrivateChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_JOIN, {
       channelId: privateChannelId,
     }, globalOwnerToken);
@@ -464,68 +467,34 @@ describe('HTTP tests for channel/join', () => {
   });
 });
 
+let normalUserId: number;
+let normalUserToken: string;
+const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
+const NORMAL_USER_PW = 'imnorm233';
+const NORMAL_USER_NAME_FIRST = 'normalpers';
+const NORMAL_USER_NAME_LAST = 'ffas';
+
+function createNomalUser() {
+  res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    email: NORMAL_USER_EMAIL,
+    password: NORMAL_USER_PW,
+    nameFirst: NORMAL_USER_NAME_FIRST,
+    nameLast: NORMAL_USER_NAME_LAST
+  });
+  jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+  normalUserId = jsonResponse.authUserId;
+  normalUserToken = jsonResponse.token;
+}
+
 describe('HTTP tests for channel/invite', () => {
-  let normalUserId: number;
-  let normalUserToken: string;
-  const NORMAL_USER_EMAIL = 'imnormnal@gmail.com';
-  const NORMAL_USER_PW = 'imnorm233';
-  const NORMAL_USER_NAME_FIRST = 'normalpers';
-  const NORMAL_USER_NAME_LAST = 'ffas';
   beforeEach(() => {
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: GLOBAL_USER_EMAIL,
-      password: GLOBAL_USER_PASSWORD,
-      nameFirst: GLOBAL_USER_NAME_FIRST,
-      nameLast: GLOBAL_USER_NAME_LAST
-    });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    globalOwnerUserId = jsonResponse.authUserId;
-    globalOwnerToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PUBLIC_USER_EMAIL,
-      password: PUBLIC_USER_PASSWORD,
-      nameFirst: PUBLIC_USER_NAME_FIRST,
-      nameLast: PUBLIC_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    publicChannelCreatorUserId = jsonResponse.authUserId;
-    publicChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PRIVATE_USER_EMAIL,
-      password: PRIVATE_USER_PASSWORD,
-      nameFirst: PRIVATE_USER_NAME_FIRST,
-      nameLast: PRIVATE_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    privateChannelCreatorUserId = jsonResponse.authUserId;
-    privateChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PUBLIC_CHANNEL_NAME,
-      isPublic: true
-    }, publicChannelCreatorToken);
-    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PRIVATE_CHANNEL_NAME,
-      isPublic: false
-    }, privateChannelCreatorToken);
-    privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: NORMAL_USER_EMAIL,
-      password: NORMAL_USER_PW,
-      nameFirst: NORMAL_USER_NAME_FIRST,
-      nameLast: NORMAL_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    normalUserId = jsonResponse.authUserId;
-    normalUserToken = jsonResponse.token;
+    clearDataForTest();
+    createGlobalUser();
   });
 
   test('channelInvite invalid channel ID throws error', () => {
+    createNomalUser();
+    createPrivateUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: 999993123111999,
       uId: normalUserId,
@@ -541,6 +510,7 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invalid uId throws error', () => {
+    createPublicChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: 99999999,
@@ -555,6 +525,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invited uId is already a member throws error.', () => {
+    createPublicChannelUser();
+    createPrivateUser();
     let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId,
@@ -576,6 +548,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invited uId is already an owner throws error.', () => {
+    createPublicChannelUser();
+    createPrivateUser();
     let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: privateChannelCreatorUserId,
@@ -597,6 +571,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite inviter is not a member of public channel throws error', () => {
+    createPublicChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: normalUserId,
@@ -611,6 +587,9 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite inviter is not a member of private channel throws error', () => {
+    createPrivateChannelUser();
+    createPublicUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: normalUserId,
@@ -625,6 +604,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invitor invalid token throws fobidden', () => {
+    createPublicChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: normalUserId,
@@ -639,6 +620,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invite normal user to public channel success', () => {
+    createPublicChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: normalUserId,
@@ -649,6 +632,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invite normal user to private channel success', () => {
+    createPrivateChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: normalUserId,
@@ -659,6 +644,7 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invite global owner to public channel success', () => {
+    createPublicChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: globalOwnerUserId,
@@ -669,6 +655,7 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite invite global owner to private channel success', () => {
+    createPrivateChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: globalOwnerUserId,
@@ -679,6 +666,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite global owner not a member invite to public channel throws forbidden', () => {
+    createPublicChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: normalUserId,
@@ -688,6 +677,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite global owner not a member invite to private channel throws forbidden', () => {
+    createPrivateChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: normalUserId,
@@ -697,6 +688,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite normal member invite to public channel throws forbidden', () => {
+    createPublicChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: globalOwnerUserId,
@@ -706,6 +699,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite normal member invite to private channel throws forbidden', () => {
+    createPrivateChannelUser();
+    createNomalUser();
     const res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: globalOwnerUserId,
@@ -715,6 +710,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite global owner added as a member then can invite in private channel success', () => {
+    createPrivateChannelUser();
+    createNomalUser();
     let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: globalOwnerUserId,
@@ -731,6 +728,8 @@ describe('HTTP tests for channel/invite', () => {
   });
 
   test('channelInvite global owner added as a member then can invite in public channel success', () => {
+    createPublicChannelUser();
+    createNomalUser();
     let res = sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
       uId: globalOwnerUserId,
@@ -932,54 +931,10 @@ describe('HTTP tests for channel/addowner', () => {
   const NORMAL_USER_NAME_FIRST = 'normalpers';
   const NORMAL_USER_NAME_LAST = 'ffas';
 
-  let publicChannelMemberId;
-  let privateChannelMemberId;
+  // let publicChannelMemberId;
+  // let privateChannelMemberId;
 
-  beforeEach(() => {
-    let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: GLOBAL_USER_EMAIL,
-      password: GLOBAL_USER_PASSWORD,
-      nameFirst: GLOBAL_USER_NAME_FIRST,
-      nameLast: GLOBAL_USER_NAME_LAST
-    });
-    let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    globalOwnerUserId = jsonResponse.authUserId;
-    globalOwnerToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PUBLIC_USER_EMAIL,
-      password: PUBLIC_USER_PASSWORD,
-      nameFirst: PUBLIC_USER_NAME_FIRST,
-      nameLast: PUBLIC_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    publicChannelCreatorUserId = jsonResponse.authUserId;
-    publicChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(AUTH_REGISTER, {
-      email: PRIVATE_USER_EMAIL,
-      password: PRIVATE_USER_PASSWORD,
-      nameFirst: PRIVATE_USER_NAME_FIRST,
-      nameLast: PRIVATE_USER_NAME_LAST
-    });
-    jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    privateChannelCreatorUserId = jsonResponse.authUserId;
-    privateChannelCreatorToken = jsonResponse.token;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PUBLIC_CHANNEL_NAME,
-      isPublic: true
-    }, publicChannelCreatorToken);
-    publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-
-    res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-      name: PRIVATE_CHANNEL_NAME,
-      isPublic: false
-    }, privateChannelCreatorToken);
-    privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
-    publicChannelMemberId = privateChannelCreatorUserId;
-    privateChannelMemberId = publicChannelCreatorUserId;
-
+  function createNomalUser2() {
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: NORMAL_USER_EMAIL,
       password: NORMAL_USER_PW,
@@ -988,18 +943,91 @@ describe('HTTP tests for channel/addowner', () => {
     });
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     normalUserId = jsonResponse.authUserId;
+  }
 
-    sendPostRequestToEndpoint(CHANNEL_INVITE, {
-      channelId: publicChannelId,
-      uId: publicChannelMemberId
-    }, publicChannelCreatorToken);
+  function createPrivateChannelMemberId() {
+    createPublicUser();
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: privateChannelId,
       uId: privateChannelMemberId
     }, privateChannelCreatorToken);
+  }
+
+  function createPublicChannelMemberId() {
+    createPrivateUser();
+    sendPostRequestToEndpoint(CHANNEL_INVITE, {
+      channelId: publicChannelId,
+      uId: publicChannelMemberId
+    }, publicChannelCreatorToken);
+  }
+
+  beforeEach(() => {
+    clearDataForTest();
+    createGlobalUser();
+    // let res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    //   email: GLOBAL_USER_EMAIL,
+    //   password: GLOBAL_USER_PASSWORD,
+    //   nameFirst: GLOBAL_USER_NAME_FIRST,
+    //   nameLast: GLOBAL_USER_NAME_LAST
+    // });
+    // let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    // globalOwnerUserId = jsonResponse.authUserId;
+    // globalOwnerToken = jsonResponse.token;
+
+    // res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    //   email: PUBLIC_USER_EMAIL,
+    //   password: PUBLIC_USER_PASSWORD,
+    //   nameFirst: PUBLIC_USER_NAME_FIRST,
+    //   nameLast: PUBLIC_USER_NAME_LAST
+    // });
+    // jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    // publicChannelCreatorUserId = jsonResponse.authUserId;
+    // publicChannelCreatorToken = jsonResponse.token;
+
+    // res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    //   email: PRIVATE_USER_EMAIL,
+    //   password: PRIVATE_USER_PASSWORD,
+    //   nameFirst: PRIVATE_USER_NAME_FIRST,
+    //   nameLast: PRIVATE_USER_NAME_LAST
+    // });
+    // jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    // privateChannelCreatorUserId = jsonResponse.authUserId;
+    // privateChannelCreatorToken = jsonResponse.token;
+
+    // res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    //   name: PUBLIC_CHANNEL_NAME,
+    //   isPublic: true
+    // }, publicChannelCreatorToken);
+    // publicChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    // res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    //   name: PRIVATE_CHANNEL_NAME,
+    //   isPublic: false
+    // }, privateChannelCreatorToken);
+    // privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
+
+    // res = sendPostRequestToEndpoint(AUTH_REGISTER, {
+    //   email: NORMAL_USER_EMAIL,
+    //   password: NORMAL_USER_PW,
+    //   nameFirst: NORMAL_USER_NAME_FIRST,
+    //   nameLast: NORMAL_USER_NAME_LAST
+    // });
+    // jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
+    // normalUserId = jsonResponse.authUserId;
+
+    // sendPostRequestToEndpoint(CHANNEL_INVITE, {
+    //   channelId: publicChannelId,
+    //   uId: publicChannelMemberId
+    // }, publicChannelCreatorToken);
+    // sendPostRequestToEndpoint(CHANNEL_INVITE, {
+    //   channelId: privateChannelId,
+    //   uId: privateChannelMemberId
+    // }, privateChannelCreatorToken);
   });
 
   test('channelAddOwner add member to public channel owner success', () => {
+    createPublicChannelUser();
+    createPublicChannelMemberId();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: publicChannelId,
       uId: publicChannelMemberId
@@ -1010,6 +1038,8 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner add member to private channel owner successful', () => {
+    createPrivateChannelUser();
+    createPrivateChannelMemberId();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: privateChannelId,
       uId: privateChannelMemberId
@@ -1020,6 +1050,7 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner add non-member global owner to private channel throws error', () => {
+    createPrivateChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: privateChannelId,
       uId: globalOwnerUserId
@@ -1029,6 +1060,7 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner add non-member global owner to public channel throws error', () => {
+    createPublicChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: publicChannelId,
       uId: globalOwnerUserId
@@ -1038,6 +1070,8 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner add non-member to private channel throws error', () => {
+    createPrivateChannelUser();
+    createNomalUser2();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: privateChannelId,
       uId: normalUserId
@@ -1047,6 +1081,8 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner add non-member public channel throws error', () => {
+    createPublicChannelUser();
+    createNomalUser2();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: publicChannelId,
       uId: normalUserId
@@ -1056,6 +1092,8 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner global owner as adder not a member throws forbidden', () => {
+    createPublicChannelUser();
+    createPrivateChannelMemberId();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: publicChannelId,
       uId: publicChannelMemberId
@@ -1065,6 +1103,8 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner invalid channel ID throws error', () => {
+    createPublicChannelUser();
+    createPublicChannelMemberId();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: 5676879809,
       uId: publicChannelMemberId
@@ -1079,6 +1119,8 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner existing owner throws error', () => {
+    createPublicChannelUser();
+    createPublicChannelMemberId();
     let res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: publicChannelId,
       uId: publicChannelMemberId
@@ -1100,6 +1142,7 @@ describe('HTTP tests for channel/addowner', () => {
   });
 
   test('channelAddOwner invalid uId throws error', () => {
+    createPrivateChannelUser();
     const res = sendPostRequestToEndpoint(CHANNEL_ADD_OWNER, {
       channelId: privateChannelId,
       uId: 2222222
