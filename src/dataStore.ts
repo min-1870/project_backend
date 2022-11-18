@@ -161,11 +161,8 @@ class DataStore {
     this.saveDataStore();
   }
 
-  updateUserEmail(userId: number, email: string) {
-    if (this.isEmailUsed(email)) {
-      throw HTTPError(400, 'email is already in use');
-    }
-    this.users.find(u => u.uId === userId).email = email;
+  updateProfileImage(userId: number, profileImgUrl: string) {
+    this.users.find(u => u.uId === userId).profileImgUrl = profileImgUrl;
     this.saveDataStore();
   }
 

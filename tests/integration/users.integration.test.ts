@@ -279,6 +279,90 @@ describe('Tests for /users/all/v2', () => {
   });
 });
 
+describe('Tests for /user/profile/uploadphoto/v1', () => {
+  test('Successful upload of image', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/uploadphoto/v2', {
+      imgUrl: 'http://images.unsplash.com/photo-1606115915090-be18fea23ec7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8anBlZ3xlbnwwfHwwfHw%3D&w=1000&q=80',
+      xStart: 0,
+      yStart: 0,
+      xEnd: 10,
+      yEnd: 10,
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+  test('url is not a jpeg', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/uploadphoto/v2', {
+      imgUrl: 'http://w7.pngwing.com/pngs/715/372/png-transparent-two-checked-flags-racing-flags-auto-racing-racing-flag-miscellaneous-game-flag-png-free-download.png',
+      xStart: 0,
+      yStart: 0,
+      xEnd: 10,
+      yEnd: 10,
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('width is too small for dimensions', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/uploadphoto/v2', {
+      imgUrl: 'http://w7.pngwing.com/pngs/715/372/png-transparent-two-checked-flags-racing-flags-auto-racing-racing-flag-miscellaneous-game-flag-png-free-download.png',
+      xStart: 999999999999999,
+      yStart: 1,
+      xEnd: 999999999999999,
+      yEnd: 1,
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('height is too small for dimensions', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/uploadphoto/v2', {
+      imgUrl: 'http://w7.pngwing.com/pngs/715/372/png-transparent-two-checked-flags-racing-flags-auto-racing-racing-flag-miscellaneous-game-flag-png-free-download.png',
+      xStart: 1,
+      yStart: 999999999999999,
+      xEnd: 1,
+      yEnd: 999999999999999,
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('xEnd is smaller than xStart', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/uploadphoto/v2', {
+      imgUrl: 'http://img.freepik.com/premium-photo/mixedbreed-cat-sitting-against-white-background_191971-27908.jpg?w=2000',
+      xStart: 0,
+      yStart: 0,
+      xEnd: 10,
+      yEnd: 10,
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(400);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+  });
+
+  test('yEnd is smaller than yStart', () => {
+    const res = sendPutRequestToEndpoint('/user/profile/updatephoto/v2', {
+      imgUrl: 'http://img.freepik.com/premium-photo/mixedbreed-cat-sitting-against-white-background_191971-27908.jpg?w=2000',
+      xStart: 10,
+      yStart: 10,
+      xEnd: 0,
+      yEnd: 0,
+    }, token);
+
+    const bodyObj = JSON.parse(res.body as string);
+    expect(res.statusCode).toBe(403);
+    expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+
+
 describe('HTTP tests for user stat functions', () => {
   // happy path
   test('user/stats', () => {
