@@ -18,8 +18,7 @@ export function dataStoreUserToUser(dataStoreUser: dataStoreUser): user {
     email: dataStoreUser.email,
     nameFirst: dataStoreUser.nameFirst,
     nameLast: dataStoreUser.nameLast,
-    handleStr: dataStoreUser.handleStr,
-    profileImgUrl: dataStoreUser.profileImgUrl
+    handleStr: dataStoreUser.handleStr
   };
 }
 
