@@ -178,7 +178,7 @@ export function messageReact(
 export function messageUnreact(
   token: string,
   messageId: number,
-  reactId: number,
+  reactId: number
 ) {
   const user = database.getUserByToken(token);
   if (reactId !== 1) {
@@ -197,10 +197,10 @@ export function messageUnreact(
     }
   }
   if (!message.reacts.some(r => r.reactId === reactId && r.uIds.some(uId => uId === user.uId))) {
-    throw HTTPError(400, 'The message dose not contain a react from the user.')
+    throw HTTPError(400, 'The message dose not contain a react from the user.');
   }
   database.removeReact(reactId, message.messageId, user.uId);
-  return {}
+  return {};
 }
 
 export class React {

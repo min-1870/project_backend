@@ -773,10 +773,8 @@ describe('HTTP tests for message unreact', () => {
 
   let privateChannelCreatorToken: string;
   let publicChannelCreatorToken: string;
-  let globalOwnerToken: string;
   let privateChannelCreatorUserId: number;
   let publicChannelCreatorUserId: number;
-  let globalOwnerUserId: number;
 
   let publicChannelId: number;
 
@@ -795,8 +793,6 @@ describe('HTTP tests for message unreact', () => {
       nameLast: GLOBAL_USER_NAME_LAST
     });
     let jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
-    globalOwnerUserId = jsonResponse.authUserId;
-    globalOwnerToken = jsonResponse.token;
 
     res = sendPostRequestToEndpoint(AUTH_REGISTER, {
       email: PUBLIC_USER_EMAIL,
@@ -897,25 +893,25 @@ describe('HTTP tests for message unreact', () => {
       dmCreatorToken
     );
 
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(400);
   });
 
   test('messageUnreact unreact with invalid react ID throws error', () => {
-    let res = sendPostRequestToEndpoint(MESSAGE_UNREACT,
+    const res = sendPostRequestToEndpoint(MESSAGE_UNREACT,
       { messageId: 1235, reactId: 13 },
       publicChannelCreatorToken
     );
 
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(400);
   });
 
   test('messageUnreact invalid auth token throws forbidden', () => {
-    let res = sendPostRequestToEndpoint(MESSAGE_UNREACT,
+    const res = sendPostRequestToEndpoint(MESSAGE_UNREACT,
       { messageId: 1235, reactId: 1 },
       'bad token'
     );
 
-    expect(res.statusCode).toBe(403)
+    expect(res.statusCode).toBe(403);
   });
 
   test('messageUnreact user no reaction', () => {

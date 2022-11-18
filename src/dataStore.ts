@@ -826,9 +826,9 @@ class DataStore {
   ) {
     const user = this.getUserById(userId);
     const message = this.getDataStoreMessageByMessageId(messageId);
-    if (message.reacts.some(r => r.reactId === reactId && r.uIds.some(uId => uId == user.uId))) {
+    if (message.reacts.some(r => r.reactId === reactId && r.uIds.some(uId => uId === user.uId))) {
       this.getDataStoreMessageByMessageId(messageId).reacts.splice(
-        message.reacts.findIndex(r => r.reactId === reactId && r.uIds.includes(user.uId)), 1)
+        message.reacts.findIndex(r => r.reactId === reactId && r.uIds.includes(user.uId)), 1);
     }
   }
 
