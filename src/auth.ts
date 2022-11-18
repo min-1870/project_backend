@@ -107,6 +107,13 @@ function onlyalphanumeric(handle:string): string {
   return handle;
 }
 
+/**
+ * Sends a reset code to email given if email is part of UNSW Beans
+ *
+ * @param {string} email - email to send reset code to
+ *
+ * @returns {} - empty object
+ */
 export function sendPasswordResetEmail(email :string) {
   if (database.isEmailUsed(email)) {
     const transporter = createTransport({
@@ -139,7 +146,14 @@ export function getResetCodes(email: string) {
       .map(pR => pR.resetCode)
   };
 }
-
+/**
+ * Resets password for user with resetcode from email
+ *
+ * @param {string} resetCode - code that was sent to email
+ * @param {string} newPassword - new password
+ *
+ * @returns {} - empty object
+ */
 export function resetPassword(resetCode: string, newPassword: string) {
   if (newPassword.length < 6) {
     throw HTTPError(400, 'Password must be 6 character or longer');
