@@ -57,6 +57,29 @@ export function messageRemove(token: string, messageId: number): (Record<string,
   return {};
 }
 
+export function messageSendLater(
+  token: string,
+  channelId: number,
+  message: string,
+  timeSent: number
+) {
+  const user = database.getUserByToken(token);
+  const channel = database.getDataStoreChannelByChannelId(channelId);
+  if (message.length < 1 || message.length > 1000) {
+    throw HTTPError(400, 'length of message is less than 1 or over 1000 characters');
+  }
+  if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
+    throw HTTPError(403, 'channelId is valid and the authorised user is not a member of the channel');
+  }
+  if (timeSent < Date.now()) {
+    throw HTTPError(400, 'time sent is in the past.');
+  }
+  const newMessage = database.addMessageToChannel(message, user.uId, channel.channelId, timeSent);
+  return {
+    messageId: newMessage.messageId
+  };
+}
+
 /** Given a message, update its text with new text. If the new message is an empty
  * string, the message is deleted.
  *
