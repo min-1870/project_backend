@@ -296,7 +296,6 @@ describe('HTTP tests for /notifications/get', () => {
   });
 
   test('notificationsGet dm message tag single user notifications', () => {
-    console.log(dmCreatorId);
     const messageWithTag = `How are you @${privateChannelCreatorHandle}?`.repeat(20);
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
