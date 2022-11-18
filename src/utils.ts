@@ -76,7 +76,8 @@ export function toOutputMessages(dataStoreMessage: messages, authUserId: number)
     message: dataStoreMessage.message,
     uId: dataStoreMessage.uId,
     timeSent: dataStoreMessage.timeSent,
-    reacts: dataStoreMessage.reacts.map(r => r.toMessageOutput(authUserId))
+    reacts: dataStoreMessage.reacts.map(r => r.toMessageOutput(authUserId)),
+    isPinned: dataStoreMessage.isPinned
   };
 }
 
