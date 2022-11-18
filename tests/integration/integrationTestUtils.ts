@@ -19,7 +19,7 @@ export function sendGetRequestToEndpoint(endpoint: string, qs: object, header?: 
         }
       }
     );
-  }else{
+  } else {
     res = request(
       'GET',
       `${url}:${port}${endpoint}`,
@@ -46,7 +46,7 @@ export function sendDeleteRequestToEndpoint(endpoint: string, qs: object, header
         }
       }
     );
-  }else{
+  } else {
     res = request(
       'DELETE',
       `${url}:${port}${endpoint}`,
@@ -99,7 +99,7 @@ export function sendPutRequestToEndpoint(endpoint: string, json: object, header?
         }
       }
     );
-  }else{
+  } else {
     res = request(
       'PUT',
       `${url}:${port}${endpoint}`,
