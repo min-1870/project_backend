@@ -95,24 +95,28 @@ export function parseTags(message: string): string[] {
 export function processMessageTagsAndSendNotifications(
   messageId: number, message: string, senderId: number) {
   const taggedUserHandles = new Set(parseTags(message));
-  database.getDataStoreMessageByMessageId(messageId);
-  taggedUserHandles.forEach(handle => {
-    if (database.isHandleStrUsed(handle)) {
-      const receiverId = database.getUserByHandle(handle).uId;
-      if (database.isMessageInChannels(messageId)) {
-        if (database.isUserMemberInChannel(receiverId,
-          database.getDataStoreChannelByMessageId(messageId).channelId)) {
-          database.addNotification(senderId,
-            receiverId, notificationTypes.TaggedToChannel, -1,
-            messageId, database.getDataStoreChannelByMessageId(messageId).channelId);
-        }
-      } else {
-        const dm = database.getDmByMessageId(messageId);
-        if (database.isUserInDm(receiverId, dm.dmId)) {
-          database.addNotification(senderId,
-            receiverId, notificationTypes.TaggedToDm, dm.dmId, messageId, -1);
+  try {
+    database.getDataStoreMessageByMessageId(messageId);
+    taggedUserHandles.forEach(handle => {
+      if (database.isHandleStrUsed(handle)) {
+        const receiverId = database.getUserByHandle(handle).uId;
+        if (database.isMessageInChannels(messageId)) {
+          if (database.isUserMemberInChannel(receiverId,
+            database.getDataStoreChannelByMessageId(messageId).channelId)) {
+            database.addNotification(senderId,
+              receiverId, notificationTypes.TaggedToChannel, -1,
+              messageId, database.getDataStoreChannelByMessageId(messageId).channelId);
+          }
+        } else {
+          const dm = database.getDmByMessageId(messageId);
+          if (database.isUserInDm(receiverId, dm.dmId)) {
+            database.addNotification(senderId,
+              receiverId, notificationTypes.TaggedToDm, dm.dmId, messageId, -1);
+          }
         }
       }
-    }
-  });
+    });
+  } catch (err) {
+    // Soft fail all notification error
+  }
 }

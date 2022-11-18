@@ -144,6 +144,27 @@ export function dmMessageSend(
   return { messageId: newMessage.messageId };
 }
 
+export function dmMessageSendLater(
+  token: string,
+  dmId: number,
+  message: string,
+  timeStamp: number): ({messageId: number} | error) {
+  const user = database.getUserByToken(token);
+  const dm = database.getDmById(dmId);
+  if (message.length < 1 || message.length > 1000) {
+    throw HTTPError(400, 'length of message is less than 1 or over 1000 characters');
+  }
+  if (!database.isUserMemberInDm(user.uId, dmId)) {
+    throw HTTPError(403, 'user is not part of dm');
+  }
+  if (timeStamp < Date.now()) {
+    throw HTTPError(400, 'Time sent is before current.');
+  }
+  const newMessage = database.addMessageToDm(message, user.uId, dm.dmId, timeStamp);
+  processMessageTagsAndSendNotifications(newMessage.messageId, message, user.uId);
+  return { messageId: newMessage.messageId };
+}
+
 /**
  * Given a message within a channel or DM the authorised user is part of,
  * adds a "react" to that particular message.

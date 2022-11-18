@@ -201,6 +201,12 @@ export type messageSendDmRequest = {
   message: string
 }
 
+export type messageSendLaterDmRequest = {
+  dmId: number,
+  message: string,
+  timeSent: number
+}
+
 export type channelJoinRequest = {
   token: string,
   channelId: number,
