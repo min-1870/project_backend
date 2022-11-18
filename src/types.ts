@@ -2,7 +2,7 @@ import { React } from './message';
 import { dataStoreNotification } from './notifications';
 
 // The user output type.
-export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string };
+export type user = { uId: number, email: string, nameFirst: string, nameLast: string, handleStr: string, profileImgUrl: string };
 export type users = { users: user[] };
 
 // Messages output type.
@@ -56,6 +56,7 @@ export type dataStoreUser = {
   nameFirst: string,
   nameLast: string,
   handleStr: string,
+  profileImgUrl: string,
   isGlobalOwner: boolean,
   sessionTokens: string[]
 }
@@ -151,6 +152,15 @@ export type channelMessagesRequest = {
   token: string,
   channelId: number,
   start: number
+}
+
+export type uploadImageRequest = {
+  token: string,
+  imgUrl: string,
+  xStart: number,
+  yStart: number,
+  xEnd: number,
+  yEnd: number
 }
 
 export type channelsCreateRequest = {

@@ -3,6 +3,8 @@ import { database } from './dataStore';
 import { error, user } from './types';
 import validator from 'validator';
 import HTTPError from 'http-errors';
+import sharp from 'sharp';
+import request from 'sync-request';
 
 /**
  * For a valid user, return info about their user ID, email, firstname , last name and handle
@@ -71,3 +73,50 @@ export function listAllUsersV1(token: string): ({ users: user[] } | error) {
   database.getUserByToken(token);
   return { users: database.users.map(user => dataStoreUserToUser(user)) };
 }
+
+/**
+  * Returns a list of all users and their associated details.
+  *
+  * @param {string} token - an object that represents the right to perform certain actions
+  *
+  * @param {string} imgUrl - url of image uploaded by user
+  *
+  * @param {string} xStart - x component of a bound of image
+  *
+  * @param {string} yStart - y component of a bound of image
+  *
+  * @param {string} xEnd - x component of a bound of image
+  *
+  * @param {string} yEnd - y component of a bound of image
+  *
+  * @returns {} - empty object returned
+*/
+
+export async function uploadImage(token: string, imgUrl: string, xStart: number, yStart: number, xEnd: number, yEnd: number): Promise<(Record<string, never> | error)> {
+  const userId = database.getUserByToken(token);
+  const res = request('GET', imgUrl);
+  const body = res.getBody();
+  const metadata = await sharp(body).metadata();
+  const format = metadata.format;
+  if (format.toLowerCase() !== 'jpg' || format.toLowerCase() !== 'jpeg') {
+    throw HTTPError(400, 'Not a jpg');
+  }
+  if (format.width() < xStart || format.width() < xEnd) {
+    throw HTTPError(400, 'Width too small');
+  }
+  if (format.height() < yStart || format.height() < yEnd) {
+    throw HTTPError(400, 'Height too small');
+  }
+  if (xStart > xEnd) {
+    throw HTTPError(400, 'Dimensions incorrect');
+  }
+  if (yStart > yEnd) {
+    throw HTTPError(400, 'Dimensions incorrect');
+  }
+  /* fs.writeFileSync('processImages/image.jpg', body, { flag: 'w' }); */
+  sharp(body)
+    .extract({ width: (xEnd - xStart), height: (yEnd - yStart), left: xStart, top: yStart })
+    .toFile('newImages/' + userId + 'jpg');
+  database.updateProfilePhoto(userId.uId, 'http://127.0.0.1' + ':' + 39799 + 'newImages/' + userId + 'jpg');
+  return {};
+} 

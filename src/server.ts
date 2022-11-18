@@ -19,7 +19,8 @@ import {
   userProfileHandleChange,
   userProfileNameChange,
   userProfile,
-  listAllUsersV1
+  listAllUsersV1,
+  uploadImage
 } from './users';
 import {
   authRegisterRequest,
@@ -54,6 +55,7 @@ import {
   standupActiveRequest,
   messageSendLaterRequest,
   messageSendLaterDmRequest,
+  uploadImageRequest
 } from './types';
 import {
   channelMessages,
@@ -299,6 +301,12 @@ app.put('/user/profile/setemail/v2', (req: Request, res: Response, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+app.post('/user/profile/uploadphotov1', express.static('user'), (req: Request, res: Response) => {
+  const { imgUrl, xStart, yStart, xEnd, yEnd } = req.body as uploadImageRequest;
+  const token = req.header('token');
+  res.json(uploadImage(token, imgUrl, Number(xStart), Number(yStart), Number(xEnd), Number(yEnd)));
 });
 
 app.put('/user/profile/setname/v2', (req: Request, res: Response, next) => {
