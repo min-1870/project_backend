@@ -1,5 +1,5 @@
 import { authResponse, channelMessagesOutput, dmId, messageId } from '../../src/types';
-import { AUTH_REGISTER, clearDataForTest, DM_CREATE, DM_SEND } from '../testBase';
+import { AUTH_REGISTER, clearDataForTest, DM_CREATE, DM_MESSGES, DM_SEND, MESSAGE_SEND_LATER_DM } from '../testBase';
 import {
   parseJsonResponse,
   OK,
@@ -478,6 +478,114 @@ describe('HTTP tests for message/senddm/v1', () => {
     expect((parseJsonResponse(res2) as unknown as channelMessagesOutput).messages[0].timeSent).toBeLessThanOrEqual(Date.now() + 2);
   });
 });
+
+describe('HTTP tests for message/sendlaterdm', () => {
+  let dmId: number;
+  beforeEach(() => {
+    const res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [uId]
+    }, token);
+
+    const jsonResponse = parseJsonResponse(res) as unknown as dmId;
+    dmId = jsonResponse.dmId;
+  });
+
+  test('message/senddm with invalid dmId', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: (dmId + 104340),
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 100
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('length of message is less than 1 characters', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: dmId,
+      message: '',
+      timeSent: Date.now() + 100
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('length of message is over 1000 characters', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: dmId,
+      message: VERY_LONG_MESSAGE,
+      timeSent: Date.now() + 100
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('failure, user not part of dm', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: dmId,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 100
+    }, tokenThree);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('token is invalid', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: dmId,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 100
+    }, (token + 99999));
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('correct input correct return', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: dmId,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 1000
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messageId: expect.any(Number)
+    });
+  });
+
+  test('correct input correct message message not show', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: dmId,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 10000
+    }, token);
+
+    const res2 = sendGetRequestToEndpoint(DM_MESSGES, {
+      dmId: dmId,
+      start: 0,
+    }, token);
+
+    console.log(parseJsonResponse(res));
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res2)).toStrictEqual({
+      messages: [
+      ],
+      start: 0,
+      end: -1,
+    });
+  });
+
+  test('timeSent before current throws error', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER_DM, {
+      dmId: dmId,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() - 10000
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+});
+
 describe('HTTP tests for dm/details/v1', () => {
   let dmId: number;
   beforeEach(() => {

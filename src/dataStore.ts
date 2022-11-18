@@ -318,13 +318,13 @@ class DataStore {
   }
 
   getDataStoreDmByMessageId(messageId: number): dataStoreDm {
-    const channelWithMessage = this.dms.find(channel =>
-      channel.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
+    const dmWithMessage = this.dms.find(dm =>
+      dm.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
 
-    if (!channelWithMessage) {
+    if (!dmWithMessage) {
       throw HTTPError(400, 'Invalid message ID.');
     }
-    return channelWithMessage;
+    return dmWithMessage;
   }
 
   /**

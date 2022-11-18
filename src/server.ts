@@ -53,6 +53,7 @@ import {
   msgShareRequest,
   standupActiveRequest,
   messageSendLaterRequest,
+  messageSendLaterDmRequest,
 } from './types';
 import {
   channelMessages,
@@ -65,7 +66,7 @@ import {
 } from './channel';
 // import fs from 'fs';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
-import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageSendLater, messageUnpin, messageUnreact } from './message';
+import { dmMessageSend, dmMessageSendLater, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageSendLater, messageUnpin, messageUnreact } from './message';
 import { getNotification } from './notifications';
 import { changePerms, deleteUser, msgShare, searchMessage } from './admins';
 import { standupActive, standupSend, standupStart } from './standup';
@@ -340,6 +341,16 @@ app.post('/message/senddm/v2', (req: Request, res: Response, next) => {
     const { dmId, message } = req.body as unknown as messageSendDmRequest;
     const token = req.header('token');
     res.json(dmMessageSend(token, Number(dmId), message));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/message/sendlaterdm/v1', (req: Request, res: Response, next) => {
+  try {
+    const { dmId, message, timeSent } = req.body as unknown as messageSendLaterDmRequest;
+    const token = req.header('token');
+    res.json(dmMessageSendLater(token, Number(dmId), message, Number(timeSent)));
   } catch (err) {
     next(err);
   }

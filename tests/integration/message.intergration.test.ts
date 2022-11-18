@@ -503,7 +503,6 @@ describe('HTTP tests for message react', () => {
   const GLOBAL_USER_NAME_LAST = 'Pottster';
 
   const PUBLIC_CHANNEL_NAME = 'Test public channel';
-  // const PRIVATE_CHANNEL_NAME = 'Test private channel';
 
   let privateChannelCreatorToken: string;
   let publicChannelCreatorToken: string;
@@ -512,17 +511,11 @@ describe('HTTP tests for message react', () => {
   let publicChannelCreatorUserId: number;
   let globalOwnerUserId: number;
 
-  // let publicChannelCreatorHandle: string;
-  // let privateChannelCreatorHandle: string;
-  // let globalOwnerHandle: string;
-
   let publicChannelId: number;
-  // let privateChannelId: number;
 
   let publicChannelMessageId: number;
   let dmMessageId: number;
 
-  // let dmCreatorId: number;
   let dmCreatorToken: string;
   let testDmId: number;
 
@@ -558,28 +551,7 @@ describe('HTTP tests for message react', () => {
     jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
     privateChannelCreatorUserId = jsonResponse.authUserId;
     privateChannelCreatorToken = jsonResponse.token;
-    // dmCreatorId = privateChannelCreatorUserId;
     dmCreatorToken = privateChannelCreatorToken;
-
-    // // let userProfile;
-    // res = sendGetRequestToEndpoint(USER_PROFILE,
-    //   { uId: publicChannelCreatorUserId }, publicChannelCreatorToken);
-    // // userProfile = (parseJsonResponse(res) as unknown as user);
-    // // publicChannelCreatorHandle = userProfile.user.handleStr;
-    // res = sendGetRequestToEndpoint(USER_PROFILE,
-    //   { uId: privateChannelCreatorUserId }, privateChannelCreatorToken);
-    // // userProfile = (parseJsonResponse(res) as unknown as user);
-    // // privateChannelCreatorHandle = userProfile.user.handleStr;
-    // res = sendGetRequestToEndpoint(USER_PROFILE,
-    //   { uId: globalOwnerUserId }, globalOwnerToken);
-    // // userProfile = (parseJsonResponse(res) as unknown as user);
-    // // globalOwnerHandle = userProfile.user.handleStr;
-
-    // res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
-    //   name: PRIVATE_CHANNEL_NAME,
-    //   isPublic: false
-    // }, privateChannelCreatorToken);
-    // privateChannelId = (parseJsonResponse(res) as unknown as channelId).channelId;
   });
 
   test('messageReact new react to channel message succeeds', () => {

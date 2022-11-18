@@ -123,7 +123,7 @@ export function dmMessages(
     throw HTTPError(403, 'user is not part of dm');
   }
 
-  const messages = [...dm.messages].reverse();
+  const messages = [...dm.messages.filter(m => m.timeSent <= Date.now())].reverse();
   let slicedMessages: messages[];
   let end: number;
 
