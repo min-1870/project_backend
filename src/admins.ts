@@ -4,6 +4,14 @@ import { messages } from './types';
 import { dmMessageSend, messageSend } from './message';
 import { toOutputMessages } from './utils';
 
+/**
+  * Removes user from UNSW Beans
+  *
+  * @param {string} token - user that initiated command
+  * @param {number} uId - uId of user being removed from Beans
+  *
+  * @returns {} - empty object
+*/
 export function deleteUser(token:string, uId: number) {
   const authUser = database.getUserByToken(token);
 
@@ -38,6 +46,15 @@ export function deleteUser(token:string, uId: number) {
   return {};
 }
 
+/**
+  * Changes Perms of user
+  *
+  * @param {string} token - user that initiated command
+  * @param {number} uId - uId of user being removed from Beans
+  * @param {number} permissionId- uId of user being removed from Beans
+  *
+  * @returns {} - empty object
+*/
 export function changePerms(token:string, uId: number, permissionId: number) {
   const authUser = database.getUserByToken(token);
   let isPermValid;
@@ -79,7 +96,15 @@ export function changePerms(token:string, uId: number, permissionId: number) {
 
   return {};
 }
-
+/**
+  * Finds all messages that have querystr and makes them an array
+  *
+  * @param {string} token - user that initiated command
+  * @param {number} uId - uId of user being removed from Beans
+  * @param {number} permissionId- uId of user being removed from Beans
+  *
+  * @returns {messages} - array of messages
+*/
 export function searchMessage(token: string, queryStr: string) {
   const authUser = database.getUserByToken(token);
   if (queryStr.length < 1 || queryStr.length > 1000) {
@@ -89,7 +114,7 @@ export function searchMessage(token: string, queryStr: string) {
   for (const item of database.dms) {
     if (item.allMembers.includes(authUser.uId)) {
       for (const itemTwo of item.messages) {
-        if (itemTwo.message === queryStr) {
+        if (itemTwo.message.includes(queryStr)) {
           arr.push(itemTwo);
         }
       }
@@ -98,7 +123,7 @@ export function searchMessage(token: string, queryStr: string) {
   for (const item of database.channels) {
     if (item.allMembers.includes(authUser.uId)) {
       for (const itemTwo of item.messages) {
-        if (itemTwo.message === queryStr) {
+        if (itemTwo.message.includes(queryStr)) {
           arr.push(itemTwo);
         }
       }
@@ -106,7 +131,17 @@ export function searchMessage(token: string, queryStr: string) {
   }
   return { messages: arr.map(msg => toOutputMessages(msg, authUser.uId)) };
 }
-
+/**
+  * Shares message to another channel
+  *
+  * @param {string} token - user that initiated command
+  * @param {number} ogMessageId - messageId of message being shared
+  * @param {string} message- string being added to shared message
+  * @param {number} channelId - channel message is being shared to
+  * @param {number} dmId- dm message is being shared to
+  *
+  * @returns {sharedMessageId} - messageId of shared message
+*/
 export function msgShare(token: string, ogMessageId: number, message: string, channelId: number, dmId: number) {
   const authUser = database.getUserByToken(token);
   if (message.length > 1000) {
