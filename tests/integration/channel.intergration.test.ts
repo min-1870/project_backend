@@ -245,7 +245,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages more than 50 messages success', () => {
-    createPublicChannelUser()
+    createPublicChannelUser();
     let expectedMessages = [];
     for (let i = 0; i < 51; i++) {
       expectedMessages.push(`hello ${i}`);
@@ -275,7 +275,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages less than 50 messages success', () => {
-    createPublicChannelUser()
+    createPublicChannelUser();
     let expectedMessages = [];
     for (let i = 0; i < 3; i++) {
       expectedMessages.push(`hello ${i}`);
@@ -307,7 +307,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages start from middle more than 50 messages success', () => {
-    createPublicChannelUser()
+    createPublicChannelUser();
     let expectedMessages = [];
     for (let i = 0; i < 100; i++) {
       const msg = `hello ${i}`;
@@ -343,7 +343,7 @@ describe('HTTP tests for channel/messages', () => {
   });
 
   test('channelMessages start from middle less than 50 messages success', () => {
-    createPublicChannelUser()
+    createPublicChannelUser();
     let expectedMessages = [];
     for (let i = 0; i < 11; i++) {
       expectedMessages.push(`hello ${i}`);
