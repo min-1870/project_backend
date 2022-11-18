@@ -1,5 +1,5 @@
-import { authResponse, channelId } from '../../src/types';
-import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, MESSAGE_SEND, SEARCH } from '../testBase';
+import { authResponse, channelId, dmId } from '../../src/types';
+import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, DM_CREATE, DM_SEND, MESSAGE_SEND, SEARCH } from '../testBase';
 import { OK, parseJsonResponse, sendDeleteRequestToEndpoint, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -39,13 +39,26 @@ beforeEach(() => {
 });
 
 describe('HTTP tests for admin/user/remove/v1', () => {
-  // let channel1Id: number;
+  let channel1Id: number;
   beforeEach(() => {
-    sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: TEST_CHANNEL_NAME,
       isPublic: true
-    }, token);
-    // channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    }, token2);
+    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    const dmId = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [authUserId2]
+    }, token2);
+    const dm1Id = (parseJsonResponse(dmId) as unknown as dmId).dmId;
+    sendPostRequestToEndpoint(DM_SEND, {
+      dmId: dm1Id,
+      message: 'hi'
+    }, token2);
+
+    sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: channel1Id,
+      message: 'haha',
+    }, token2);
   });
   test('invalid uID', () => {
     const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {
@@ -207,6 +220,10 @@ describe('HTTP tests for admin/userpermission/change/v1', () => {
       uId: authUserId2,
       permissionId: 1
     }, token);
+    sendPostRequestToEndpoint(ADMIN_USER_PERMISSION_CHANGE, {
+      uId: authUserId2,
+      permissionId: 2
+    }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
@@ -248,13 +265,30 @@ describe('HTTP tests for /search/v1', () => {
       channelId: channel1Id,
       message: 'hi',
     }, token);
-    const res = sendGetRequestToEndpoint(SEARCH, {
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: []
+    }, token);
+    const testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'hi'
+    }, token);
+
+    res = sendGetRequestToEndpoint(SEARCH, {
       queryStr: 'hi'
     }, token);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
       messages: [
+        {
+          messageId: expect.any(Number),
+          uId: expect.any(Number),
+          message: 'hi',
+          timeSent: expect.any(Number),
+          reacts: [],
+          isPinned: false
+        },
         {
           messageId: expect.any(Number),
           uId: expect.any(Number),

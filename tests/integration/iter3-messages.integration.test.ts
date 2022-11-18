@@ -1,5 +1,5 @@
 import { authResponse, channelId, dmId, messageId } from '../../src/types';
-import { DM_CREATE } from '../testBase';
+import { DM_CREATE, DM_SEND } from '../testBase';
 import {
   OK,
   parseJsonResponse,
@@ -114,6 +114,24 @@ describe('HTTP tests for message/pin/v1', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
+
+  test('correct input correct return dm', () => {
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: []
+    }, token);
+    const testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'hi'
+    }, token);
+    const dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+    res = sendPostRequestToEndpoint('/message/pin/v1', {
+      messageId: dmMessageId
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
 });
 
 describe('HTTP tests for message/unpin/v1', () => {
@@ -202,6 +220,28 @@ describe('HTTP tests for message/unpin/v1', () => {
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
+
+  test('correct input correct return dm', () => {
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: []
+    }, token);
+    const testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'hi'
+    }, token);
+    const dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
+    res = sendPostRequestToEndpoint('/message/pin/v1', {
+      messageId: dmMessageId
+    }, token);
+
+    res = sendPostRequestToEndpoint('/message/unpin/v1', {
+      messageId: dmMessageId
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
 });
 
 describe('HTTP tests for message/share/v1', () => {
@@ -222,7 +262,7 @@ describe('HTTP tests for message/share/v1', () => {
     testMessageId = (parseJsonResponse(res2) as unknown as messageId).messageId;
 
     const res = sendPostRequestToEndpoint(DM_CREATE, {
-      uIds: [token2]
+      uIds: []
     }, token);
     testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
   });
@@ -312,7 +352,7 @@ describe('HTTP tests for message/share/v1', () => {
     expect(bodyObj.error).toStrictEqual({ message: 'user is not part of channel/dm' });
   });
 
-  test('success', () => {
+  test('success channel', () => {
     const res = sendPostRequestToEndpoint('/message/share/v1', {
       ogMessageId: testMessageId,
       message: '',
@@ -321,6 +361,20 @@ describe('HTTP tests for message/share/v1', () => {
     }, token);
 
     expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      sharedMessageId: expect.any(Number)
+    });
+  });
+
+  test('success dm', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: '',
+      channelId: -1,
+      dmId: testDmId
+    }, token);
+
+    expect(res.statusCode).toBe(200);
     expect(parseJsonResponse(res)).toStrictEqual({
       sharedMessageId: expect.any(Number)
     });
