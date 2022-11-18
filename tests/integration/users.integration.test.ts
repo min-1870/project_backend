@@ -1,5 +1,5 @@
 import { authResponse } from '../../src/types';
-import { USER_PROFILE } from '../testBase';
+import { USERS_STATS, USER_PROFILE, USER_STATS } from '../testBase';
 import {
   parseJsonResponse,
   OK,
@@ -278,6 +278,7 @@ describe('Tests for /users/all/v2', () => {
     });
   });
 });
+
 describe('Tests for /user/profile/uploadphoto/v1', () => {
   test('Successful upload of image', () => {
     const res = sendPutRequestToEndpoint('/user/profile/uploadphoto/v2', {
@@ -360,5 +361,64 @@ describe('Tests for /user/profile/uploadphoto/v1', () => {
     const bodyObj = JSON.parse(res.body as string);
     expect(res.statusCode).toBe(403);
     expect(bodyObj.error).toStrictEqual({ message: expect.any(String) });
+
+
+describe('HTTP tests for user stat functions', () => {
+  // happy path
+  test('user/stats', () => {
+    const res = sendGetRequestToEndpoint(USER_STATS, {}, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      userStats: {
+        channelsJoined: [
+          {
+            numChannelsJoined: expect.any(Number),
+            timeStamp: expect.any(Number),
+          },
+        ],
+        dmsJoined: [
+          {
+            numDmsJoined: expect.any(Number),
+            timeStamp: expect.any(Number),
+          },
+        ],
+        involvementRate: null,
+        messagesSent: [
+          {
+            numMessagesSent: expect.any(Number),
+            timeStamp: expect.any(Number),
+          },
+        ],
+      }
+    });
+  });
+  test('users/stats', () => {
+    const res = sendGetRequestToEndpoint(USERS_STATS, {}, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      workspaceStats: {
+        channelsExist: [
+          {
+            numChannelsExist: expect.any(Number),
+            timeStamp: expect.any(Number),
+          },
+        ],
+        dmsExist: [
+          {
+            numDmsExist: expect.any(Number),
+            timeStamp: expect.any(Number)
+          },
+        ],
+        messagesExist: [
+          {
+            numMessagesExist: expect.any(Number),
+            timeStamp: expect.any(Number)
+          },
+        ],
+        utilizationRate: expect.any(Number),
+      },
+    });
   });
 });

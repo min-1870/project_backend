@@ -67,6 +67,12 @@ class DataStore {
     return user;
   }
 
+  getAllDmsUserIsMemberOf(userId: number): dataStoreDm[] {
+    return this.dms
+      .filter(dm => this.isUserMemberInDm(userId, dm.dmId)) ||
+      [];
+  }
+
   /**
    * Checks if a session token is valid. Throws 403 if not.
    *
