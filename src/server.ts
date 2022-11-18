@@ -64,7 +64,7 @@ import {
 } from './channel';
 // import fs from 'fs';
 import { deleteDm, dmCreation, dmLeave, dmlist, dmMessages, dmDetails } from './dms';
-import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin } from './message';
+import { dmMessageSend, messageEdit, messagePin, messageReact, messageRemove, messageSend, messageUnpin, messageUnreact } from './message';
 import { getNotification } from './notifications';
 import { changePerms, deleteUser, msgShare, searchMessage } from './admins';
 import { standupActive, standupSend, standupStart } from './standup';
@@ -417,6 +417,16 @@ app.post('/message/react/v1', (req: Request, res: Response, next) => {
     const { messageId, reactId } = req.body as reactMessageRequest;
     const token = req.header('token');
     res.json(messageReact(token, Number(messageId), Number(reactId)));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/message/unreact/v1', (req: Request, res: Response, next) => {
+  try {
+    const { messageId, reactId } = req.body as reactMessageRequest;
+    const token = req.header('token');
+    res.json(messageUnreact(token, Number(messageId), Number(reactId)));
   } catch (err) {
     next(err);
   }

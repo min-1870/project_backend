@@ -175,6 +175,34 @@ export function messageReact(
   return {};
 }
 
+export function messageUnreact(
+  token: string,
+  messageId: number,
+  reactId: number,
+) {
+  const user = database.getUserByToken(token);
+  if (reactId !== 1) {
+    throw HTTPError(400, 'Invalid react ID');
+  }
+  const message = database.getDataStoreMessageByMessageId(messageId);
+  if (database.isMessageInChannels(message.messageId)) {
+    const channel = database.getDataStoreChannelByMessageId(messageId);
+    if (!database.isUserMemberInChannel(user.uId, channel.channelId)) {
+      throw HTTPError(400, 'User is not part of the channel where this message is.');
+    }
+  } else {
+    const dm = database.getDmByMessageId(messageId);
+    if (!database.isUserInDm(user.uId, dm.dmId)) {
+      throw HTTPError(400, 'User is not part of the channel where this message is.');
+    }
+  }
+  if (!message.reacts.some(r => r.reactId === reactId && r.uIds.some(uId => uId === user.uId))) {
+    throw HTTPError(400, 'The message dose not contain a react from the user.')
+  }
+  database.removeReact(reactId, message.messageId, user.uId);
+  return {}
+}
+
 export class React {
   reactId: number;
   uIds: number[];

@@ -356,12 +356,11 @@ class DataStore {
       return messageInChannel;
     }
     const messageInDm = this.dms.find(
-      dm => dm.messages.some(m => m.messageId === messageId))
-      .messages.find(m => m.messageId === messageId);
+      dm => dm.messages.some(m => m.messageId === messageId));
     if (!messageInDm) {
       throw HTTPError(400, 'Invalid message ID');
     }
-    return messageInDm;
+    return messageInDm.messages.find(m => m.messageId === messageId);
   }
 
   getDmByMessageId(messageId: number) {
@@ -817,6 +816,19 @@ class DataStore {
     if (!this.getDataStoreMessageByMessageId(messageId).reacts.some(r => r.reactId === reactId)) {
       const newReact = new React(reactId, [user.uId]);
       this.getDataStoreMessageByMessageId(messageId).reacts.push(newReact);
+    }
+  }
+
+  removeReact(
+    reactId: number,
+    messageId: number,
+    userId: number
+  ) {
+    const user = this.getUserById(userId);
+    const message = this.getDataStoreMessageByMessageId(messageId);
+    if (message.reacts.some(r => r.reactId === reactId && r.uIds.some(uId => uId == user.uId))) {
+      this.getDataStoreMessageByMessageId(messageId).reacts.splice(
+        message.reacts.findIndex(r => r.reactId === reactId && r.uIds.includes(user.uId)), 1)
     }
   }
 
