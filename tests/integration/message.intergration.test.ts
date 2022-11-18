@@ -234,6 +234,25 @@ describe('HTTP tests for message/remove', () => {
     expect(parseJsonResponse(res)).toStrictEqual({});
   });
 
+  test('correct input correct return dm', () => {
+    let res = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: []
+    }, token);
+    const testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
+    res = sendPostRequestToEndpoint(DM_SEND, {
+      dmId: testDmId,
+      message: 'hi'
+    }, token);
+    const dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId
+    res = sendDeleteRequestToEndpoint(MESSAGE_REMOVE, {
+      messageId: dmMessageId
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({});
+  });
+
+
   test('correct input correct channel/message', () => {
     sendDeleteRequestToEndpoint(MESSAGE_REMOVE, {
       messageId: testMessageId
