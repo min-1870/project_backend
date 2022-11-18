@@ -111,8 +111,7 @@ export function channelMessages(
   if (!database.isUserMemberInChannel(authUser.uId, channel.channelId)) {
     throw HTTPError(403, 'Not a member of channel.');
   }
-
-  const messages = [...channel.messages].reverse();
+  const messages = [...channel.messages.filter(m => m.timeSent <= Date.now())].reverse();
   let slicedMessages: messages[];
   let end: number;
 

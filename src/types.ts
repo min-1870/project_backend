@@ -178,6 +178,13 @@ export type messageSendRequest = {
   message: string
 }
 
+export type messageSendLaterRequest = {
+  token: string,
+  channelId: number,
+  message: string,
+  timeSent: number
+}
+
 export type messageEditRequest = {
   token: string,
   messageId: number,

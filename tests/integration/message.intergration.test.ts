@@ -1,5 +1,5 @@
 import { authResponse, channelId, channelMessagesOutput, dmId, messageId /** user */ } from '../../src/types';
-import { AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_INVITE, CHANNEL_JOIN, CHANNEL_MESSAGES, clearDataForTest, DM_CREATE, DM_MESSGES, DM_SEND, MESSAGE_DM_SEND, MESSAGE_EDIT, MESSAGE_REACT, MESSAGE_REMOVE, MESSAGE_SEND, MESSAGE_UNREACT } from '../testBase';
+import { AUTH_REGISTER, CHANNELS_CREATE, CHANNEL_INVITE, CHANNEL_JOIN, CHANNEL_MESSAGES, clearDataForTest, DM_CREATE, DM_MESSGES, DM_SEND, MESSAGE_DM_SEND, MESSAGE_EDIT, MESSAGE_REACT, MESSAGE_REMOVE, MESSAGE_SEND, MESSAGE_SEND_LATER, MESSAGE_UNREACT } from '../testBase';
 import {
   OK,
   parseJsonResponse,
@@ -169,6 +169,94 @@ describe('HTTP tests for message/send', () => {
 
     expect(res.statusCode).toBe(OK);
     expect((parseJsonResponse(res2) as unknown as channelMessagesOutput).messages[0].timeSent).toBeLessThanOrEqual(Date.now() + 2);
+  });
+});
+
+describe('HTTP tests for message/sendlater', () => {
+  let channel1Id: number;
+  beforeEach(() => {
+    jest.useFakeTimers();
+    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+      name: TEST_CHANNEL_NAME,
+      isPublic: true
+    }, token);
+    channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+  });
+  afterEach(() => {
+    jest.clearAllTimers();
+  });
+
+  test('channelId does not refer to a valid channel', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER, {
+      channelId: TEST_INVALID_CHANNELID,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 10
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('length of message is less than 1 characters', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER, {
+      channelId: channel1Id,
+      message: '',
+      timeSent: Date.now() + 10
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('length of message is over 1000 characters', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER, {
+      channelId: channel1Id,
+      message: 'long'.repeat(1000),
+      timeSent: Date.now() + 10
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('channelId is valid and the authorised user is not a member of the channel', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER, {
+      channelId: channel1Id,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 10
+    }, token2);
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('token is invalid', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER, {
+      channelId: channel1Id,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 10
+    }, 'bad token');
+
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('correct time sent is before throws error', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER, {
+      channelId: channel1Id,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() - 1
+    }, token);
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('messageSendLater success', () => {
+    const res = sendPostRequestToEndpoint(MESSAGE_SEND_LATER, {
+      channelId: channel1Id,
+      message: TEST_MESSAGE,
+      timeSent: Date.now() + 10000
+    }, token);
+
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messageId: expect.any(Number)
+    });
   });
 });
 

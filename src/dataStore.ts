@@ -309,7 +309,7 @@ class DataStore {
    */
   getDataStoreChannelByMessageId(messageId: number): dataStoreChannel {
     const channelWithMessage = this.channels.find(channel =>
-      channel.messages.some(m => m.messageId === messageId));
+      channel.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
 
     if (!channelWithMessage) {
       throw HTTPError(400, 'Invalid message ID.');
@@ -319,7 +319,7 @@ class DataStore {
 
   getDataStoreDmByMessageId(messageId: number): dataStoreDm {
     const channelWithMessage = this.dms.find(channel =>
-      channel.messages.some(m => m.messageId === messageId));
+      channel.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
 
     if (!channelWithMessage) {
       throw HTTPError(400, 'Invalid message ID.');
@@ -335,12 +335,12 @@ class DataStore {
    */
   isMessageInChannels(messageId: number): boolean {
     return this.channels
-      .some(c => c.messages.some(m => m.messageId === messageId));
+      .some(c => c.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
   }
 
   isMessageInDms(messageId: number): boolean {
     return this.dms
-      .some(c => c.messages.some(m => m.messageId === messageId));
+      .some(c => c.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
   }
 
   /**
@@ -352,19 +352,19 @@ class DataStore {
   getDataStoreMessageByMessageId(messageId: number): messages {
     if (this.isMessageInChannels(messageId)) {
       const channel = this.getDataStoreChannelByMessageId(messageId);
-      const messageInChannel = channel.messages.find(m => m.messageId === messageId);
+      const messageInChannel = channel.messages.find(m => m.messageId === messageId && m.timeSent <= Date.now());
       return messageInChannel;
     }
     const messageInDm = this.dms.find(
-      dm => dm.messages.some(m => m.messageId === messageId));
+      dm => dm.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
     if (!messageInDm) {
       throw HTTPError(400, 'Invalid message ID');
     }
-    return messageInDm.messages.find(m => m.messageId === messageId);
+    return messageInDm.messages.find(m => m.messageId === messageId && m.timeSent <= Date.now());
   }
 
   getDmByMessageId(messageId: number) {
-    const dm = this.dms.find(dm => dm.messages.some(message => message.messageId === messageId));
+    const dm = this.dms.find(dm => dm.messages.some(m => m.messageId === messageId && m.timeSent <= Date.now()));
     if (!dm) {
       throw HTTPError(400, 'Message not in DM.');
     }
@@ -689,19 +689,19 @@ class DataStore {
     };
   }
 
-  addMessageToChannel(message: string, userId: number, channelId: number) {
+  addMessageToChannel(message: string, userId: number, channelId: number, timeStamp: number = Date.now()) {
     const channel = this.getDataStoreChannelByChannelId(channelId);
     const user = this.getUserById(userId);
-    const newMessage = createNewMessage(user.uId, message);
+    const newMessage = createNewMessage(user.uId, message, timeStamp);
     this.channels.find(c => c === channel).messages.push(newMessage);
     this.saveDataStore();
     return newMessage;
   }
 
-  addMessageToDm(message: string, userId: number, dmId: number) {
+  addMessageToDm(message: string, userId: number, dmId: number, timeStamp: number = Date.now()) {
     const dm = this.getDmById(dmId);
     const user = this.getUserById(userId);
-    const newMessage = createNewMessage(user.uId, message);
+    const newMessage = createNewMessage(user.uId, message, timeStamp);
     this.dms.find(d => d === dm).messages.push(newMessage);
     this.saveDataStore();
     return newMessage;
@@ -879,12 +879,12 @@ class DataStore {
   }
 }
 
-function createNewMessage(uId, message): messages {
+function createNewMessage(uId: number, message: string, timeSent: number = Date.now()): messages {
   return {
     messageId: generateMessageId(),
     uId,
     message,
-    timeSent: Date.now(),
+    timeSent,
     reacts: [],
     isPinned: false
   };
