@@ -37,7 +37,6 @@ let privateChannelId: number;
 let publicChannelMessageId: number;
 let dmMessageId: number;
 
-let dmCreatorId: number;
 let dmCreatorToken: string;
 let testDmId: number;
 
@@ -73,7 +72,6 @@ beforeEach(() => {
   jsonResponse = (parseJsonResponse(res) as unknown as authResponse);
   privateChannelCreatorUserId = jsonResponse.authUserId;
   privateChannelCreatorToken = jsonResponse.token;
-  dmCreatorId = privateChannelCreatorUserId;
   dmCreatorToken = privateChannelCreatorToken;
 
   let userProfile;
@@ -296,7 +294,6 @@ describe('HTTP tests for /notifications/get', () => {
   });
 
   test('notificationsGet dm message tag single user notifications', () => {
-    console.log(dmCreatorId);
     const messageWithTag = `How are you @${privateChannelCreatorHandle}?`.repeat(20);
     sendPostRequestToEndpoint(CHANNEL_INVITE, {
       channelId: publicChannelId,
