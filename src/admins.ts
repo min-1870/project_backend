@@ -26,22 +26,15 @@ export function deleteUser(token:string, uId: number) {
   for (const item of database.dms) {
     if (database.isUserInDm(uId, item.dmId)) {
       database.removeUserFromDm(uId, item.dmId);
-      for (const message of item.messages) {
-        if (message.uId === uId) {
-          database.removeUserDmMessage(message.uId);
-        }
-      }
     }
+    database.removeUserMessagesFromDms(uId);
   }
+  
   for (const item of database.channels) {
     if (database.isUserMemberInChannel(uId, item.channelId)) {
       database.removeUserFromChannel(uId, item.channelId);
-      for (const message of item.messages) {
-        if (message.uId === uId) {
-          database.removeUserChannelMessage(message.uId);
-        }
-      }
     }
+    database.removeUserMessagesFromChannels(uId);
   }
   return {};
 }
@@ -134,25 +127,21 @@ export function msgShare(token: string, ogMessageId: number, message: string, ch
   }
 
   if ((dmId === -1) && database.isMessageInChannels(ogMessageId) === false) {
-    console.log(1);
     throw HTTPError(400, 'ogMessageId isnt valid');
   }
 
   if ((channelId === -1) && database.isMessageInDms(ogMessageId) === false) {
-    console.log(2);
     throw HTTPError(400, 'ogMessageId isnt valid');
   }
 
   if ((dmId === -1) && database.isMessageInChannels(ogMessageId) === true) {
     if (database.getDataStoreChannelByMessageId(ogMessageId).allMembers.includes(authUser.uId) === false) {
-      console.log(3);
       throw HTTPError(400, 'ogMessageId isnt valid');
     }
   }
 
   if ((channelId === -1) && database.isMessageInDms(ogMessageId) === true) {
     if (database.getDataStoreDmByMessageId(ogMessageId).allMembers.includes(authUser.uId) === false) {
-      console.log(4);
       throw HTTPError(400, 'ogMessageId isnt valid');
     }
   }

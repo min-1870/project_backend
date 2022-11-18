@@ -1,5 +1,5 @@
 import { authResponse, channelId } from '../../src/types';
-import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, MESSAGE_SEND, SEARCH } from '../testBase';
+import { ADMIN_USER_PERMISSION_CHANGE, ADMIN_USER_REMOVE, AUTH_REGISTER, CHANNELS_CREATE, clearDataForTest, DM_CREATE, DM_SEND, MESSAGE_SEND, SEARCH } from '../testBase';
 import { OK, parseJsonResponse, sendDeleteRequestToEndpoint, sendGetRequestToEndpoint, sendPostRequestToEndpoint } from './integrationTestUtils';
 
 const EMAIL = 'Bob123@gmail.com';
@@ -41,11 +41,25 @@ beforeEach(() => {
 describe('HTTP tests for admin/user/remove/v1', () => {
   // let channel1Id: number;
   beforeEach(() => {
-    sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    let channelId = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: TEST_CHANNEL_NAME,
       isPublic: true
-    }, token);
+    }, token2);
     // channel1Id = (parseJsonResponse(channel1Res) as unknown as channelId).channelId;
+    const dmId = sendPostRequestToEndpoint(DM_CREATE, {
+      uIds: [authUserId2]
+    }, token2);
+
+    sendPostRequestToEndpoint(DM_SEND, {
+      dmId: dmId ,
+      message: 'hi'
+    }, token2);
+
+    sendPostRequestToEndpoint(MESSAGE_SEND, {
+      channelId: channelId,
+      message: 'haha',
+    }, token2);
+
   });
   test('invalid uID', () => {
     const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {

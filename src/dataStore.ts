@@ -768,6 +768,30 @@ class DataStore {
     this.saveDataStore();
   }
 
+  removeUserMessagesFromDms(userId: number) {
+    const user = this.getUserById(userId);
+    for (const item of database.dms) {
+      for (const message of item.messages) {
+        if (message.uId === user.uId) {
+          this.removeUserDmMessage(message.uId);
+        }
+      }
+    }
+    this.saveDataStore();
+  }
+
+  removeUserMessagesFromChannels(userId: number) {
+    const user = this.getUserById(userId);
+    for (const item of database.channels) {
+      for (const message of item.messages) {
+        if (message.uId === user.uId) {
+          this.removeUserChannelMessage(message.uId);
+        }
+      }
+    }
+    this.saveDataStore();
+  }
+
   addNotification(
     senderId: number,
     receiverId: number,

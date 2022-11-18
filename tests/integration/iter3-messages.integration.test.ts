@@ -222,7 +222,7 @@ describe('HTTP tests for message/share/v1', () => {
     testMessageId = (parseJsonResponse(res2) as unknown as messageId).messageId;
 
     const res = sendPostRequestToEndpoint(DM_CREATE, {
-      uIds: [token2]
+      uIds: []
     }, token);
     testDmId = (parseJsonResponse(res) as undefined as dmId).dmId;
   });
@@ -321,6 +321,20 @@ describe('HTTP tests for message/share/v1', () => {
     }, token);
 
     expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      sharedMessageId: expect.any(Number)
+    });
+  });
+
+  test('success', () => {
+    const res = sendPostRequestToEndpoint('/message/share/v1', {
+      ogMessageId: testMessageId,
+      message: '',
+      channelId: -1,
+      dmId: testDmId
+    }, token);
+
+    expect(res.statusCode).toBe(400);
     expect(parseJsonResponse(res)).toStrictEqual({
       sharedMessageId: expect.any(Number)
     });

@@ -1,4 +1,4 @@
-import { authResponse, channelId } from '../../src/types';
+import { authResponse, channelId, channelMessagesOutput } from '../../src/types';
 import {
   AUTH_REGISTER,
   CHANNELS_CREATE,
@@ -9,6 +9,7 @@ import {
   CHANNEL_LEAVE, CHANNEL_MESSAGES,
   CHANNEL_REMOVE_OWNER,
   clearDataForTest,
+  MESSAGE_SEND,
 } from '../testBase';
 import {
   OK,
@@ -210,131 +211,131 @@ describe('HTTP tests for channel/messages', () => {
     expect(res.statusCode).toBe(403);
   });
 
-  // test('channelMessages more than 50 messages success', () => {
-  //   let expectedMessages = [];
-  //   for (let i = 0; i < 51; i++) {
-  //     expectedMessages.push(`hello ${i}`);
-  //     sendPostRequestToEndpoint(MESSAGE_SEND, {
-  //       channelId: publicChannelId,
-  //       message: `hello ${i}`
-  //     },
-  //     publicChannelCreatorToken);
-  //   }
+  test('channelMessages more than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 51; i++) {
+      expectedMessages.push(`hello ${i}`);
+      sendPostRequestToEndpoint(MESSAGE_SEND, {
+        channelId: publicChannelId,
+        message: `hello ${i}`
+      },
+      publicChannelCreatorToken);
+    }
 
-  //   const start = 0;
-  //   const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-  //     channelId: publicChannelId,
-  //     start
-  //   }, publicChannelCreatorToken);
+    const start = 0;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    }, publicChannelCreatorToken);
 
-  //   expect(res.statusCode).toBe(OK);
-  //   const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
-  //   expect(parseJsonResponse(res)).toStrictEqual({
-  //     messages: expect.any(Array),
-  //     start,
-  //     end: start + 50
-  //   });
-  //   expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
-  //   const actualMessages = resBody.messages.map(m => m.message);
-  //   expect(expectedMessages).toStrictEqual(actualMessages);
-  // });
+    expect(res.statusCode).toBe(OK);
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: start + 50
+    });
+    expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
+  });
 
-  // test('channelMessages less than 50 messages success', () => {
-  //   let expectedMessages = [];
-  //   for (let i = 0; i < 3; i++) {
-  //     expectedMessages.push(`hello ${i}`);
+  test('channelMessages less than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 3; i++) {
+      expectedMessages.push(`hello ${i}`);
 
-  //     sendPostRequestToEndpoint(MESSAGE_SEND,
-  //       {
-  //         channelId: publicChannelId,
-  //         message: `hello ${i}`
-  //       },
-  //       publicChannelCreatorToken
-  //     );
-  //   }
+      sendPostRequestToEndpoint(MESSAGE_SEND,
+        {
+          channelId: publicChannelId,
+          message: `hello ${i}`
+        },
+        publicChannelCreatorToken
+      );
+    }
 
-  //   const start = 0;
-  //   const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-  //     channelId: publicChannelId,
-  //     start
-  //   }, publicChannelCreatorToken);
+    const start = 0;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    }, publicChannelCreatorToken);
 
-  //   expect(parseJsonResponse(res)).toStrictEqual({
-  //     messages: expect.any(Array),
-  //     start,
-  //     end: -1
-  //   });
-  //   const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
-  //   expectedMessages = expectedMessages.slice(0, 11).reverse();
-  //   const actualMessages = resBody.messages.map(m => m.message);
-  //   expect(expectedMessages).toStrictEqual(actualMessages);
-  // });
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: -1
+    });
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expectedMessages = expectedMessages.slice(0, 11).reverse();
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
+  });
 
-  //   test('channelMessages start from middle more than 50 messages success', () => {
-  //     let expectedMessages = [];
-  //     for (let i = 0; i < 100; i++) {
-  //       const msg = `hello ${i}`;
-  //       expectedMessages.push(msg);
-  //       const res = sendPostRequestToEndpoint(
-  //         MESSAGE_SEND,
-  //         {
-  //           channelId: publicChannelId,
-  //           message: msg
-  //         },
-  //         publicChannelCreatorToken);
+    test('channelMessages start from middle more than 50 messages success', () => {
+      let expectedMessages = [];
+      for (let i = 0; i < 100; i++) {
+        const msg = `hello ${i}`;
+        expectedMessages.push(msg);
+        const res = sendPostRequestToEndpoint(
+          MESSAGE_SEND,
+          {
+            channelId: publicChannelId,
+            message: msg
+          },
+          publicChannelCreatorToken);
 
-  //       expect(res.statusCode).toBe(OK);
-  //     }
+        expect(res.statusCode).toBe(OK);
+      }
 
-  //     const start = 11;
-  //     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-  //       channelId: publicChannelId,
-  //       start
-  //     },
-  //     publicChannelCreatorToken);
+      const start = 11;
+      const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+        channelId: publicChannelId,
+        start
+      },
+      publicChannelCreatorToken);
 
-  //     expect(res.statusCode).toBe(OK);
-  //     expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
-  //     expect(parseJsonResponse(res)).toStrictEqual({
-  //       messages: expect.any(Array),
-  //       start,
-  //       end: start + 50
-  //     });
-  //     const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
-  //     const actualMessages = resBody.messages.map(m => m.message);
-  //     expect(expectedMessages).toStrictEqual(actualMessages);
-  //   });
+      expect(res.statusCode).toBe(OK);
+      expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
+      expect(parseJsonResponse(res)).toStrictEqual({
+        messages: expect.any(Array),
+        start,
+        end: start + 50
+      });
+      const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+      const actualMessages = resBody.messages.map(m => m.message);
+      expect(expectedMessages).toStrictEqual(actualMessages);
+    });
 
-  //   test('channelMessages start from middle less than 50 messages success', () => {
-  //     let expectedMessages = [];
-  //     for (let i = 0; i < 11; i++) {
-  //       expectedMessages.push(`hello ${i}`);
-  //       const res = sendPostRequestToEndpoint(MESSAGE_SEND,
-  //         {
-  //           channelId: publicChannelId,
-  //           message: `hello ${i}`
-  //         },
-  //         publicChannelCreatorToken);
-  //       expect(res.statusCode).toBe(OK);
-  //     }
+    test('channelMessages start from middle less than 50 messages success', () => {
+      let expectedMessages = [];
+      for (let i = 0; i < 11; i++) {
+        expectedMessages.push(`hello ${i}`);
+        const res = sendPostRequestToEndpoint(MESSAGE_SEND,
+          {
+            channelId: publicChannelId,
+            message: `hello ${i}`
+          },
+          publicChannelCreatorToken);
+        expect(res.statusCode).toBe(OK);
+      }
 
-  //     const start = 3;
-  //     const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-  //       channelId: publicChannelId,
-  //       start
-  //     }, publicChannelCreatorToken);
+      const start = 3;
+      const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+        channelId: publicChannelId,
+        start
+      }, publicChannelCreatorToken);
 
-//     expect(res.statusCode).toBe(OK);
-//     expect(parseJsonResponse(res)).toStrictEqual({
-//       messages: expect.any(Array),
-//       start,
-//       end: -1
-//     });
-//     const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
-//     expectedMessages = [...expectedMessages].reverse().slice(3);
-//     const actualMessages = resBody.messages.map(m => m.message);
-//     expect(expectedMessages).toStrictEqual(actualMessages);
-//   });
+    expect(res.statusCode).toBe(OK);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: -1
+    });
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    expectedMessages = [...expectedMessages].reverse().slice(3);
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
+  });
 });
 
 describe('HTTP tests for channel/join', () => {
