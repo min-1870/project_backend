@@ -6,13 +6,7 @@ const port = config.port;
 const url = config.url;
 
 export function sendGetRequestToEndpoint(endpoint: string, qs: object, header?: string): Response {
-  let res = request(
-    'GET',
-    `${url}:${port}${endpoint}`,
-    {
-      qs,
-    }
-  );
+  let res;
 
   if (typeof header !== 'undefined') {
     res = request(
@@ -25,19 +19,21 @@ export function sendGetRequestToEndpoint(endpoint: string, qs: object, header?: 
         }
       }
     );
+  }else{
+    res = request(
+      'GET',
+      `${url}:${port}${endpoint}`,
+      {
+        qs,
+      }
+    );
   }
 
   return res;
 }
 
 export function sendDeleteRequestToEndpoint(endpoint: string, qs: object, header?: string): Response {
-  let res = request(
-    'DELETE',
-    `${url}:${port}${endpoint}`,
-    {
-      qs,
-    }
-  );
+  let res;
 
   if (typeof header !== 'undefined') {
     res = request(
@@ -50,18 +46,20 @@ export function sendDeleteRequestToEndpoint(endpoint: string, qs: object, header
         }
       }
     );
+  }else{
+    res = request(
+      'DELETE',
+      `${url}:${port}${endpoint}`,
+      {
+        qs,
+      }
+    );
   }
   return res;
 }
 
 export function sendPostRequestToEndpoint(endpoint: string, json: object, header?: string): Response {
-  let res = request(
-    'POST',
-    `${url}:${port}${endpoint}`,
-    {
-      json,
-    }
-  );
+  let res;
 
   if (typeof header !== 'undefined') {
     res = request(
@@ -74,19 +72,21 @@ export function sendPostRequestToEndpoint(endpoint: string, json: object, header
         }
       }
     );
+  } else {
+    res = request(
+      'POST',
+      `${url}:${port}${endpoint}`,
+      {
+        json,
+      }
+    );
   }
 
   return res;
 }
 
 export function sendPutRequestToEndpoint(endpoint: string, json: object, header?: string): Response {
-  let res = request(
-    'PUT',
-    `${url}:${port}${endpoint}`,
-    {
-      json,
-    }
-  );
+  let res;
 
   if (typeof header !== 'undefined') {
     res = request(
@@ -97,6 +97,14 @@ export function sendPutRequestToEndpoint(endpoint: string, json: object, header?
         headers: {
           token: header
         }
+      }
+    );
+  }else{
+    res = request(
+      'PUT',
+      `${url}:${port}${endpoint}`,
+      {
+        json,
       }
     );
   }
