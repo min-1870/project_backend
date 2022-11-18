@@ -349,7 +349,7 @@ class DataStore {
    * @param messageId - message ID of the message to get.
    * @returns {messages} meesage with that ID.
    */
-  //mark
+  // mark
   getDataStoreMessageByMessageId(messageId: number): messages {
     if (this.isMessageInChannels(messageId)) {
       const channel = this.getDataStoreChannelByMessageId(messageId);
@@ -390,7 +390,7 @@ class DataStore {
   removeUserDmMessage(messageId: number) {
     const message = this.getDataStoreMessageByMessageId(messageId);
     message.message = 'Removed user';
-    //mark
+    // mark
     this.saveDataStore();
   }
 
@@ -781,7 +781,7 @@ class DataStore {
     }
     this.saveDataStore();
   }
-  //mark
+  // mark
 
   removeUserMessagesFromChannels(userId: number) {
     const user = this.getUserById(userId);

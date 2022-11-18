@@ -124,7 +124,7 @@ describe('HTTP tests for message/pin/v1', () => {
       dmId: testDmId,
       message: 'hi'
     }, token);
-    const dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId
+    const dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
     res = sendPostRequestToEndpoint('/message/pin/v1', {
       messageId: dmMessageId
     }, token);
@@ -230,7 +230,7 @@ describe('HTTP tests for message/unpin/v1', () => {
       dmId: testDmId,
       message: 'hi'
     }, token);
-    const dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId
+    const dmMessageId = (parseJsonResponse(res) as undefined as messageId).messageId;
     res = sendPostRequestToEndpoint('/message/pin/v1', {
       messageId: dmMessageId
     }, token);

@@ -41,7 +41,7 @@ beforeEach(() => {
 describe('HTTP tests for admin/user/remove/v1', () => {
   let channel1Id: number;
   beforeEach(() => {
-    let channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
+    const channel1Res = sendPostRequestToEndpoint(CHANNELS_CREATE, {
       name: TEST_CHANNEL_NAME,
       isPublic: true
     }, token2);
@@ -51,7 +51,7 @@ describe('HTTP tests for admin/user/remove/v1', () => {
     }, token2);
     const dm1Id = (parseJsonResponse(dmId) as unknown as dmId).dmId;
     sendPostRequestToEndpoint(DM_SEND, {
-      dmId: dm1Id ,
+      dmId: dm1Id,
       message: 'hi'
     }, token2);
 
@@ -59,7 +59,6 @@ describe('HTTP tests for admin/user/remove/v1', () => {
       channelId: channel1Id,
       message: 'haha',
     }, token2);
-
   });
   test('invalid uID', () => {
     const res = sendDeleteRequestToEndpoint(ADMIN_USER_REMOVE, {
@@ -274,7 +273,6 @@ describe('HTTP tests for /search/v1', () => {
       dmId: testDmId,
       message: 'hi'
     }, token);
-
 
     res = sendGetRequestToEndpoint(SEARCH, {
       queryStr: 'hi'

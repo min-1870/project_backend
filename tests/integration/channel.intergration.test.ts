@@ -271,59 +271,59 @@ describe('HTTP tests for channel/messages', () => {
     expect(expectedMessages).toStrictEqual(actualMessages);
   });
 
-    test('channelMessages start from middle more than 50 messages success', () => {
-      let expectedMessages = [];
-      for (let i = 0; i < 100; i++) {
-        const msg = `hello ${i}`;
-        expectedMessages.push(msg);
-        const res = sendPostRequestToEndpoint(
-          MESSAGE_SEND,
-          {
-            channelId: publicChannelId,
-            message: msg
-          },
-          publicChannelCreatorToken);
-
-        expect(res.statusCode).toBe(OK);
-      }
-
-      const start = 11;
-      const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-        channelId: publicChannelId,
-        start
-      },
-      publicChannelCreatorToken);
+  test('channelMessages start from middle more than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 100; i++) {
+      const msg = `hello ${i}`;
+      expectedMessages.push(msg);
+      const res = sendPostRequestToEndpoint(
+        MESSAGE_SEND,
+        {
+          channelId: publicChannelId,
+          message: msg
+        },
+        publicChannelCreatorToken);
 
       expect(res.statusCode).toBe(OK);
-      expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
-      expect(parseJsonResponse(res)).toStrictEqual({
-        messages: expect.any(Array),
-        start,
-        end: start + 50
-      });
-      const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
-      const actualMessages = resBody.messages.map(m => m.message);
-      expect(expectedMessages).toStrictEqual(actualMessages);
+    }
+
+    const start = 11;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    },
+    publicChannelCreatorToken);
+
+    expect(res.statusCode).toBe(OK);
+    expectedMessages = [...expectedMessages].reverse().slice(start, start + 50);
+    expect(parseJsonResponse(res)).toStrictEqual({
+      messages: expect.any(Array),
+      start,
+      end: start + 50
     });
+    const resBody = parseJsonResponse(res) as unknown as channelMessagesOutput;
+    const actualMessages = resBody.messages.map(m => m.message);
+    expect(expectedMessages).toStrictEqual(actualMessages);
+  });
 
-    test('channelMessages start from middle less than 50 messages success', () => {
-      let expectedMessages = [];
-      for (let i = 0; i < 11; i++) {
-        expectedMessages.push(`hello ${i}`);
-        const res = sendPostRequestToEndpoint(MESSAGE_SEND,
-          {
-            channelId: publicChannelId,
-            message: `hello ${i}`
-          },
-          publicChannelCreatorToken);
-        expect(res.statusCode).toBe(OK);
-      }
+  test('channelMessages start from middle less than 50 messages success', () => {
+    let expectedMessages = [];
+    for (let i = 0; i < 11; i++) {
+      expectedMessages.push(`hello ${i}`);
+      const res = sendPostRequestToEndpoint(MESSAGE_SEND,
+        {
+          channelId: publicChannelId,
+          message: `hello ${i}`
+        },
+        publicChannelCreatorToken);
+      expect(res.statusCode).toBe(OK);
+    }
 
-      const start = 3;
-      const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
-        channelId: publicChannelId,
-        start
-      }, publicChannelCreatorToken);
+    const start = 3;
+    const res = sendGetRequestToEndpoint(CHANNEL_MESSAGES, {
+      channelId: publicChannelId,
+      start
+    }, publicChannelCreatorToken);
 
     expect(res.statusCode).toBe(OK);
     expect(parseJsonResponse(res)).toStrictEqual({
